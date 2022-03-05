@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30BB\u30CD\u30EA\u30AA_\u9759\u5BC2\u306E\u98A8\u4F7F\u3044 \u30BB\u30CD\u30EA\u30AA"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: ffe65396fd1312d4cb623f148ec492ac, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 1d49e9831714b3145b4211f859a4c189, type: 3}
+  CardName: "\u9759\u5BC2\u306E\u98A8\u4F7F\u3044 \u30BB\u30CD\u30EA\u30AA"
+  UnitName: "\u30BB\u30CD\u30EA\u30AA"
+  UnitName_English: Soren
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 02000000
+  Power: 30
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 0
+  Weapons: 03000000
+  ClassName: Senerio_QuietWindUser
+  SkillNames:
+  - "\u50AD\u5175\u56E3\u306E\u8ECD\u5E2B"
+  SupportSkillNames:
+  - "\u9B54\u8853\u306E\u7D0B\u7AE0"
+  CardID: 586
+  MaxCountInDeck: 4

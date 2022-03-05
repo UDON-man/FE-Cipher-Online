@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u9ED2\u4E43\u9727\u4E9C_\u3072\u3068\u5473\u9055\u3046\u30AB\u30EA\u30B9\u30DE
+    \u9ED2\u4E43\u9727\u4E9C"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 3a1b311cc2d1d6b459751aa3762160a3, type: 3}
+  CardImage_English: {fileID: 21300000, guid: ebd6958f0469acf45bfeccba9cf63d98, type: 3}
+  CardName: "\u3072\u3068\u5473\u9055\u3046\u30AB\u30EA\u30B9\u30DE \u9ED2\u4E43\u9727\u4E9C"
+  UnitName: "\u9ED2\u4E43\u9727\u4E9C"
+  UnitName_English: Kiria Kurono
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 01000000
+  Power: 50
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 1
+  Weapons: 030000000d000000
+  ClassName: Kiria_SpecialCharisma
+  SkillNames:
+  - Reincarnation
+  - Give Me!!
+  SupportSkillNames: []
+  CardID: 470
+  MaxCountInDeck: 4

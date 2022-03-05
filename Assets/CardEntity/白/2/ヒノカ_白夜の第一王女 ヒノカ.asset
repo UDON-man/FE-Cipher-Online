@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30D2\u30CE\u30AB_\u767D\u591C\u306E\u7B2C\u4E00\u738B\u5973 \u30D2\u30CE\u30AB"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: c0b9d607f6e5a66498c4390b2131b3c8, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 9acb42be8fa15044cab608dcab92363d, type: 3}
+  CardName: "\u767D\u591C\u306E\u7B2C\u4E00\u738B\u5973 \u30D2\u30CE\u30AB"
+  UnitName: "\u30D2\u30CE\u30AB"
+  UnitName_English: Hinoka
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 05000000
+  Power: 30
+  SupportPower: 30
+  Ranges: 01000000
+  sex: 1
+  Weapons: 010000000b00000008000000
+  ClassName: Hinoka_ByakuyaFirstPrincess
+  SkillNames:
+  - "\u767D\u591C\u306E\u738B\u5973"
+  SupportSkillNames:
+  - "\u5929\u7A7A\u306E\u7D0B\u7AE0"
+  CardID: 131
+  MaxCountInDeck: 4

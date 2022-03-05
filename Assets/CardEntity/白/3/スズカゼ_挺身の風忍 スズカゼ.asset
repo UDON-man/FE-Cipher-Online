@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30B9\u30BA\u30AB\u30BC_\u633A\u8EAB\u306E\u98A8\u5FCD \u30B9\u30BA\u30AB\u30BC"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 847f8a6b99bb09246b4863b0b94a5b79, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 41bdbfa8fefa19e4ca211d2db2242817, type: 3}
+  CardName: "\u633A\u8EAB\u306E\u98A8\u5FCD \u30B9\u30BA\u30AB\u30BC"
+  UnitName: "\u30B9\u30BA\u30AB\u30BC"
+  UnitName_English: Kaze
+  PlayCost: 4
+  HasCC: 1
+  CCCost: 3
+  cardColors: 05000000
+  Power: 60
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 0
+  Weapons: 07000000
+  ClassName: Suzukaze_GuardKazenin
+  SkillNames:
+  - "\u5F71\u306E\u52D9\u3081"
+  - "\u75BE\u98A8\u306E\u9663"
+  SupportSkillNames: []
+  CardID: 301
+  MaxCountInDeck: 4

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30C4\u30D0\u30AD_\u7709\u76EE\u79C0\u9E97\u306A\u6B66\u8005 \u30C4\u30D0\u30AD"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: a6904601da22f6f4bb477de1293a3686, type: 3}
+  CardImage_English: {fileID: 21300000, guid: db191a5e4d1614a4992966744a7d098b, type: 3}
+  CardName: "\u7709\u76EE\u79C0\u9E97\u306A\u6B66\u8005 \u30C4\u30D0\u30AD"
+  UnitName: "\u30C4\u30D0\u30AD"
+  UnitName_English: Subaki
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 05000000
+  Power: 30
+  SupportPower: 30
+  Ranges: 01000000
+  sex: 0
+  Weapons: 010000000b00000008000000
+  ClassName: Tsubaki_BeautifulMusha
+  SkillNames:
+  - "\u30B5\u30AF\u30E9\u968A\u306E\u30C4\u30D0\u30AD"
+  SupportSkillNames:
+  - "\u5929\u7A7A\u306E\u7D0B\u7AE0"
+  CardID: 151
+  MaxCountInDeck: 4

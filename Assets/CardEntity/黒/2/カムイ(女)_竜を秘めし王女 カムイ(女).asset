@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30AB\u30E0\u30A4(\u5973)_\u7ADC\u3092\u79D8\u3081\u3057\u738B\u5973
+    \u30AB\u30E0\u30A4(\u5973)"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: bff13c7d2785bf641b86dcd6872e44da, type: 3}
+  CardImage_English: {fileID: 21300000, guid: ca4dc405a97f14b4e8637b87114824e5, type: 3}
+  CardName: "\u7ADC\u3092\u79D8\u3081\u3057\u738B\u5973 \u30AB\u30E0\u30A4(\u5973)"
+  UnitName: "\u30AB\u30E0\u30A4(\u5973)"
+  UnitName_English: Corrin(F)
+  PlayCost: 2
+  HasCC: 0
+  CCCost: 0
+  cardColors: 06000000
+  Power: 60
+  SupportPower: 20
+  Ranges: 01000000
+  sex: 1
+  Weapons: 0500000006000000
+  ClassName: KamuiOtoko_SealedDragon
+  SkillNames:
+  - "\u7ADC\u306E\u5486\u54EE"
+  SupportSkillNames: []
+  CardID: 179
+  MaxCountInDeck: 4

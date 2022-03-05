@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30B4\u30FC\u30C9\u30F3_\u89E3\u653E\u8ECD\u306E\u5F13\u5175 \u30B4\u30FC\u30C9\u30F3"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 3d6a3b0565b9cea4c93cd0297785449d, type: 3}
+  CardImage_English: {fileID: 21300000, guid: cb591acc54ff3464c81bfc4730f97a13, type: 3}
+  CardName: "\u89E3\u653E\u8ECD\u306E\u5F13\u5175 \u30B4\u30FC\u30C9\u30F3"
+  UnitName: "\u30B4\u30FC\u30C9\u30F3"
+  UnitName_English: Gordin
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 00000000
+  Power: 30
+  SupportPower: 20
+  Ranges: 02000000
+  sex: 0
+  Weapons: 09000000
+  ClassName: Godon_ReleaseArcherKnight
+  SkillNames:
+  - "\u92FC\u306E\u5F13"
+  - "\u98DB\u884C\u7279\u52B9"
+  SupportSkillNames:
+  - "\u653B\u6483\u306E\u7D0B\u7AE0"
+  CardID: 12
+  MaxCountInDeck: 4

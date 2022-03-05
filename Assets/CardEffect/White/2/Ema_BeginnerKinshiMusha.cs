@@ -1,0 +1,46 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System;
+using System.Linq;
+public class Ema_BeginnerKinshiMusha : CEntity_Effect
+{
+    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    {
+        List<ICardEffect> cardEffects = new List<ICardEffect>();
+
+        PowerUpClass powerUpClass = new PowerUpClass();
+        powerUpClass.SetUpICardEffect("先輩のフォロー", null, null, -1, false);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition);
+        cardEffects.Add(powerUpClass);
+
+        bool PowerUpCondition(Unit unit)
+        {
+            if (unit == card.UnitContainingThisCharacter())
+            {
+                if (GManager.instance.turnStateMachine.AttackingUnit != null && GManager.instance.turnStateMachine.DefendingUnit != null)
+                {
+                    if (GManager.instance.turnStateMachine.AttackingUnit == unit || GManager.instance.turnStateMachine.DefendingUnit == unit)
+                    {
+                        if (card.UnitContainingThisCharacter() == GManager.instance.turnStateMachine.AttackingUnit || card.UnitContainingThisCharacter() == GManager.instance.turnStateMachine.DefendingUnit)
+                        {
+                            if (card.Owner.SupportCards.Count((cardSource) => cardSource.Weapons.Contains(Weapon.Wing)) > 0)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("飛行特効", (enemyUnit, Power) => Power + 30, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Wing), PowerUpByEnemy.Mode.Attacking);
+        cardEffects.Add(powerUpByEnemy);
+
+        return cardEffects;
+    }
+}
+

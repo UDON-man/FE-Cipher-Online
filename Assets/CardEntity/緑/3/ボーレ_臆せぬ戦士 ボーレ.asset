@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30DC\u30FC\u30EC_\u81C6\u305B\u306C\u6226\u58EB \u30DC\u30FC\u30EC"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: bccef25d8fb21444eb3f1468e9d53636, type: 3}
+  CardImage_English: {fileID: 21300000, guid: db4690f4cf75bb1408b58f3a2d917c1e, type: 3}
+  CardName: "\u81C6\u305B\u306C\u6226\u58EB \u30DC\u30FC\u30EC"
+  UnitName: "\u30DC\u30FC\u30EC"
+  UnitName_English: Boyd
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 02000000
+  Power: 30
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 02000000
+  ClassName: Saji_FighterOfTaris
+  SkillNames:
+  - "\u6226\u58EB\u306E\u5FC3\u5F97"
+  SupportSkillNames:
+  - "\u653B\u6483\u306E\u7D0B\u7AE0"
+  CardID: 258
+  MaxCountInDeck: 4

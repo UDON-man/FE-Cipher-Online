@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30EB\u30AD\u30CA_\u672A\u6765\u3092\u77E5\u308B\u8005 \u30EB\u30AD\u30CA"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: e85e8eb1b8cdf0844a71cfc575f1f3b6, type: 3}
+  CardImage_English: {fileID: 21300000, guid: d76e0308ed1780147bb4c434dcaa3a6f, type: 3}
+  CardName: "\u672A\u6765\u3092\u77E5\u308B\u8005 \u30EB\u30AD\u30CA"
+  UnitName: "\u30EB\u30AD\u30CA"
+  UnitName_English: Lucina
+  PlayCost: 4
+  HasCC: 1
+  CCCost: 3
+  cardColors: 01000000
+  Power: 70
+  SupportPower: 20
+  Ranges: 01000000
+  sex: 1
+  Weapons: 00000000
+  ClassName: Lukina_FutureKnower
+  SkillNames:
+  - "\u904B\u547D\u306B\u6297\u3046\u8005"
+  - "\u88CF\u5263 \u30D5\u30A1\u30EB\u30B7\u30AA\u30F3"
+  SupportSkillNames: []
+  CardID: 56
+  MaxCountInDeck: 4

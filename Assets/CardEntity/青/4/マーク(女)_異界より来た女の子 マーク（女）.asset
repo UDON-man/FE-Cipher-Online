@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30DE\u30FC\u30AF(\u5973)_\u7570\u754C\u3088\u308A\u6765\u305F\u5973\u306E\u5B50
+    \u30DE\u30FC\u30AF\uFF08\u5973\uFF09"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 946709ae792b4744e8e216cd73e91b6d, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 71c86818e23691b4b9a11b5467049d1f, type: 3}
+  CardName: "\u7570\u754C\u3088\u308A\u6765\u305F\u5973\u306E\u5B50 \u30DE\u30FC\u30AF\uFF08\u5973\uFF09"
+  UnitName: "\u30DE\u30FC\u30AF(\u5973)"
+  UnitName_English: Morgan(F)
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 01000000
+  Power: 40
+  SupportPower: 20
+  Ranges: 01000000
+  sex: 1
+  Weapons: 00000000
+  ClassName: MarkOnnna_GirlFromAnotherWorld
+  SkillNames:
+  - "\u3059\u3079\u3066\u306E\u53EF\u80FD\u6027"
+  SupportSkillNames:
+  - "\u8A08\u7565\u306E\u7D0B\u7AE0"
+  CardID: 450
+  MaxCountInDeck: 4

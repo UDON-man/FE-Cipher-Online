@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30AD\u30B5\u30E9\u30AE_\u5929\u6027\u306E\u72E9\u4EBA \u30AD\u30B5\u30E9\u30AE"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: aab1475771eaa1c498cd00c71b24c4c0, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 3f1b1c8f9ed239541a4d69164e12dae2, type: 3}
+  CardName: "\u5929\u6027\u306E\u72E9\u4EBA \u30AD\u30B5\u30E9\u30AE"
+  UnitName: "\u30AD\u30B5\u30E9\u30AE"
+  UnitName_English: Kiragi
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 05000000
+  Power: 50
+  SupportPower: 20
+  Ranges: 02000000
+  sex: 0
+  Weapons: 09000000
+  ClassName: Kisaragi_NaturalHunter
+  SkillNames:
+  - "\u75BE\u98A8\u306E\u738B\u5B50"
+  - "\u98DB\u884C\u7279\u52B9"
+  SupportSkillNames: []
+  CardID: 310
+  MaxCountInDeck: 4

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30E6\u30EA\u30B7\u30FC\u30BA_\u30AF\u30EA\u30DF\u30A2\u306E\u526F\u5BB0\u76F8
+    \u30E6\u30EA\u30B7\u30FC\u30BA"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 3e188e0d2ef842645b0122e21e0d2136, type: 3}
+  CardImage_English: {fileID: 21300000, guid: d41e8d762f77fb945a08a04dcd532de7, type: 3}
+  CardName: "\u30AF\u30EA\u30DF\u30A2\u306E\u526F\u5BB0\u76F8 \u30E6\u30EA\u30B7\u30FC\u30BA"
+  UnitName: "\u30E6\u30EA\u30B7\u30FC\u30BA"
+  UnitName_English: Bastian
+  PlayCost: 4
+  HasCC: 1
+  CCCost: 3
+  cardColors: 02000000
+  Power: 60
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 0
+  Weapons: 03000000
+  ClassName: Yurisizu_CirmiaSubLeader
+  SkillNames:
+  - "\u88CF\u306E\u4ED5\u4E8B"
+  - "\u30AF\u30EA\u30DF\u30A2\u4E00\u306E\u7B56\u58EB"
+  SupportSkillNames: []
+  CardID: 591
+  MaxCountInDeck: 4

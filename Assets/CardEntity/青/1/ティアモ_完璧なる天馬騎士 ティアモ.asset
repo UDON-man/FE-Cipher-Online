@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30C6\u30A3\u30A2\u30E2_\u5B8C\u74A7\u306A\u308B\u5929\u99AC\u9A0E\u58EB
+    \u30C6\u30A3\u30A2\u30E2"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 96f2befb6989bb34194a59b6da581c5a, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 7ad1406973bdea742a3f4832143f407b, type: 3}
+  CardName: "\u5B8C\u74A7\u306A\u308B\u5929\u99AC\u9A0E\u58EB \u30C6\u30A3\u30A2\u30E2"
+  UnitName: "\u30C6\u30A3\u30A2\u30E2"
+  UnitName_English: Cordelia
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 01000000
+  Power: 50
+  SupportPower: 30
+  Ranges: 01000000
+  sex: 1
+  Weapons: 010000000b00000008000000
+  ClassName: Thiamo_PerfectHorseKnight
+  SkillNames:
+  - "\u75BE\u98A8\u8FC5\u96F7"
+  - "\u624B\u88FD\u306E\u624B\u69CD"
+  SupportSkillNames: []
+  CardID: 77
+  MaxCountInDeck: 4

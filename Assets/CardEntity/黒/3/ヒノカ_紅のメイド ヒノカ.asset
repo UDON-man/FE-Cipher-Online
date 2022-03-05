@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30D2\u30CE\u30AB_\u7D05\u306E\u30E1\u30A4\u30C9 \u30D2\u30CE\u30AB"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: f14210e619295314d8a81fe432e4674e, type: 3}
+  CardImage_English: {fileID: 21300000, guid: aba31a399fda1a2479cbaee2c2f43969, type: 3}
+  CardName: "\u7D05\u306E\u30E1\u30A4\u30C9 \u30D2\u30CE\u30AB"
+  UnitName: "\u30D2\u30CE\u30AB"
+  UnitName_English: Hinoka
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 06000000
+  Power: 50
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 1
+  Weapons: 07000000
+  ClassName: Hinoka_RedMaid
+  SkillNames:
+  - "\u4EA4\u308F\u308B\u5149"
+  - "\u6226\u59EB\u306E\u3054\u5949\u4ED5"
+  SupportSkillNames: []
+  CardID: 323
+  MaxCountInDeck: 4

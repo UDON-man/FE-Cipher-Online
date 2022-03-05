@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30AB\u30A4\u30F3_\u731B\u725B\u3068\u547C\u3070\u308C\u3057\u9A0E\u58EB
+    \u30AB\u30A4\u30F3"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 84b52697f246b5c4bb7677a4721db684, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 728b532955937a34888eb2708750b3c9, type: 3}
+  CardName: "\u731B\u725B\u3068\u547C\u3070\u308C\u3057\u9A0E\u58EB \u30AB\u30A4\u30F3"
+  UnitName: "\u30AB\u30A4\u30F3"
+  UnitName_English: Cain
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 00000000
+  Power: 60
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 0000000008000000
+  ClassName: Kain_CalledOx
+  SkillNames:
+  - "\u8056\u9A0E\u58EB\u306E\u52A0\u8B77"
+  - "\u8D64\u7DD1\u306E\u53CC\u6483"
+  SupportSkillNames: []
+  CardID: 6
+  MaxCountInDeck: 4

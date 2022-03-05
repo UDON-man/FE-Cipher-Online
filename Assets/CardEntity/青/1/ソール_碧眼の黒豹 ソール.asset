@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30BD\u30FC\u30EB_\u78A7\u773C\u306E\u9ED2\u8C79 \u30BD\u30FC\u30EB"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: a57cf6a94e6a7b2448702ff450890745, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 61fca7b0a21f5d24685fab04fb156680, type: 3}
+  CardName: "\u78A7\u773C\u306E\u9ED2\u8C79 \u30BD\u30FC\u30EB"
+  UnitName: "\u30BD\u30FC\u30EB"
+  UnitName_English: Stahl
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 01000000
+  Power: 60
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 0000000008000000
+  ClassName: Sole_BlueEyeBlackPunther
+  SkillNames:
+  - "\u8056\u76FE"
+  - "\u78A7\u3068\u7D05\u306E\u7D46"
+  SupportSkillNames: []
+  CardID: 68
+  MaxCountInDeck: 4

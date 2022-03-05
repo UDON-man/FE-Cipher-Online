@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30BB\u30C4\u30CA_\u304A\u3063\u3068\u308A\u5F13\u8056 \u30BB\u30C4\u30CA"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: f412aa701089df240a4693a9a1dbd9e6, type: 3}
+  CardImage_English: {fileID: 21300000, guid: bc3bc353f2a56d741b2ab90173b19e15, type: 3}
+  CardName: "\u304A\u3063\u3068\u308A\u5F13\u8056 \u30BB\u30C4\u30CA"
+  UnitName: "\u30BB\u30C4\u30CA"
+  UnitName_English: Setsuna
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 05000000
+  Power: 30
+  SupportPower: 20
+  Ranges: 02000000
+  sex: 1
+  Weapons: 09000000
+  ClassName: Setsuna_SlowBowMaster
+  SkillNames:
+  - "\u79C1\u3082\u304C\u3093\u3070\u308B..."
+  - "\u98DB\u884C\u7279\u52B9"
+  SupportSkillNames: []
+  CardID: 140
+  MaxCountInDeck: 4

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30CF\u30FC\u30EB_\u9ED2\u75BE\u98A8 \u30CF\u30FC\u30EB"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: bdbc0b012ec0dd44db7058a6b6b1495d, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 1fd2dc03052e345498bcb57ea4a11ec5, type: 3}
+  CardName: "\u9ED2\u75BE\u98A8 \u30CF\u30FC\u30EB"
+  UnitName: "\u30CF\u30FC\u30EB"
+  UnitName_English: Haar
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 02000000
+  Power: 50
+  SupportPower: 30
+  Ranges: 01000000
+  sex: 0
+  Weapons: 020000000b00000006000000
+  ClassName: Harl_BlackWind
+  SkillNames:
+  - "\u76EE\u899A\u3081\u3057\u7ADC\u7259"
+  - "\u624B\u65A7"
+  SupportSkillNames: []
+  CardID: 568
+  MaxCountInDeck: 4

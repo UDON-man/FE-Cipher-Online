@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30BB\u30CD\u30EA\u30AA_\u51B7\u5FB9\u306A\u308B\u53C2\u8B00 \u30BB\u30CD\u30EA\u30AA"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 541d1451408f5914fb35e8d291849214, type: 3}
+  CardImage_English: {fileID: 21300000, guid: c89fa057fe947bf47b59b0bddf6f2b27, type: 3}
+  CardName: "\u51B7\u5FB9\u306A\u308B\u53C2\u8B00 \u30BB\u30CD\u30EA\u30AA"
+  UnitName: "\u30BB\u30CD\u30EA\u30AA"
+  UnitName_English: Soren
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 02000000
+  Power: 50
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 0
+  Weapons: 03000000
+  ClassName: Senerio_CoolSanbo
+  SkillNames:
+  - "\u529B\u306E\u6D3B\u7528"
+  - "\u98A8\u306E\u4F7F\u3044\u624B"
+  SupportSkillNames: []
+  CardID: 348
+  MaxCountInDeck: 4

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30DF\u30AB\u30E4_\u6681\u306E\u56E3\u306E\u5C11\u5973 \u30DF\u30AB\u30E4PR"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: ca14de5c7c337654498818ff8746ae68, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 978210799b3edd548923a6c9d4d4160e, type: 3}
+  CardName: "\u6681\u306E\u56E3\u306E\u5C11\u5973 \u30DF\u30AB\u30E4"
+  UnitName: "\u30DF\u30AB\u30E4"
+  UnitName_English: Micaiah
+  PlayCost: 2
+  HasCC: 0
+  CCCost: 0
+  cardColors: 02000000
+  Power: 40
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 1
+  Weapons: 03000000
+  ClassName: Mikaya_DawnTeamGirl
+  SkillNames:
+  - "\u5927\u3044\u306A\u308B\u5E0C\u671B"
+  - "\u5149\u306E\u9F13\u52D5"
+  SupportSkillNames: []
+  CardID: 617
+  MaxCountInDeck: 4

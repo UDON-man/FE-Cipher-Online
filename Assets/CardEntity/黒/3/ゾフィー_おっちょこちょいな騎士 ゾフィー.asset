@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30BE\u30D5\u30A3\u30FC_\u304A\u3063\u3061\u3087\u3053\u3061\u3087\u3044\u306A\u9A0E\u58EB
+    \u30BE\u30D5\u30A3\u30FC"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 35518cd71c30f6646bd36da2af25c5fa, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 567f81e419fc02f40b702e7d382d79d8, type: 3}
+  CardName: "\u304A\u3063\u3061\u3087\u3053\u3061\u3087\u3044\u306A\u9A0E\u58EB \u30BE\u30D5\u30A3\u30FC"
+  UnitName: "\u30BE\u30D5\u30A3\u30FC"
+  UnitName_English: Sophie
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 06000000
+  Power: 40
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 1
+  Weapons: 0100000008000000
+  ClassName: Zofie_CarelessKnight
+  SkillNames:
+  - "\u305D\u3063\u3061\u3058\u3083\u306A\u3044\u3093\u3060\u3063\u3066\u30FC!!"
+  SupportSkillNames:
+  - "\u653B\u6483\u306E\u7D0B\u7AE0"
+  CardID: 341
+  MaxCountInDeck: 4

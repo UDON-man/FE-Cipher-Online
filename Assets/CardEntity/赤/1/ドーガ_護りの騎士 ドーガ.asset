@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30C9\u30FC\u30AC_\u8B77\u308A\u306E\u9A0E\u58EB \u30C9\u30FC\u30AC"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 34899ec8ce1f20e4c822d9ccbae9136d, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 04976c4fe300ddc489cea6fe104c9952, type: 3}
+  CardName: "\u8B77\u308A\u306E\u9A0E\u58EB \u30C9\u30FC\u30AC"
+  UnitName: "\u30C9\u30FC\u30AC"
+  UnitName_English: Draug
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 00000000
+  Power: 30
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 010000000a000000
+  ClassName: Doga_DefendingKnight
+  SkillNames:
+  - "\u91CD\u88C5\u306E\u5FC3\u5F97"
+  SupportSkillNames:
+  - "\u9632\u5FA1\u306E\u7D0B\u7AE0"
+  CardID: 10
+  MaxCountInDeck: 4

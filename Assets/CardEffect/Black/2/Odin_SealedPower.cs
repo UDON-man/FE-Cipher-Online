@@ -1,0 +1,89 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System;
+using System.Linq;
+
+public class Odin_SealedPower : CEntity_Effect
+{
+    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    {
+        List<ICardEffect> cardEffects = new List<ICardEffect>();
+
+        PowerUpClass powerUpClass = new PowerUpClass();
+        powerUpClass.SetUpICardEffect("レオン隊のオーディン", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        cardEffects.Add(powerUpClass);
+
+        bool CanUseCondition(Hashtable hashtable)
+        {
+            if (card.Owner.FieldUnit.Count((_unit) => _unit.Character.UnitNames.Contains("レオン")) > 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        return cardEffects;
+    }
+
+    #region 暗闇の紋章
+    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    {
+        List<ICardEffect> supportEffects = new List<ICardEffect>();
+
+        if (timing == EffectTiming.OnSetSupport)
+        {
+            activateClass_Support[0].SetUpICardEffect("暗闇の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
+            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
+            supportEffects.Add(activateClass_Support[0]);
+
+            bool CanUseCondition(Hashtable hashtable)
+            {
+                if (card.Owner.SupportCards.Contains(card))
+                {
+                    if (GManager.instance.turnStateMachine.AttackingUnit != null)
+                    {
+                        if (GManager.instance.turnStateMachine.AttackingUnit.Character != null)
+                        {
+                            if (GManager.instance.turnStateMachine.AttackingUnit.Character.Owner == card.Owner)
+                            {
+                                if (card.Owner.Enemy.HandCards.Count >= 5)
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+
+            IEnumerator ActivateCoroutine()
+            {
+                SelectHandEffect selectHandEffect = GetComponent<SelectHandEffect>();
+
+                selectHandEffect.SetUp(
+                        SelectPlayer: card.Owner.Enemy,
+                        CanTargetCondition: (cardSource) => cardSource.Owner.HandCards.Contains(cardSource),
+                        CanTargetCondition_ByPreSelecetedList: null,
+                        CanEndSelectCondition: null,
+                        MaxCount: 1,
+                        CanNoSelect: false,
+                        CanEndNotMax: false,
+                        isShowOpponent: true,
+                        SelectCardCoroutine: null,
+                        AfterSelectCardCoroutine: null,
+                        mode: SelectHandEffect.Mode.Discard);
+
+                yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
+            }
+        }
+
+        return supportEffects;
+    }
+    #endregion
+
+}

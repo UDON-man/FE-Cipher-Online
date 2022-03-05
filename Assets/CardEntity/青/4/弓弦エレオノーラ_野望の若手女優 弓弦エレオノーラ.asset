@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u5F13\u5F26\u30A8\u30EC\u30AA\u30CE\u30FC\u30E9_\u91CE\u671B\u306E\u82E5\u624B\u5973\u512A
+    \u5F13\u5F26\u30A8\u30EC\u30AA\u30CE\u30FC\u30E9"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: c4f62a9869ebb994885b01aad6503ec3, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 90717a58f3172cf42b69e9940e4e48f8, type: 3}
+  CardName: "\u91CE\u671B\u306E\u82E5\u624B\u5973\u512A \u5F13\u5F26\u30A8\u30EC\u30AA\u30CE\u30FC\u30E9"
+  UnitName: "\u5F13\u5F26\u30A8\u30EC\u30AA\u30CE\u30FC\u30E9"
+  UnitName_English: Eleonora Yumizuru
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 01000000
+  Power: 30
+  SupportPower: 20
+  Ranges: 02000000
+  sex: 1
+  Weapons: 090000000d000000
+  ClassName: Eleonora_AmbitiousYoungActress
+  SkillNames:
+  - "\u30A4\u30C3\u30C4\u30FB\u30EC\u30A4\u30C8"
+  - "\u98DB\u884C\u7279\u52B9"
+  SupportSkillNames:
+  - "\u653B\u6483\u306E\u7D0B\u7AE0"
+  CardID: 427
+  MaxCountInDeck: 4

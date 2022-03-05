@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30DE\u30FC\u30AF(\u7537)_\u7570\u754C\u3088\u308A\u6765\u305F\u7537\u306E\u5B50
+    \u30DE\u30FC\u30AF(\u7537)"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: f401aac3e06f70e4980a2ed9446a47c3, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 773ea62355d1cf14782cca9212398053, type: 3}
+  CardName: "\u7570\u754C\u3088\u308A\u6765\u305F\u7537\u306E\u5B50 \u30DE\u30FC\u30AF(\u7537)"
+  UnitName: "\u30DE\u30FC\u30AF(\u7537)"
+  UnitName_English: Morgan(M)
+  PlayCost: 2
+  HasCC: 0
+  CCCost: 0
+  cardColors: 01000000
+  Power: 40
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 0
+  Weapons: 03000000
+  ClassName: MarkOtoko_FromAnotherWorld
+  SkillNames:
+  - "\u8ECD\u5E2B\u306E\u7CFB\u8B5C"
+  SupportSkillNames: []
+  CardID: 90
+  MaxCountInDeck: 4

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30BD\u30D5\u30A3\u30FC\u30E4_\u96A0\u308C\u91CC\u306E\u4E88\u8A00\u8005
+    \u30BD\u30D5\u30A3\u30FC\u30E4"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 4b4f885587a13844a839996e7be3cbe2, type: 3}
+  CardImage_English: {fileID: 21300000, guid: dc466eeae95bbfa488dd3f2af364ec73, type: 3}
+  CardName: "\u96A0\u308C\u91CC\u306E\u4E88\u8A00\u8005 \u30BD\u30D5\u30A3\u30FC\u30E4"
+  UnitName: "\u30BD\u30D5\u30A3\u30FC\u30E4"
+  UnitName_English: Sophia
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 04000000
+  Power: 30
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 1
+  Weapons: 03000000
+  ClassName: Sophia_ProPhetOfTheHiddenVillage
+  SkillNames:
+  - "\u4E88\u8A00"
+  SupportSkillNames:
+  - "\u6697\u95C7\u306E\u7D0B\u7AE0"
+  CardID: 530
+  MaxCountInDeck: 4

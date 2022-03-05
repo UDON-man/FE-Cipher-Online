@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30CE\u30CE_\u304A\u3066\u3093\u3070\u30DE\u30E0\u30AF\u30FC\u30C8 \u30CE\u30CE"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: e11b7686c86b6eb4882280831c4f26fe, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 46dded062c38cae48bad407930493fa2, type: 3}
+  CardName: "\u304A\u3066\u3093\u3070\u30DE\u30E0\u30AF\u30FC\u30C8 \u30CE\u30CE"
+  UnitName: "\u30CE\u30CE"
+  UnitName_English: Nowi
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 01000000
+  Power: 20
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 1
+  Weapons: 0500000006000000
+  ClassName: Nono_OtenbaMamukut
+  SkillNames:
+  - "\u9577\u5BFF\u306A\u7ADC\u4E00\u65CF"
+  - "\u30D0\u30A4\u30AA\u30EA\u30BA\u30E0\u30FB\u5947\u6570"
+  SupportSkillNames:
+  - "\u7ADC\u4EBA\u306E\u7D0B\u7AE0"
+  CardID: 81
+  MaxCountInDeck: 4

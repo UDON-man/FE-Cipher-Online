@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30A2\u30BA\u30FC\u30EB_\u82B1\u54B2\u304F\u7B11\u9854 \u30A2\u30BA\u30FC\u30EB"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 04bb9a1ba5efbe646922243afd86d067, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 1d22238b25e748f41ac11deaf4315621, type: 3}
+  CardName: "\u82B1\u54B2\u304F\u7B11\u9854 \u30A2\u30BA\u30FC\u30EB"
+  UnitName: "\u30A2\u30BA\u30FC\u30EB"
+  UnitName_English: Inigo
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 01000000
+  Power: 40
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 00000000
+  ClassName: Azuru_SmileFlower
+  SkillNames:
+  - "\u30CA\u30F3\u30D1\u306A\u30A2\u30BA\u30FC\u30EB"
+  SupportSkillNames:
+  - "\u653B\u6483\u306E\u7D0B\u7AE0"
+  CardID: 100
+  MaxCountInDeck: 4

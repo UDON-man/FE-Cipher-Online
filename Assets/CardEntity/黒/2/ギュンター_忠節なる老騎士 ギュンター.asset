@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30AE\u30E5\u30F3\u30BF\u30FC_\u5FE0\u7BC0\u306A\u308B\u8001\u9A0E\u58EB
+    \u30AE\u30E5\u30F3\u30BF\u30FC"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 1c1f5a2531f8f4f42aa578cac587ce7c, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 6630df39d82adc2488708cb9b97f2c10, type: 3}
+  CardName: "\u5FE0\u7BC0\u306A\u308B\u8001\u9A0E\u58EB \u30AE\u30E5\u30F3\u30BF\u30FC"
+  UnitName: "\u30AE\u30E5\u30F3\u30BF\u30FC"
+  UnitName_English: Gunter
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 06000000
+  Power: 70
+  SupportPower: 20
+  Ranges: 01000000
+  sex: 0
+  Weapons: 01000000080000000a000000
+  ClassName: Jeigan_OldPowerful
+  SkillNames:
+  - "\u6226\u5834\u306E\u6559\u80B2\u5F79"
+  SupportSkillNames: []
+  CardID: 209
+  MaxCountInDeck: 4

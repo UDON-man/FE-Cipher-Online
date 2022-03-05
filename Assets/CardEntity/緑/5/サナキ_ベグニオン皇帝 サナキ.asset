@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30B5\u30CA\u30AD_\u30D9\u30B0\u30CB\u30AA\u30F3\u7687\u5E1D \u30B5\u30CA\u30AD"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: e0d69e57bf7439f41ab65e2b9b01180a, type: 3}
+  CardImage_English: {fileID: 21300000, guid: a84e394fa3d1aa443a4bdcc273f7c1f9, type: 3}
+  CardName: "\u30D9\u30B0\u30CB\u30AA\u30F3\u7687\u5E1D \u30B5\u30CA\u30AD"
+  UnitName: "\u30B5\u30CA\u30AD"
+  UnitName_English: Sanaki
+  PlayCost: 5
+  HasCC: 1
+  CCCost: 3
+  cardColors: 02000000
+  Power: 60
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 1
+  Weapons: 03000000
+  ClassName: Sanaki_BegnionEmperor
+  SkillNames:
+  - "\u7687\u5E1D\u306E\u6A84"
+  - "\u9802\u306B\u7ACB\u3064\u8005"
+  SupportSkillNames: []
+  CardID: 579
+  MaxCountInDeck: 4

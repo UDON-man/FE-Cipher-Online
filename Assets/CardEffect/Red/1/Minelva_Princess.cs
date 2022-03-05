@@ -1,0 +1,35 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System;
+using System.Linq;
+
+public class Minelva_Princess : CEntity_Effect
+{
+    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    {
+        List<ICardEffect> cardEffects = new List<ICardEffect>();
+
+        PowerUpClass powerUpClass = new PowerUpClass();
+        powerUpClass.SetUpICardEffect("飛竜の鞭", null, null, -1, false);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10 * card.Owner.FieldUnit.Count((otherUnit) => otherUnit != this.card.UnitContainingThisCharacter() && otherUnit.Weapons.Contains(Weapon.Wing)), CanPowerUpCondition);
+        cardEffects.Add(powerUpClass);
+
+        bool CanPowerUpCondition(Unit unit)
+        {
+            if (card.UnitContainingThisCharacter() == unit)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        InvalidationClass invalidationClass = new InvalidationClass();
+        invalidationClass.SetUpICardEffect("アイオテの盾", null, null,- 1, false);
+        invalidationClass.SetUpInvalidationClass((cardEffect) => cardEffect.EffectName == "飛行特効");
+        cardEffects.Add(invalidationClass);
+
+        return cardEffects;
+    }
+}

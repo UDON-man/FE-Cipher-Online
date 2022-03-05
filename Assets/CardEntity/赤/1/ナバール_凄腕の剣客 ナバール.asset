@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30CA\u30D0\u30FC\u30EB_\u51C4\u8155\u306E\u5263\u5BA2 \u30CA\u30D0\u30FC\u30EB"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 3c9604639b5524947a92c01e5931a4d9, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 47d85f6cfee83b846bfca5152d623ed6, type: 3}
+  CardName: "\u51C4\u8155\u306E\u5263\u5BA2 \u30CA\u30D0\u30FC\u30EB"
+  UnitName: "\u30CA\u30D0\u30FC\u30EB"
+  UnitName_English: Navarre
+  PlayCost: 2
+  HasCC: 0
+  CCCost: 0
+  cardColors: 00000000
+  Power: 70
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 00000000
+  ClassName: Nabar_GreatSwordman
+  SkillNames:
+  - "\u5BBF\u547D\u306E\u597D\u6575\u624B"
+  SupportSkillNames: []
+  CardID: 21
+  MaxCountInDeck: 4

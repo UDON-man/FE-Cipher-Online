@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30A8\u30EA\u30FC\u30BC_\u53EF\u6190\u306A\u5FCD \u30A8\u30EA\u30FC\u30BC"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: e94c03b5f0f7731409e7dd1b378b87f0, type: 3}
+  CardImage_English: {fileID: 21300000, guid: e818929a23261af419e8fe9927790b38, type: 3}
+  CardName: "\u53EF\u6190\u306A\u5FCD \u30A8\u30EA\u30FC\u30BC"
+  UnitName: "\u30A8\u30EA\u30FC\u30BC"
+  UnitName_English: Elise
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 05000000
+  Power: 30
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 1
+  Weapons: 07000000
+  ClassName: Erese_CuteShinobi
+  SkillNames:
+  - "\u304C\u3093\u3070\u3063\u3061\u3083\u3046\u3088!"
+  SupportSkillNames:
+  - "\u5FCD\u8853\u306E\u7D0B\u7AE0"
+  CardID: 300
+  MaxCountInDeck: 4

@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30B8\u30E7\u30FC\u30AB\u30FC_\u30D5\u30A1\u30A4\u30C6\u30A3\u30F3\u30B0\u30FB\u30D0\u30C8\u30E9\u30FC
+    \u30B8\u30E7\u30FC\u30AB\u30FC"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 32510e8a29ff02b4ca2e98e0b5c26668, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 7d2f743087bc91a46851a1f0dc8a1151, type: 3}
+  CardName: "\u30D5\u30A1\u30A4\u30C6\u30A3\u30F3\u30B0\u30FB\u30D0\u30C8\u30E9\u30FC
+    \u30B8\u30E7\u30FC\u30AB\u30FC"
+  UnitName: "\u30B8\u30E7\u30FC\u30AB\u30FC"
+  UnitName_English: Jakob
+  PlayCost: 5
+  HasCC: 1
+  CCCost: 4
+  cardColors: 06000000
+  Power: 60
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 0
+  Weapons: 07000000
+  ClassName: Joker_FightingBattler
+  SkillNames:
+  - "\u3069\u3046\u305E\u3053\u3061\u3089\u3078"
+  - "\u3059\u3050\u306B\u624B\u5F53\u3066\u3092"
+  - "\u8CB4\u65B9\u306E\u305F\u3081\u306B"
+  SupportSkillNames: []
+  CardID: 207
+  MaxCountInDeck: 4

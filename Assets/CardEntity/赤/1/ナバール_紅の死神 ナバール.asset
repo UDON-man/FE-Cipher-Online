@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30CA\u30D0\u30FC\u30EB_\u7D05\u306E\u6B7B\u795E \u30CA\u30D0\u30FC\u30EB"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 7b5d0847cd908e0478c2d3d30b98fa9d, type: 3}
+  CardImage_English: {fileID: 21300000, guid: cf79b4197bb81694687b963562d5cf61, type: 3}
+  CardName: "\u7D05\u306E\u6B7B\u795E \u30CA\u30D0\u30FC\u30EB"
+  UnitName: "\u30CA\u30D0\u30FC\u30EB"
+  UnitName_English: Navarre
+  PlayCost: 4
+  HasCC: 1
+  CCCost: 3
+  cardColors: 00000000
+  Power: 70
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 00000000
+  ClassName: Nabar_RedDeathGod
+  SkillNames:
+  - "\u544A\u6B7B\u306E\u4E00\u9583"
+  - "\u4E8C\u5200\u6D41"
+  SupportSkillNames: []
+  CardID: 20
+  MaxCountInDeck: 4

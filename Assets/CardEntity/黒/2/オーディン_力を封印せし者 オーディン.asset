@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30AA\u30FC\u30C7\u30A3\u30F3_\u529B\u3092\u5C01\u5370\u305B\u3057\u8005
+    \u30AA\u30FC\u30C7\u30A3\u30F3"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 5c321d284d9cc8a4584f24c2d25ef66f, type: 3}
+  CardImage_English: {fileID: 21300000, guid: fcc1f8d39953c854ebccf0638c05a884, type: 3}
+  CardName: "\u529B\u3092\u5C01\u5370\u305B\u3057\u8005 \u30AA\u30FC\u30C7\u30A3\u30F3"
+  UnitName: "\u30AA\u30FC\u30C7\u30A3\u30F3"
+  UnitName_English: Odin
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 06000000
+  Power: 30
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 0
+  Weapons: 03000000
+  ClassName: Odin_SealedPower
+  SkillNames:
+  - "\u30EC\u30AA\u30F3\u968A\u306E\u30AA\u30FC\u30C7\u30A3\u30F3"
+  SupportSkillNames:
+  - "\u6697\u95C7\u306E\u7D0B\u7AE0"
+  CardID: 200
+  MaxCountInDeck: 4

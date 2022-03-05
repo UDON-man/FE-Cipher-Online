@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30EA\u30D9\u30E9_\u7F8E\u8C8C\u306E\u50E7\u4FB6 \u30EA\u30D9\u30E9"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: eb5007bb6777d6e48b593a4f2bfdf88f, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 1a9b0e33743d5764e9f5fe2a1295887a, type: 3}
+  CardName: "\u7F8E\u8C8C\u306E\u50E7\u4FB6 \u30EA\u30D9\u30E9"
+  UnitName: "\u30EA\u30D9\u30E9"
+  UnitName_English: Libra
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 01000000
+  Power: 60
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 02000000
+  ClassName: Rivela_BeautifulPriest
+  SkillNames:
+  - "\u50E7\u4FB6\u306E\u6226\u65A7"
+  SupportSkillNames: []
+  CardID: 441
+  MaxCountInDeck: 4

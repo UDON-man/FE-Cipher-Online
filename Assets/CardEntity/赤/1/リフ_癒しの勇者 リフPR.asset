@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30EA\u30D5_\u7652\u3057\u306E\u52C7\u8005 \u30EA\u30D5PR"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: cf34fa4e9047bfc4196e706f3cfe5d48, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 970f908a4fafc704abe60bc7abbb3caf, type: 3}
+  CardName: "\u7652\u3057\u306E\u52C7\u8005 \u30EA\u30D5"
+  UnitName: "\u30EA\u30D5"
+  UnitName_English: Wrys
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 00000000
+  Power: 60
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 02000000
+  ClassName: Rifu_HealingHero
+  SkillNames:
+  - "\u304D\u305A\u3050\u3059\u308A"
+  SupportSkillNames: []
+  CardID: 114
+  MaxCountInDeck: 4

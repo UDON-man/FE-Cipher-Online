@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30B0\u30EC\u30A4_\u7518\u515A\u306E\u5FCD \u30B0\u30EC\u30A4"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: b467904b35b321d45b28c6ae57a98fb4, type: 3}
+  CardImage_English: {fileID: 21300000, guid: db81751398ef9684786da5ef4ab8d1df, type: 3}
+  CardName: "\u7518\u515A\u306E\u5FCD \u30B0\u30EC\u30A4"
+  UnitName: "\u30B0\u30EC\u30A4"
+  UnitName_English: Asugi
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 05000000
+  Power: 30
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 0
+  Weapons: 07000000
+  ClassName: Glay_SweetNinja
+  SkillNames:
+  - "\u4E00\u6483\u96E2\u8131"
+  SupportSkillNames:
+  - "\u5FCD\u8853\u306E\u7D0B\u7AE0"
+  CardID: 166
+  MaxCountInDeck: 4

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30BF\u30AF\u30DF_\u98A8\u7E8F\u3046\u795E\u5C04\u624B \u30BF\u30AF\u30DF"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: e4de603acf03a9f4fb9ce5e3de882f2f, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 4389527e2a197b4439b9b224a0474aa3, type: 3}
+  CardName: "\u98A8\u7E8F\u3046\u795E\u5C04\u624B \u30BF\u30AF\u30DF"
+  UnitName: "\u30BF\u30AF\u30DF"
+  UnitName_English: Takumi
+  PlayCost: 4
+  HasCC: 1
+  CCCost: 3
+  cardColors: 05000000
+  Power: 60
+  SupportPower: 20
+  Ranges: 02000000
+  sex: 0
+  Weapons: 09000000
+  ClassName: Takumi_WindGodArcher
+  SkillNames:
+  - "\u795E\u5668 \u98A8\u795E\u5F13"
+  - "\u98DB\u884C\u7279\u52B9"
+  SupportSkillNames: []
+  CardID: 132
+  MaxCountInDeck: 4

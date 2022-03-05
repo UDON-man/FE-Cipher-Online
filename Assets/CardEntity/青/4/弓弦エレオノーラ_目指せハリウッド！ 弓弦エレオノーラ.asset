@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u5F13\u5F26\u30A8\u30EC\u30AA\u30CE\u30FC\u30E9_\u76EE\u6307\u305B\u30CF\u30EA\u30A6\u30C3\u30C9\uFF01
+    \u5F13\u5F26\u30A8\u30EC\u30AA\u30CE\u30FC\u30E9"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: aac779fbed9719146b2d33b21eb0e711, type: 3}
+  CardImage_English: {fileID: 21300000, guid: f9dbfdebffdad464f89838d04ac7fd6e, type: 3}
+  CardName: "\u76EE\u6307\u305B\u30CF\u30EA\u30A6\u30C3\u30C9\uFF01 \u5F13\u5F26\u30A8\u30EC\u30AA\u30CE\u30FC\u30E9"
+  UnitName: "\u5F13\u5F26\u30A8\u30EC\u30AA\u30CE\u30FC\u30E9"
+  UnitName_English: Eleonora Yumizuru
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 01000000
+  Power: 50
+  SupportPower: 20
+  Ranges: 02000000
+  sex: 1
+  Weapons: 090000000d000000
+  ClassName: Eleonora_AimToHollowood
+  SkillNames:
+  - "\u30DB\u30E9\u30FC\u30FB\u30CF\u30F3\u30BF\u30FC"
+  - "\u98DB\u884C\u7279\u52B9"
+  SupportSkillNames: []
+  CardID: 471
+  MaxCountInDeck: 4

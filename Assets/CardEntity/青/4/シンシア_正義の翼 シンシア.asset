@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30B7\u30F3\u30B7\u30A2_\u6B63\u7FA9\u306E\u7FFC \u30B7\u30F3\u30B7\u30A2"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 424a51fd61414854b86bb4d5d351e158, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 8a0027aa489503144a4a89413013b9fe, type: 3}
+  CardName: "\u6B63\u7FA9\u306E\u7FFC \u30B7\u30F3\u30B7\u30A2"
+  UnitName: "\u30B7\u30F3\u30B7\u30A2"
+  UnitName_English: Cynthia
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 01000000
+  Power: 50
+  SupportPower: 30
+  Ranges: 01000000
+  sex: 1
+  Weapons: 010000000b00000008000000
+  ClassName: Cynthia_JusticeWing
+  SkillNames:
+  - "\u30D2\u30FC\u30ED\u30FC\u767B\u5834!"
+  - "\u83EF\u9E97\u306A\u9000\u5834!"
+  SupportSkillNames: []
+  CardID: 458
+  MaxCountInDeck: 4

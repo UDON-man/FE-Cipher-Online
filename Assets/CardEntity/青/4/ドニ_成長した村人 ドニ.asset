@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30C9\u30CB_\u6210\u9577\u3057\u305F\u6751\u4EBA \u30C9\u30CB"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: e616511946513e049a8f8872db0f28d6, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 643607ddaaf281649bd922c73fdbf32a, type: 3}
+  CardName: "\u6210\u9577\u3057\u305F\u6751\u4EBA \u30C9\u30CB"
+  UnitName: "\u30C9\u30CB"
+  UnitName_English: Donnel
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 01000000
+  Power: 60
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 00000000
+  ClassName: Doni_GrownVillager
+  SkillNames:
+  - "\u7551\u306B\u6C34\u3084\u308B\u3079!"
+  - "\u624D\u80FD\u306E\u958B\u82B1"
+  SupportSkillNames: []
+  CardID: 446
+  MaxCountInDeck: 4

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30E1\u30B0_\u7D20\u6734\u306A\u6751\u5A18 \u30E1\u30B0"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: ec671f35ced225c4d8da7c8be173b997, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 44778d39a76d91141838a3753b11046c, type: 3}
+  CardName: "\u7D20\u6734\u306A\u6751\u5A18 \u30E1\u30B0"
+  UnitName: "\u30E1\u30B0"
+  UnitName_English: Meg
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 02000000
+  Power: 30
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 1
+  Weapons: 000000000a000000
+  ClassName: Meg_NaiveVillagerGirl
+  SkillNames:
+  - "\u30E1\u30B0\u306E\u76FE"
+  SupportSkillNames:
+  - "\u9632\u5FA1\u306E\u7D0B\u7AE0"
+  CardID: 557
+  MaxCountInDeck: 4

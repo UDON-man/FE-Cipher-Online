@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30AF\u30ED\u30E0_\u6B63\u7FA9\u3092\u8CAB\u304F\u738B\u5B50 \u30AF\u30ED\u30E0PR"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 9b7cb0a59a2a2014489648c482d0ff9d, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 58a4121e5928f604e9354b56ab5c0ab5, type: 3}
+  CardName: "\u6B63\u7FA9\u3092\u8CAB\u304F\u738B\u5B50 \u30AF\u30ED\u30E0"
+  UnitName: "\u30AF\u30ED\u30E0"
+  UnitName_English: Chrom
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 01000000
+  Power: 60
+  SupportPower: 20
+  Ranges: 01000000
+  sex: 0
+  Weapons: 00000000
+  ClassName: Crom_JuticePrince
+  SkillNames:
+  - "\u767D\u9280\u306E\u541B\u4E3B"
+  SupportSkillNames: []
+  CardID: 112
+  MaxCountInDeck: 4

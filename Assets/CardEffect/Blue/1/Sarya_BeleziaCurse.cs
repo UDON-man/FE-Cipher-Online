@@ -1,0 +1,50 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System;
+
+public class Sarya_BeleziaCurse : CEntity_Effect
+{
+    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    {
+        List<ICardEffect> cardEffects = new List<ICardEffect>();
+
+        if (timing == EffectTiming.OnDeclaration)
+        {
+            if (card.Owner.Enemy.HandCards.Count > 0)
+            {
+                activateClass[0].SetUpICardEffect("ミィル", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, null, -1, false);
+                activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
+                cardEffects.Add(activateClass[0]);
+
+                if (ContinuousController.instance.language == Language.ENG)
+                {
+                    activateClass[0].EffectName = "Flux";
+                }
+
+                IEnumerator ActivateCoroutine()
+                {
+                    SelectHandEffect selectHandEffect = GetComponent<SelectHandEffect>();
+
+                    selectHandEffect.SetUp(
+                            SelectPlayer: card.Owner.Enemy,
+                            CanTargetCondition: (cardSource) => cardSource.Owner.HandCards.Contains(cardSource),
+                            CanTargetCondition_ByPreSelecetedList: null,
+                            CanEndSelectCondition: null,
+                            MaxCount: 1,
+                            CanNoSelect: false,
+                            CanEndNotMax: false,
+                            isShowOpponent: true,
+                            SelectCardCoroutine: null,
+                            AfterSelectCardCoroutine: null,
+                            mode: SelectHandEffect.Mode.Discard);
+
+                    yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
+                }
+                
+            }
+        }
+
+        return cardEffects;
+    }
+}

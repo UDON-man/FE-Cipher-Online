@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30EA\u30EA\u30FC\u30CA_\u53EF\u6190\u306A\u76DF\u4E3B \u30EA\u30EA\u30FC\u30CA"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 91e76c8c18c875547a7cded172f4e056, type: 3}
+  CardImage_English: {fileID: 21300000, guid: bfc4dafbe7b03f64ead31bfbbae48204, type: 3}
+  CardName: "\u53EF\u6190\u306A\u76DF\u4E3B \u30EA\u30EA\u30FC\u30CA"
+  UnitName: "\u30EA\u30EA\u30FC\u30CA"
+  UnitName_English: Lilina
+  PlayCost: 4
+  HasCC: 1
+  CCCost: 3
+  cardColors: 04000000
+  Power: 60
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 1
+  Weapons: 03000000
+  ClassName: Lilina_CuteDomain
+  SkillNames:
+  - "\u696D\u706B\u306E\u7406 \u30D5\u30A9\u30EB\u30D6\u30EC\u30A4\u30BA"
+  - "\u5927\u9B54\u5C0E\u58EB\u306E\u7D20\u8CEA"
+  SupportSkillNames: []
+  CardID: 487
+  MaxCountInDeck: 4

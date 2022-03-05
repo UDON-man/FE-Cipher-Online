@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u5263\u5F25\u4EE3_\u5FC3\u306B\u5203\u3092\u6301\u3064\u7537 \u5263\u5F25\u4EE3"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: fec9f946930717b4ca7b5df5b6ad50d2, type: 3}
+  CardImage_English: {fileID: 21300000, guid: b4b50e1863b999349a48f664fbff1db1, type: 3}
+  CardName: "\u5FC3\u306B\u5203\u3092\u6301\u3064\u7537 \u5263\u5F25\u4EE3"
+  UnitName: "\u5263\u5F25\u4EE3"
+  UnitName_English: Yashiro Tsurugi
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 00000000
+  Power: 40
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 000000000d000000
+  ClassName: Yashiro_HaveSwordInHisHeart
+  SkillNames:
+  - "\u622F\u308C\u306A\u3089\u4F59\u6240\u3067\u3084\u308C"
+  SupportSkillNames:
+  - "\u653B\u6483\u306E\u7D0B\u7AE0"
+  CardID: 380
+  MaxCountInDeck: 4

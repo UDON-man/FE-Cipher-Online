@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30AB\u30F3\u30CA(\u7537)_\u767D\u304D\u795E\u7ADC\u738B\u5B50 \u30AB\u30F3\u30CA(\u7537)"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: d796ff0d091bcc849a4fac21dbd0b375, type: 3}
+  CardImage_English: {fileID: 21300000, guid: e409fca21e857ff4ab0f23a80830d63a, type: 3}
+  CardName: "\u767D\u304D\u795E\u7ADC\u738B\u5B50 \u30AB\u30F3\u30CA(\u7537)"
+  UnitName: "\u30AB\u30F3\u30CA(\u7537)"
+  UnitName_English: Kana(M)
+  PlayCost: 4
+  HasCC: 1
+  CCCost: 3
+  cardColors: 05000000
+  Power: 60
+  SupportPower: 20
+  Ranges: 01000000
+  sex: 0
+  Weapons: 0500000006000000
+  ClassName: KannnaOtoko_WhiteGodDragonPrince
+  SkillNames:
+  - "\u5F37\u3059\u304E\u308B\u529B"
+  - "\u795E\u7956\u7ADC\u306E\u8840\u65CF"
+  SupportSkillNames: []
+  CardID: 305
+  MaxCountInDeck: 4

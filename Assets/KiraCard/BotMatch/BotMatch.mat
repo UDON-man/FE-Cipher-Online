@@ -1,0 +1,365 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: BotMatch
+  m_Shader: {fileID: 4800000, guid: e5c7f044c0ca90f4da12abe47b144805, type: 3}
+  m_ShaderKeywords: _GRADATION_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _ArtEmission:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BackFace:
+        m_Texture: {fileID: 2800000, guid: c6636bf7ae35bc1448a1f93e10e7b5af, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BackFaceSpecular:
+        m_Texture: {fileID: 2800000, guid: fac1a5f2ef6a639418615d6938518f17, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DistortionTex:
+        m_Texture: {fileID: 2800000, guid: feb58942fa1ebc04880c54323ceeae12, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EFX1Color:
+        m_Texture: {fileID: 2800000, guid: 1d4a01b92ec898e4fa05ca67b1cd7a78, type: 3}
+        m_Scale: {x: 2, y: 2}
+        m_Offset: {x: 0, y: 0}
+    - _EFX1Mask:
+        m_Texture: {fileID: 2800000, guid: 951b2f615fb028246a7e89c14aea4719, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Frame:
+        m_Texture: {fileID: 2800000, guid: be0038d502cb9c142aab8b2dfd270946, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FrameNormal:
+        m_Texture: {fileID: 2800000, guid: 5cf16864473177d4aaa0d1eed6f7a880, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FrameTex:
+        m_Texture: {fileID: 2800000, guid: 92ac600f995e050479426635d243adff, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HaloTex:
+        m_Texture: {fileID: 2800000, guid: 95bb0b05921f73a4ea0699001626d414, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HoloTex:
+        m_Texture: {fileID: 2800000, guid: c6a97f4450bc3c04fa3d1e165cc0ba29, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Kira:
+        m_Texture: {fileID: 2800000, guid: 808041027eed35a45b0cf9c6f421a8ad, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _KiraNormal:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _KiraTex:
+        m_Texture: {fileID: 2800000, guid: 39247ace51d083f4aa4e5b910c7d0a97, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _KiraTex0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _KiraTex0012:
+        m_Texture: {fileID: 2800000, guid: 876e4176d30bee54db2ca97158d72e55, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Kira_copy:
+        m_Texture: {fileID: 2800000, guid: 808041027eed35a45b0cf9c6f421a8ad, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 5c5cdc49127121a4aaa266d7681d520a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NisuNormal:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NisuTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Sign:
+        m_Texture: {fileID: 2800000, guid: ed37e5280ee5cf943a5e121047acbc9e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SignNormal:
+        m_Texture: {fileID: 2800000, guid: e968755b9ede46b489ab1d5e7ec797e1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SkyBox:
+        m_Texture: {fileID: 8900000, guid: 1100cd5ea5005034dab121cd04d64348, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SubKiraTex:
+        m_Texture: {fileID: 2800000, guid: 7df63a4247a77c549a2f511374372e64, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SubNormal:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SubNormal_copy:
+        m_Texture: {fileID: 2800000, guid: 7df63a4247a77c549a2f511374372e64, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_1032:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_1363:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_1647:
+        m_Texture: {fileID: 2800000, guid: e40f2d9cc1b312447b9838324dc54deb, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_1895:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_2128:
+        m_Texture: {fileID: 2800000, guid: 4a6c67b8dc90f7f45a0c4a79db7bdc08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_2688:
+        m_Texture: {fileID: 2800000, guid: ad1f2874690ff604497b525eaaaf6705, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_3136:
+        m_Texture: {fileID: 2800000, guid: ac727a15439ea974ca128c619743ff24, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_334:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_351:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_415:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_4446:
+        m_Texture: {fileID: 2800000, guid: 0ae537d724178fd40907ebf0d40738e3, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_4785:
+        m_Texture: {fileID: 2800000, guid: 0ae537d724178fd40907ebf0d40738e3, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_5465:
+        m_Texture: {fileID: 2800000, guid: 155a7b81cf19f8a4d8a649fe13a55a46, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_5738:
+        m_Texture: {fileID: 2800000, guid: 1d4a01b92ec898e4fa05ca67b1cd7a78, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_5810:
+        m_Texture: {fileID: 2800000, guid: d01c0d7420b10e8429a36e8329839efa, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_6316:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_6666:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_6678:
+        m_Texture: {fileID: 2800000, guid: 9c98c5b0935c4ff4c87271f79fb99d53, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_6939:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_7250:
+        m_Texture: {fileID: 2800000, guid: 0ae537d724178fd40907ebf0d40738e3, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_7811:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_8000:
+        m_Texture: {fileID: 2800000, guid: 7870b31d48c2d2b479594d39124770c9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_8193:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_8514:
+        m_Texture: {fileID: 2800000, guid: ad1f2874690ff604497b525eaaaf6705, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_8652:
+        m_Texture: {fileID: 8900000, guid: 6360dfd383bce72479d745acd1f13bdb, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_877:
+        m_Texture: {fileID: 2800000, guid: ca2a04bbe25faea40b9a17a0ab94cc93, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_8865:
+        m_Texture: {fileID: 2800000, guid: feb58942fa1ebc04880c54323ceeae12, type: 3}
+        m_Scale: {x: 3, y: 3}
+        m_Offset: {x: 0, y: 0}
+    - _node_9290:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_9704:
+        m_Texture: {fileID: 2800000, guid: 5595748877901494d85cce56120bc466, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_9832:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_9884:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AmbientColor: 0
+    - _ArtGloss: 0.28
+    - _ArtMetal: 0.449
+    - _BumpScale: 1
+    - _CardDistortion: 1
+    - _Cutoff: 0.5
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _FrameGloss: 0.7
+    - _FrameMetal: 0.4
+    - _Gloss: 0.818
+    - _GlossMapScale: 1
+    - _Glossiness: 0.5
+    - _GlossyReflections: 1
+    - _GradAngle: 1.45
+    - _Gradation: 1
+    - _HoloBSaturation: 1
+    - _HoloBrightness: 0.72
+    - _HoloSaturation: 0.63
+    - _HoloShift: 0.68
+    - _HoloWhiteness: 0.46
+    - _KiraAngle: 0.24
+    - _KiraGloss: 0.6
+    - _KiraMetal: 1
+    - _KiraPower: 1
+    - _KiraSaturation: 0.5128205
+    - _KiraTile: 0.4
+    - _Metallic: 1
+    - _Mode: 0
+    - _NisuNormalPower: 0.697
+    - _OcclusionStrength: 1
+    - _Parallax: 0.02
+    - _SignGloss: 1
+    - _SignMetal: 0.412
+    - _SkyBoxPower: 0
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _SubKiraAngle: 0
+    - _SubKiraPower: 0.07
+    - _SubKiraTile: 0.5
+    - _SubKiraTilei: 1
+    - _UVSec: 0
+    - _ZWrite: 1
+    - _node_1195: 0
+    - _node_2159: 0.534
+    - _node_2596: 0.594
+    - _node_2822: 0.777
+    - _node_2843: 0
+    - _node_37: 0
+    - _node_4003: 0
+    - _node_4015: 0.5
+    - _node_4015_copy: 3.173913
+    - _node_427: 0
+    - _node_4460: 1
+    - _node_4590: 0
+    - _node_480: 4.782609
+    - _node_5121: 1
+    - _node_5604: 0.1
+    - _node_6139: 5
+    - _node_6218: 1000
+    - _node_6867: 1
+    - _node_6867_copy: 0.939
+    - _node_7507: 1
+    - _node_7699: 100
+    - _node_8354: 1.1
+    - _node_9140: 1
+    - _node_9986: 0.842
+    - _tekitou: 1
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FrameColor: {r: 1, g: 0.9761, b: 0, a: 1}
+    - _GradColor: {r: 0.38679248, g: 0.11129405, b: 0.11129405, a: 1}
+    - _KiraColor: {r: 0.2830189, g: 0, b: 0, a: 1}
+    - _SignColor: {r: 0.8014706, g: 0.69482464, b: 0.55985075, a: 1}
+    - _SkyBoxColor: {r: 0.18867922, g: 0.13794944, b: 0.13794944, a: 1}
+    - _node_3475: {r: 1.0735295, g: 1.0735295, b: 1.0735295, a: 1}
+    - _node_4147: {r: 1, g: 1, b: 1, a: 1}
+    - _node_5178: {r: 1, g: 1, b: 1, a: 1}
+    - _node_5675: {r: 1, g: 0.7713996, b: 0.2794118, a: 1}
+    - _node_8034: {r: 0.11724138, g: 0, b: 1, a: 1}
+    - _node_9371: {r: 1, g: 1, b: 1, a: 1}

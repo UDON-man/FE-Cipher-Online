@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30E9\u30BA\u30EF\u30EB\u30C9_\u82B1\u54B2\u304F\u7B11\u9854 \u30E9\u30BA\u30EF\u30EB\u30C9"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: c03bf937a3353de438a74d32f13c3d67, type: 3}
+  CardImage_English: {fileID: 21300000, guid: d0872781d040fb94a948df0686ba7da9, type: 3}
+  CardName: "\u82B1\u54B2\u304F\u7B11\u9854 \u30E9\u30BA\u30EF\u30EB\u30C9"
+  UnitName: "\u30E9\u30BA\u30EF\u30EB\u30C9"
+  UnitName_English: Laslow
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 06000000
+  Power: 40
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 00000000
+  ClassName: Razwald_SmileFlower
+  SkillNames:
+  - "\u30DE\u30FC\u30AF\u30B9\u968A\u306E\u30E9\u30BA\u30EF\u30EB\u30C9"
+  SupportSkillNames:
+  - "\u653B\u6483\u306E\u7D0B\u7AE0"
+  CardID: 192
+  MaxCountInDeck: 4

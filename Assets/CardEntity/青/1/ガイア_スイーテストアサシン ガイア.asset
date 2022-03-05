@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30AC\u30A4\u30A2_\u30B9\u30A4\u30FC\u30C6\u30B9\u30C8\u30A2\u30B5\u30B7\u30F3
+    \u30AC\u30A4\u30A2"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 98cafc32508365e4287a6729553de0fe, type: 3}
+  CardImage_English: {fileID: 21300000, guid: f09afe2c2bce0f54f8ae0dfeade3c692, type: 3}
+  CardName: "\u30B9\u30A4\u30FC\u30C6\u30B9\u30C8\u30A2\u30B5\u30B7\u30F3 \u30AC\u30A4\u30A2"
+  UnitName: "\u30AC\u30A4\u30A2"
+  UnitName_English: Gaius
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 01000000
+  Power: 50
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 00000000
+  ClassName: Gaia_SweetestAssasin
+  SkillNames:
+  - "\u6697\u6BBA"
+  - "\u5831\u916C\u306F\u30B9\u30A4\u30FC\u30C4"
+  SupportSkillNames: []
+  CardID: 75
+  MaxCountInDeck: 4

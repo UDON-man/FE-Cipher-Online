@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30C6\u30A3\u30C8_\u75BE\u98A8\u306E\u5929\u99AC\u9A0E\u58EB \u30C6\u30A3\u30C8"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: c301a7dcf5f990048a01c4b2841e5170, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 585f9dbe259f5d746b5f1e41c9a509b7, type: 3}
+  CardName: "\u75BE\u98A8\u306E\u5929\u99AC\u9A0E\u58EB \u30C6\u30A3\u30C8"
+  UnitName: "\u30C6\u30A3\u30C8"
+  UnitName_English: Thea
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 04000000
+  Power: 30
+  SupportPower: 30
+  Ranges: 01000000
+  sex: 1
+  Weapons: 010000000b00000008000000
+  ClassName: Thito_StormyFlier
+  SkillNames:
+  - "\u3072\u308B\u304C\u3048\u308B\u767D\u7FFC"
+  SupportSkillNames:
+  - "\u5929\u7A7A\u306E\u7D0B\u7AE0"
+  CardID: 526
+  MaxCountInDeck: 4

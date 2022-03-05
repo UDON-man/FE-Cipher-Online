@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30AB\u30B6\u30CF\u30CA_\u304A\u8EE2\u5A46\u4F8D \u30AB\u30B6\u30CF\u30CA"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 9133ea4723538424ba2ecd7b5133b0a8, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 72cabe279abadc7479ae2b544e84f746, type: 3}
+  CardName: "\u304A\u8EE2\u5A46\u4F8D \u30AB\u30B6\u30CF\u30CA"
+  UnitName: "\u30AB\u30B6\u30CF\u30CA"
+  UnitName_English: Hana
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 05000000
+  Power: 40
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 1
+  Weapons: 00000000
+  ClassName: Kazahana_OtenbaSamurai
+  SkillNames:
+  - "\u30B5\u30AF\u30E9\u968A\u306E\u30AB\u30B6\u30CF\u30CA"
+  SupportSkillNames:
+  - "\u653B\u6483\u306E\u7D0B\u7AE0"
+  CardID: 149
+  MaxCountInDeck: 4

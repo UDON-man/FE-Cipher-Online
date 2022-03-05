@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30A8\u30DE_\u3064\u3044\u306B\u30C9\u30E9\u30B4\u30F3! \u30A8\u30DE"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 490c22cab95767e48bca51a7fba7b4cf, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 2cfaec7d7f3d9734d8f23d701f188a7a, type: 3}
+  CardName: "\u3064\u3044\u306B\u30C9\u30E9\u30B4\u30F3! \u30A8\u30DE"
+  UnitName: "\u30A8\u30DE"
+  UnitName_English: Emma
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 02000000
+  Power: 50
+  SupportPower: 30
+  Ranges: 01000000
+  sex: 1
+  Weapons: 020000000b00000006000000
+  ClassName: Ema_FinallyDragon
+  SkillNames:
+  - "\u306F\u308A\u304D\u3063\u3066\u3044\u304D\u307E\u3057\u3087\u30FC\uFF01"
+  - "\u305D\u3046\u306F\u3044\u304D\u307E\u305B\u3093\uFF01"
+  SupportSkillNames: []
+  CardID: 595
+  MaxCountInDeck: 4

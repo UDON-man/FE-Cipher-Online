@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30E6\u30FC\u30CE_\u4F1D\u8AAC\u306E\u5929\u99AC\u9A0E\u58EB \u30E6\u30FC\u30CE"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 5a042fd5b4d543d45b9f1b7487e03bb5, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 3d2097ed5c7ec5d4c9b86390ce3f0362, type: 3}
+  CardName: "\u4F1D\u8AAC\u306E\u5929\u99AC\u9A0E\u58EB \u30E6\u30FC\u30CE"
+  UnitName: "\u30E6\u30FC\u30CE"
+  UnitName_English: Juno
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 04000000
+  Power: 30
+  SupportPower: 30
+  Ranges: 01000000
+  sex: 1
+  Weapons: 010000000b00000008000000
+  ClassName: Juno_LegendaryPegasusuKnight
+  SkillNames:
+  - "\u5929\u99AC\u9A0E\u58EB\u56E3\u306E\u56E3\u9577"
+  SupportSkillNames:
+  - "\u5929\u7A7A\u306E\u7D0B\u7AE0"
+  CardID: 535
+  MaxCountInDeck: 4

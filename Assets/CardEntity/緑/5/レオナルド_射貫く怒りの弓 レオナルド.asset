@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30EC\u30AA\u30CA\u30EB\u30C9_\u5C04\u8CAB\u304F\u6012\u308A\u306E\u5F13
+    \u30EC\u30AA\u30CA\u30EB\u30C9"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: e0147abb011243e458644cc435ad00d3, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 36cbb3d784df8a446984a653387d107b, type: 3}
+  CardName: "\u5C04\u8CAB\u304F\u6012\u308A\u306E\u5F13 \u30EC\u30AA\u30CA\u30EB\u30C9"
+  UnitName: "\u30EC\u30AA\u30CA\u30EB\u30C9"
+  UnitName_English: Leonardo
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 02000000
+  Power: 50
+  SupportPower: 20
+  Ranges: 02000000
+  sex: 0
+  Weapons: 09000000
+  ClassName: Reonald_ShootingFuryBow
+  SkillNames:
+  - "\u30AF\u30ED\u30B9\u30DC\u30A6"
+  - "\u98DB\u884C\u7279\u52B9"
+  SupportSkillNames: []
+  CardID: 550
+  MaxCountInDeck: 4

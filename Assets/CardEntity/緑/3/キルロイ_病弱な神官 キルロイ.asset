@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30AD\u30EB\u30ED\u30A4_\u75C5\u5F31\u306A\u795E\u5B98 \u30AD\u30EB\u30ED\u30A4"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 2d4c7ac82142d804cb2a76d4e33794db, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 2a4cdc7e96ff104408112530764a463d, type: 3}
+  CardName: "\u75C5\u5F31\u306A\u795E\u5B98 \u30AD\u30EB\u30ED\u30A4"
+  UnitName: "\u30AD\u30EB\u30ED\u30A4"
+  UnitName_English: Rhys
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 02000000
+  Power: 20
+  SupportPower: 20
+  Ranges: 00000000
+  sex: 0
+  Weapons: 04000000
+  ClassName: Killroy_SickPriest
+  SkillNames:
+  - "\u30E9\u30A4\u30D6"
+  - "\u5BBF\u547D\u306E\u30E9\u30A4\u30D0\u30EB"
+  SupportSkillNames:
+  - "\u7948\u308A\u306E\u7D0B\u7AE0"
+  CardID: 261
+  MaxCountInDeck: 4

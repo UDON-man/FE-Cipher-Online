@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30EA\u30E7\u30A6\u30DE_\u767D\u591C\u306E\u5F8C\u7D99\u8005 \u30EA\u30E7\u30A6\u30DE"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: ae7c8696998e6d64c8360b8c4177760f, type: 3}
+  CardImage_English: {fileID: 21300000, guid: b6398daa7ebd40846ac3200fd870efad, type: 3}
+  CardName: "\u767D\u591C\u306E\u5F8C\u7D99\u8005 \u30EA\u30E7\u30A6\u30DE"
+  UnitName: "\u30EA\u30E7\u30A6\u30DE"
+  UnitName_English: Ryoma
+  PlayCost: 4
+  HasCC: 1
+  CCCost: 3
+  cardColors: 05000000
+  Power: 70
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 00000000
+  ClassName: Ryouma_ByakuyaHeir
+  SkillNames:
+  - "\u795E\u5668 \u96F7\u795E\u5200"
+  - "\u8AE6\u3081\u306A\u3069\u3057\u306A\u3044!"
+  SupportSkillNames: []
+  CardID: 174
+  MaxCountInDeck: 4

@@ -5,20 +5,16 @@ using System;
 
 public class RInda_AuraHeir : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[0].SetUpICardEffect("叡智の泉", new List<Cost>() {new ReverseCost( 1,(cardsSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Spring of Wisdom";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("叡智の泉", "Spring of Wisdom", new List<Cost>() {new ReverseCost( 1,(cardsSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -28,9 +24,15 @@ public class RInda_AuraHeir : CEntity_Effect
                     {
                         if (hashtable["Unit"] is Unit)
                         {
-                            Unit EnterUnit = (Unit)hashtable["Unit"];
+                            Unit Unit = (Unit)hashtable["Unit"];
 
-                            return EnterUnit.Character.Owner == this.card.Owner && EnterUnit.Character.PlayCost <= 2;
+                            if(Unit.Character != null)
+                            {
+                                if(Unit.Character.Owner == card.Owner && Unit.Character.PlayCost <= 2)
+                                {
+                                    return true;
+                                }
+                            }
                         }
                     }
                 }
@@ -48,21 +50,16 @@ public class RInda_AuraHeir : CEntity_Effect
 
         else if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[1].SetUpICardEffect("オーラ", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, 1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Aura";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("オーラ", "Aura", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter());
-
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }

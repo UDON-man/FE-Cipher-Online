@@ -5,20 +5,16 @@ using System.Linq;
 using System;
 public class Doni_VillagerWithSword : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnStartTurn)
         {
-            activateClass[1].SetUpICardEffect("畑に種まくべ!", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Sow the Fields!";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("畑に種まくべ!", "Sow the Fields!", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -54,9 +50,9 @@ public class Doni_VillagerWithSword : CEntity_Effect
                     ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ShowCardEffect(TopCards, "Trash Card", true));
                 }
 
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10 * TopCards.Count((cardSource) => cardSource.UnitNames.Contains("ドニ")), (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10 * TopCards.Count((cardSource) => cardSource.UnitNames.Contains("ドニ")), (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
             }
         }
 

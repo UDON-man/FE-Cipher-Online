@@ -7,24 +7,20 @@ using Photon.Pun;
 using System.Linq;
 public class Chad_RikiaOcelot : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[0].SetUpICardEffect("盗み", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Steal";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("盗み", "Steal", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -47,7 +43,7 @@ public class Chad_RikiaOcelot : CEntity_Effect
                     CardSource cardSource = card.Owner.Enemy.LibraryCards[0];
 
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass[0]);
+                    hashtable.Add("cardEffect", activateClass);
                     yield return ContinuousController.instance.StartCoroutine(new IShowLibraryCard(new List<CardSource>() { cardSource }, hashtable, false).ShowLibraryCard());
 
                     if (card.Owner.isYou)
@@ -100,20 +96,16 @@ public class Chad_RikiaOcelot : CEntity_Effect
 
     #region 山猫の盗剣
 
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpICardEffect("山猫の盗剣", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Sword of the Thieving Wildcat";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("山猫の盗剣", "Sword of the Thieving Wildcat", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            supportEffects.Add(activateClass_Support);
 
             IEnumerator ActivateCoroutine()
             {

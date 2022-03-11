@@ -6,20 +6,16 @@ using System.Linq;
 
 public class Yurisizu_ImportantInKingdom : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDestroyedDuringBattleAlly)
         {
-            activateClass[0].SetUpICardEffect("勝利への布石", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Stepping Stone to Victory";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("勝利への布石", "Stepping Stone to Victory",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -64,7 +60,8 @@ public class Yurisizu_ImportantInKingdom : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Custom);
+                    mode: SelectUnitEffect.Mode.Custom,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
@@ -83,7 +80,7 @@ public class Yurisizu_ImportantInKingdom : CEntity_Effect
                         CanTargetCondition: CanTargetCondition,
                         CanTargetCondition_ByPreSelecetedList: null,
                         CanEndSelectCondition: null,
-                        CanNoSelect: () => false,
+                        CanNoSelect: () => true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: AfterSelectCardCoroutine,
                         Message: "Select a card to stack down.",
@@ -93,7 +90,9 @@ public class Yurisizu_ImportantInKingdom : CEntity_Effect
                         mode: SelectCardEffect.Mode.Custom,
                         root: SelectCardEffect.Root.Trash,
                         CustomRootCardList: null,
-                        CanLookReverseCard: true);
+                        CanLookReverseCard: true,
+                        SelectPlayer: card.Owner,
+                        cardEffect: activateClass);
 
                     yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 

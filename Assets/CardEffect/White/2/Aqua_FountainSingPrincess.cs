@@ -5,20 +5,16 @@ using System;
 using System.Linq;
 public class Aqua_FountainSingPrincess : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("癒しの声", new List<Cost>() { new TapCost() }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Smoothing Voice";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("癒しの声", "Smoothing Voice",new List<Cost>() { new TapCost() }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -44,15 +40,16 @@ public class Aqua_FountainSingPrincess : CEntity_Effect
                 CanEndNotMax: false,
                 SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                 AfterSelectUnitCoroutine: null,
-                mode: SelectUnitEffect.Mode.Custom);
+                mode: SelectUnitEffect.Mode.Custom,
+                cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
                 IEnumerator SelectUnitCoroutine(Unit unit)
                 {
-                    PowerUpClass powerUpClass = new PowerUpClass();
-                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 10, (_unit) => _unit == unit);
-                    unit.UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                    PowerModifyClass powerUpClass = new PowerModifyClass();
+                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 10, (_unit) => _unit == unit, true);
+                    unit.UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                     yield return null;
                 }
@@ -63,15 +60,16 @@ public class Aqua_FountainSingPrincess : CEntity_Effect
     }
 
     #region 歌舞の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpICardEffect("歌舞の紋章", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            supportEffects.Add(activateClass_Support[0]);
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("歌舞の紋章","Performance Emblem", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -109,7 +107,8 @@ public class Aqua_FountainSingPrincess : CEntity_Effect
                 CanEndNotMax: false,
                 SelectUnitCoroutine: null,
                 AfterSelectUnitCoroutine: null,
-                mode: SelectUnitEffect.Mode.UnTap);
+                mode: SelectUnitEffect.Mode.UnTap,
+                cardEffect: activateClass_Support);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

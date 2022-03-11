@@ -6,21 +6,17 @@ using System.Linq;
 
 public class Ike_BraveLeaderOfGodSword : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("神剣ラグネル", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            activateClass[0].SetLvS(card.UnitContainingThisCharacter(), 3);
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Ragnell, the Sacred Blade";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("神剣ラグネル", "Ragnell, the Sacred Blade",new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            activateClass.SetLvS(card.UnitContainingThisCharacter(), 3);
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -39,7 +35,7 @@ public class Ike_BraveLeaderOfGodSword : CEntity_Effect
             {
                 RangeUpClass rangeUpClass = new RangeUpClass();
                 rangeUpClass.SetUpRangeUpClass((unit, Range) => { Range.Add(1); Range.Add(2); return Range; }, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(rangeUpClass);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => rangeUpClass);
 
                 yield return null;
             }
@@ -47,19 +43,15 @@ public class Ike_BraveLeaderOfGodSword : CEntity_Effect
 
         else if(timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[1].SetUpICardEffect("救国の勇将", new List<Cost>() { new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("アイク")) }, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, 1, true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            activateClass[1].SetLvS(card.UnitContainingThisCharacter(), 4);
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Brave General of Salvation";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("救国の勇将", "Brave General of Salvation",new List<Cost>() { new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("アイク")) }, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, 1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            activateClass.SetLvS(card.UnitContainingThisCharacter(), 4);
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -72,25 +64,25 @@ public class Ike_BraveLeaderOfGodSword : CEntity_Effect
 
             IEnumerator ActivateCoroutine1()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, (unit) => unit.Character.Owner == card.Owner);
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, (unit) => unit.Character.Owner == card.Owner, true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }
         }
 
-        PowerUpClass powerUpClass1 = new PowerUpClass();
-        powerUpClass1.SetUpICardEffect("受け継がれた剣技",null,null,-1,false);
-        powerUpClass1.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass1 = new PowerModifyClass();
+        powerUpClass1.SetUpICardEffect("受け継がれた剣技", "", null, null, -1, false, card);
+        powerUpClass1.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
         powerUpClass1.SetLvS(card.UnitContainingThisCharacter(), 5);
         cardEffects.Add(powerUpClass1);
 
-        StrikeUpClass strikeUpClass = new StrikeUpClass();
-        strikeUpClass.SetUpICardEffect("受け継がれた剣技", null, null, -1, false);
-        strikeUpClass.SetUpStrikeUpClass((unit, Strike) => 2, (unit) => unit == card.UnitContainingThisCharacter());
-        strikeUpClass.SetLvS(card.UnitContainingThisCharacter(), 5);
-        cardEffects.Add(strikeUpClass);
+        StrikeModifyClass strikeModifyClass = new StrikeModifyClass();
+        strikeModifyClass.SetUpICardEffect("受け継がれた剣技", "", null, null, -1, false, card);
+        strikeModifyClass.SetUpStrikeModifyClass((unit, Strike) => 2, (unit) => unit == card.UnitContainingThisCharacter(), false);
+        strikeModifyClass.SetLvS(card.UnitContainingThisCharacter(), 5);
+        cardEffects.Add(strikeModifyClass);
 
         return cardEffects;
     }

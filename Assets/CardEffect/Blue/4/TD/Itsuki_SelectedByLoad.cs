@@ -6,20 +6,16 @@ using System.Linq;
 
 public class Itsuki_SelectedByLoad : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnCCAnyone)
         {
-            activateClass[0].SetUpICardEffect("震天大雷", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine(hashtable));
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Raging Blast";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("震天大雷", "Raging Blast",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine(hashtable));
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -31,7 +27,16 @@ public class Itsuki_SelectedByLoad : CEntity_Effect
                         {
                             Unit Unit = (Unit)hashtable["Unit"];
 
-                            return Unit.Character.Owner == this.card.Owner && Unit != this.card.UnitContainingThisCharacter();
+                            if(Unit.Character != null)
+                            {
+                                if (Unit.Character.Owner == card.Owner)
+                                {
+                                    if (Unit != card.UnitContainingThisCharacter())
+                                    {
+                                        return true;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -45,7 +50,7 @@ public class Itsuki_SelectedByLoad : CEntity_Effect
 
                 selectUnitEffect.SetUp(
                 SelectPlayer: card.Owner,
-                CanTargetCondition: (unit) => unit.Character.Owner != this.card.Owner && unit.Character.Owner.GetBackUnits().Contains(unit),
+                CanTargetCondition: (unit) => unit.Character.Owner != card.Owner && unit.Character.Owner.GetBackUnits().Contains(unit),
                 CanTargetCondition_ByPreSelecetedList: null,
                 CanEndSelectCondition: null,
                 MaxCount: 2,
@@ -53,7 +58,8 @@ public class Itsuki_SelectedByLoad : CEntity_Effect
                 CanEndNotMax: true,
                 SelectUnitCoroutine: null,
                 AfterSelectUnitCoroutine: null,
-                mode: SelectUnitEffect.Mode.Move);
+                mode: SelectUnitEffect.Mode.Move,
+                cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }
@@ -61,9 +67,10 @@ public class Itsuki_SelectedByLoad : CEntity_Effect
 
         else if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[1].SetUpICardEffect("神降ろしの才覚", new List<Cost>() , null, 1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("神降ろしの才覚","Invoke the Spirits", new List<Cost>() , null, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -79,7 +86,8 @@ public class Itsuki_SelectedByLoad : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Custom);
+                    mode: SelectUnitEffect.Mode.Custom,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
@@ -98,9 +106,9 @@ public class Itsuki_SelectedByLoad : CEntity_Effect
 
                 IEnumerator SelectUnitCoroutine(Unit unit)
                 {
-                    PowerUpClass powerUpClass = new PowerUpClass();
-                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 40, (_unit) => _unit == unit);
-                    unit.UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                    PowerModifyClass powerUpClass = new PowerModifyClass();
+                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 40, (_unit) => _unit == unit, true);
+                    unit.UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                     yield return null;
                 }

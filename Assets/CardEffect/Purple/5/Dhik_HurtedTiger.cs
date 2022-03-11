@@ -6,13 +6,13 @@ using System.Linq;
 
 public class Dhik_HurtedTiger : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("ディーク傭兵団", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, PowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("ディーク傭兵団","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, PowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool PowerUpCondition(Unit unit)

@@ -5,20 +5,16 @@ using System;
 
 public class Grego_NoEnemyArmy : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDestroyedDuringBattleAlly)
         {
-            activateClass[0].SetUpICardEffect("グレゴと幼き竜", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Gregor and the Little Dragon";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("グレゴと幼き竜", "Gregor and the Little Dragon",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {

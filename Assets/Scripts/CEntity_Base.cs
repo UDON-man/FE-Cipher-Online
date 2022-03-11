@@ -37,7 +37,6 @@ public class CEntity_Base : ScriptableObject
             }
 
             return CardID_String;
-            return ConvertBinaryNumber.IntToNString(CardID, DeckData.m);
         }
     }
 }
@@ -78,4 +77,5 @@ public enum Weapon
     Wing,
     Beast,
     Sharp,
+    Demon,
 }

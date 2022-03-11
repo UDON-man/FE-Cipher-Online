@@ -5,20 +5,16 @@ using System;
 
 public class Bledhi_ProudBlood : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnStartTurn)
         {
-            activateClass[0].SetUpICardEffect("ケガはねぇか?", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCodition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Doesn't it hurt?";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("ケガはねぇか?", "Doesn't it hurt?", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCodition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCodition(Hashtable hashtable)
             {
@@ -48,7 +44,9 @@ public class Bledhi_ProudBlood : CEntity_Effect
                     mode: SelectCardEffect.Mode.AddHand,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect:activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
             }
@@ -56,14 +54,10 @@ public class Bledhi_ProudBlood : CEntity_Effect
 
         else if(timing == EffectTiming.OnAddHandCardFromTrash)
         {
-            activateClass[1].SetUpICardEffect("英才教育", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCodition }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Higher Education";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("英才教育", "Higher Education",new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCodition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCodition(Hashtable hashtable)
             {
@@ -80,7 +74,7 @@ public class Bledhi_ProudBlood : CEntity_Effect
                             {
                                 if(cardEffect.card() != null)
                                 {
-                                    if(cardEffect.card() == this.card)
+                                    if(cardEffect.card() == card)
                                     {
                                         if (cardSource.Weapons.Contains(Weapon.MagicBook) || cardSource.Weapons.Contains(Weapon.Rod))
                                         {
@@ -98,9 +92,9 @@ public class Bledhi_ProudBlood : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }

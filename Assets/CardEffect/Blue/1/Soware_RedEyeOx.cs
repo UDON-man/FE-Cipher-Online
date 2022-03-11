@@ -7,13 +7,13 @@ using System;
 
 public class Soware_RedEyeOx : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("紅と碧の絆", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, CanPowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("紅と碧の絆", "",null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, CanPowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool CanPowerUpCondition(Unit unit)
@@ -33,18 +33,45 @@ public class Soware_RedEyeOx : CEntity_Effect
 
 
         CanNotAttackClass canNotAttackClass = new CanNotAttackClass();
-        canNotAttackClass.SetUpICardEffect("聖盾", null, null, -1, false);
+        canNotAttackClass.SetUpICardEffect("聖盾", "",null, null, -1, false,card);
         canNotAttackClass.SetCCS(card.UnitContainingThisCharacter());
+        canNotAttackClass.SetUpCanNotAttackClass(AttackingCondition, DefendingCondition);
         cardEffects.Add(canNotAttackClass);
 
-        canNotAttackClass.SetUpCanNotAttackClass(
-            (AttackingUnit) => 
-            AttackingUnit.Character.Owner != this.card.Owner && AttackingUnit.Character.Owner.GetBackUnits().Contains(AttackingUnit) 
-            && (AttackingUnit.Weapons.Contains(Weapon.Bow)|| AttackingUnit.Weapons.Contains(Weapon.MagicBook)|| AttackingUnit.Weapons.Contains(Weapon.DragonStone)), 
-            (DefendingUnit) => DefendingUnit.Character.Owner == this.card.Owner);
+        bool AttackingCondition(Unit AttackingUnit)
+        {
+            if(AttackingUnit != null)
+            {
+                if (AttackingUnit.Character != null)
+                {
+                    if (AttackingUnit.Character.Owner != card.Owner && AttackingUnit.Character.Owner.GetBackUnits().Contains(AttackingUnit))
+                    {
+                        if (AttackingUnit.Weapons.Contains(Weapon.Bow) || AttackingUnit.Weapons.Contains(Weapon.MagicBook) || AttackingUnit.Weapons.Contains(Weapon.DragonStone))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
 
-        
-        
+            return false;
+        }
+
+        bool DefendingCondition(Unit DefendingUnit)
+        {
+            if(DefendingUnit != null)
+            {
+                if (DefendingUnit.Character != null)
+                {
+                    if (DefendingUnit.Character.Owner == card.Owner)
+                    {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
 
         return cardEffects;
     }

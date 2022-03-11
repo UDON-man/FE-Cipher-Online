@@ -6,7 +6,7 @@ using System.Linq;
 
 public class Astria_MercyHero : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
@@ -24,18 +24,14 @@ public class Astria_MercyHero : CEntity_Effect
                 AfterSelectUnitCoroutine: null,
                 mode: SelectUnitEffect.Mode.Tap);
 
-            activateClass[0].SetUpICardEffect("愛の双刃", new List<Cost>() { selectAllyCost }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Twin Blades of Love";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("愛の双刃", "Twin Blades of Love", new List<Cost>() { selectAllyCost }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -48,18 +44,18 @@ public class Astria_MercyHero : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
+                PowerModifyClass powerUpClass = new PowerModifyClass();
                 Unit targetUnit = card.UnitContainingThisCharacter();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 40, (unit) => unit == targetUnit);
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 40, (unit) => unit == targetUnit, true);
 
-                targetUnit.UntilEndBattleEffects.Add(powerUpClass);
+                targetUnit.UntilEndBattleEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }
         }
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("ドラゴンソード", (enemyUnit, Power) => Power + 20, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Dragon), PowerUpByEnemy.Mode.Attacking);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("ドラゴンソード", (enemyUnit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Dragon), PowerUpByEnemy.Mode.Attacking, card);
         cardEffects.Add(powerUpByEnemy);
 
         return cardEffects;

@@ -6,20 +6,16 @@ using System;
 
 public class Crom_JuticePrince : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnCCAnyone)
         {
-            activateClass[0].SetUpICardEffect("白銀の君主", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Silver Monarch";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("白銀の君主", "Silver Monarch", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -33,9 +29,11 @@ public class Crom_JuticePrince : CEntity_Effect
 
                             if(Unit.Character != null)
                             {
-                                return Unit.Character == this.card;
+                                if(Unit.Character == card)
+                                {
+                                    return true;
+                                }
                             }
-                            
                         }
                     }
                 }
@@ -49,7 +47,7 @@ public class Crom_JuticePrince : CEntity_Effect
 
                 selectUnitEffect.SetUp(
                 SelectPlayer: card.Owner,
-                CanTargetCondition: (unit) => unit.Character.Owner != this.card.Owner,
+                CanTargetCondition: (unit) => unit.Character.Owner != card.Owner,
                 CanTargetCondition_ByPreSelecetedList: null,
                 CanEndSelectCondition: null,
                 MaxCount: 1,
@@ -57,7 +55,8 @@ public class Crom_JuticePrince : CEntity_Effect
                 CanEndNotMax: false,
                 SelectUnitCoroutine: null,
                 AfterSelectUnitCoroutine: null,
-                mode: SelectUnitEffect.Mode.Move);
+                mode: SelectUnitEffect.Mode.Move,
+                cardEffect:activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

@@ -7,6 +7,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
+using UnityEngine.Events;
 public class TurnStateMachine : MonoBehaviourPunCallbacks
 {
     //ゲーム状況を管理するクラス
@@ -17,6 +18,9 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
     //同期中
     public bool isSync;
+
+    //効果使用中
+    public bool isExecuting;
 
     //先行の1ターン目かどうか
     public bool isFirstPlayerFirstTurn { get; set; } = true;
@@ -566,7 +570,7 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
         foreach (Unit unit in gameContext.TurnPlayer.FieldUnit)
         {
-            if (unit.IsTapped)
+            if (unit.IsTapped && unit.CanUnTapOnStartTurn)
             {
                 doUntap = true;
                 yield return ContinuousController.instance.StartCoroutine(unit.UnTap(null));
@@ -636,8 +640,12 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
                 else
                 {
-                    //GManager.instance.ShowReverseUnit.SetActive(true);
                     GManager.instance.commandText.OpenCommandText("Bond Phase : Select a card to set to bond.");
+
+                    if (gameContext.You.bondObject.ShowDropTargetObject != null)
+                    {
+                        gameContext.You.bondObject.ShowDropTargetObject.SetActive(true);
+                    }
 
                     foreach (HandCard handCard in gameContext.TurnPlayer.HandCardObjects)
                     {
@@ -780,6 +788,15 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
         #endregion
 
         yield return new WaitWhile(() => gameContext.TurnPhase == GameContext.phase.Bond);
+
+        foreach (Player player in gameContext.Players)
+        {
+            if (player.bondObject.ShowDropTargetObject != null)
+            {
+                player.bondObject.ShowDropTargetObject.SetActive(false);
+            }
+        }
+
         GManager.instance.You.bondObject.SetDefaultSize();
         GManager.instance.selectCommandPanel.CloseSelectCommandPanel();
         #endregion
@@ -793,13 +810,21 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
     IEnumerator SetBondCoroutine(int _cardIndex)
     {
+        foreach(Player player in gameContext.Players)
+        {
+            if(player.bondObject.ShowDropTargetObject != null)
+            {
+                player.bondObject.ShowDropTargetObject.SetActive(false);
+            }
+        }
+
         CardSource cardSource = GManager.instance.turnStateMachine.gameContext.ActiveCardList[_cardIndex];
         IsSelecting = true;
         GManager.instance.commandText.CloseCommandText();
         yield return new WaitWhile(() => GManager.instance.commandText.gameObject.activeSelf);
 
         yield return StartCoroutine(cardSource.cardOperation.SetBondFromHand(true));
-        ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ShowCardEffect(new List<CardSource>() { cardSource }, "Added Bond Card", true));
+        
         NextPhase();
     }
     #endregion
@@ -1327,9 +1352,17 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
     public Unit DefendingUnit { get; set; } = null;
     public Unit MovingUnit { get; set; } = null;
     public Unit UseSkillUnit { get; set; } = null;
+    public CardSource UseSkillCard { get; set; } = null;
     public ICardEffect CardEffect { get; set; } = null;
     public bool isDestroydeByBattle { get; set; } = false;
     public bool endTapAttackingUnit { get; set; } = false;
+    public UnityAction<HandCard> OnClickBondAction { get; set; } = null;
+    public UnityAction OpenTrashCardPanelAction { get; set; } = null;
+
+    public UnityAction<HandCard> GetOnClickBondAction()
+    {
+        return OnClickBondAction;
+    }
     public IEnumerator ActionPhase()
     {
         #region 手札・場のカードの選択待機状態を解除
@@ -1343,6 +1376,26 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
         yield return GManager.instance.photonWaitController.StartWait("ActionPhase");
         isSync = false;
 
+        bool CanDeclareBS()
+        {
+            if(gameContext.TurnPlayer.BondCards.Count((cardSource) => cardSource.CanDeclareBS) > 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        bool CanSelectUnit()
+        {
+            if(gameContext.TurnPlayer.FieldUnit.Count((unit) => unit.CanAttack || unit.CanMoveDurinAction || unit.CanDeclareSkill()) > 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         #region 攻撃・防御エフェクトを削除
         foreach (Player player in gameContext.Players)
         {
@@ -1354,7 +1407,7 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
         #endregion
 
         #region 攻撃・移動・スキル使用可能なユニットが存在する、またはターン終了するまで繰り返し
-        while (gameContext.TurnPlayer.FieldUnit.Count((unit) => unit.CanAttack || unit.CanMoveDurinAction || unit.CanDeclareSkill(null)) > 0 && !endGame)
+        while ((CanDeclareBS() || CanSelectUnit()) && !endGame)
         {
             #region パラメータリセット
             ResetActionPhaseParameter();
@@ -1363,13 +1416,11 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
             #region 攻撃・移動・スキル使用を使用可能状態にする
             yield return GManager.instance.photonWaitController.StartWait("SetAttackerOrDeclareSkill");
 
-            yield return StartCoroutine(SetActionUnit());
+            yield return StartCoroutine(SetAction());
 
-            #region 使用可能にする
-            IEnumerator SetActionUnit()
+            #region クリック操作を追加
+            IEnumerator SetAction()
             {
-                //Debug.Log("SetAttackerOrDeclareSkill");
-
                 IsSelecting = false;
 
                 #region リセット
@@ -1390,13 +1441,17 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
                         else
                         {
-                            if (!(fieldUnitCard.thisUnit.CanAttack || fieldUnitCard.thisUnit.CanMoveDurinAction || fieldUnitCard.thisUnit.CanDeclareSkill(null)))
+                            if (!(fieldUnitCard.thisUnit.CanAttack || fieldUnitCard.thisUnit.CanMoveDurinAction || fieldUnitCard.thisUnit.CanDeclareSkill()))
                             {
                                 fieldUnitCard.RemoveSelectEffect();
                             }
                         }
                     }
                 }
+                #endregion
+
+                #region 絆カードをリセット
+                OnClickBondAction = null;
                 #endregion
 
                 GManager.instance.You.PlayMat_Front_Select.gameObject.SetActive(false);
@@ -1412,14 +1467,182 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                 yield return new WaitWhile(() => GManager.instance.commandText.gameObject.activeSelf);
                 #endregion
 
-                foreach (FieldUnitCard fieldUnitCard in gameContext.TurnPlayer.FieldUnitObjects)
+                #region メッセージ表示
+                if (gameContext.TurnPlayer.isYou)
                 {
-                    if (fieldUnitCard.thisUnit.CanAttack || fieldUnitCard.thisUnit.CanMoveDurinAction || fieldUnitCard.thisUnit.CanDeclareSkill(null))
+                    if(CanDeclareBS() && CanSelectUnit())
                     {
-                        if (gameContext.TurnPlayer.isYou)
-                        {
-                            GManager.instance.commandText.OpenCommandText("Action Phase : Select your unit.");
+                        GManager.instance.commandText.OpenCommandText("Action Phase : Select your unit or card.");
+                    }
 
+                    else if (!CanDeclareBS() && CanSelectUnit())
+                    {
+                        GManager.instance.commandText.OpenCommandText("Action Phase : Select your unit.");
+                    }
+
+                    else if (CanDeclareBS() && !CanSelectUnit())
+                    {
+                        GManager.instance.commandText.OpenCommandText("Action Phase : Select your card.");
+                    }
+                }
+
+                else
+                {
+                    GManager.instance.commandText.OpenCommandText("Action Phase : Waiting for the opponent's selection");
+                }
+                #endregion
+
+                #region クリック・ドラッグ操作
+                if (gameContext.TurnPlayer.isYou)
+                {
+                    #region 絆ゾーン
+                    OnClickBondAction = _OnClickBondAction;
+                    OpenTrashCardPanelAction = _OpenTrashCardPanelAction;
+
+                    OpenTrashCardPanelAction?.Invoke();
+
+                    if (gameContext.TurnPlayer.BondCards.Count((cardSource) => cardSource.CanDeclareBS) > 0)
+                    {
+                        if (gameContext.TurnPlayer.bondObject.ShowClickTargetObject != null)
+                        {
+                            gameContext.TurnPlayer.bondObject.ShowClickTargetObject.SetActive(true);
+                        }
+                    }
+
+                    void _OnClickBondAction(HandCard handCard)
+                    {
+                        if (!handCard.cardSource.CanDeclareBS)
+                        {
+                            return;
+                        }
+
+                        foreach (HandCard _handCard in GManager.instance.trashCardPanel.handCards)
+                        {
+                            if (_handCard != null)
+                            {
+                                _handCard.OnRemoveSelect();
+                                _handCard.handCardCommandPanel.CloseFieldUnitCommandPanel();
+
+                                if (_handCard.cardSource.CanDeclareBS)
+                                {
+                                    if (_handCard == handCard)
+                                    {
+                                        _handCard.OnSelect();
+                                        _handCard.SetOrangeOutline();
+                                    }
+
+                                    else
+                                    {
+                                        _handCard.OnSelect();
+                                        _handCard.SetBlueOutline();
+                                    }
+                                }
+                            }
+                        }
+
+                        List<HandCardCommand> HandCardCommands = new List<HandCardCommand>();
+
+                        #region 起動効果コマンド
+
+                        List<ICardEffect> cardEffects = new List<ICardEffect>();
+                        List<ICardEffect> cardEffects1 = new List<ICardEffect>();
+
+                        foreach (ICardEffect cardEffect in handCard.cardSource.cEntity_EffectController.GetCardEffects(EffectTiming.OnDeclaration))
+                        {
+                            cardEffects.Add(cardEffect);
+                            cardEffects1.Add(cardEffect);
+                        }
+
+                        cardEffects.Reverse();
+
+                        foreach (ICardEffect cardEffect in cardEffects)
+                        {
+                            if (cardEffect is ActivateICardEffect && cardEffect.isBS)
+                            {
+                                HandCardCommand SkillCommand = new HandCardCommand(cardEffect.GetEffectName(), OnClick_SetUseSkillCard_RPC, cardEffect.CanUse(null)); ;
+                                HandCardCommands.Add(SkillCommand);
+
+                                void OnClick_SetUseSkillCard_RPC()
+                                {
+                                    #region フィールドカードをリセット
+                                    foreach (Player player in gameContext.Players)
+                                    {
+                                        foreach (FieldUnitCard _fieldUnitCard in player.FieldUnitObjects)
+                                        {
+                                            _fieldUnitCard.CloseFieldUnitCommandPanel();
+                                            _fieldUnitCard.OffClickTarget();
+                                            _fieldUnitCard.RemoveDragTarget();
+                                        }
+                                    }
+                                    #endregion
+
+                                    #region 絆ゾーンをクリックした時の処理をリセット
+                                    OnClickBondAction = null;
+                                    OpenTrashCardPanelAction = null;
+                                    #endregion
+
+                                    //絆カード表示を閉じる
+                                    ContinuousController.instance.StartCoroutine(GManager.instance.trashCardPanel.CloseSelectCardPanelCoroutine());
+
+                                    photonView.RPC("SetUseSkillCard", RpcTarget.All, handCard.cardSource.cardIndex, cardEffects1.IndexOf(cardEffect));
+                                }
+                            }
+                        }
+                        #endregion
+
+                        //コマンドパネルを開く
+                        handCard.handCardCommandPanel.SetUpHandCardCommandPanel(HandCardCommands, handCard, DataBase.BondColor);
+
+                        //再度クリックするとコマンドパネルを閉じて選択し直しに戻る
+                        OnClickBondAction = _OnClickBondAction1;
+
+                        void _OnClickBondAction1(HandCard _handCard)
+                        {
+                            if (_handCard.cardSource.CanDeclareBS)
+                            {
+                                if (_handCard == handCard)
+                                {
+                                    Debug.Log("SetAction");
+                                    StartCoroutine(SetAction());
+                                }
+
+                                else
+                                {
+                                    Debug.Log("_OnClickBondAction");
+                                    _OnClickBondAction(_handCard);
+                                }
+                            }
+                        }
+                    }
+
+                    void _OpenTrashCardPanelAction()
+                    {
+                        foreach (HandCard handCard in GManager.instance.trashCardPanel.handCards)
+                        {
+                            if (handCard != null)
+                            {
+                                handCard.handCardCommandPanel.CloseFieldUnitCommandPanel();
+
+                                if (handCard.cardSource.CanDeclareBS)
+                                {
+                                    handCard.OnSelect();
+                                    handCard.SetBlueOutline();
+                                }
+
+                                else
+                                {
+                                    handCard.OnRemoveSelect();
+                                }
+                            }
+                        }
+                    }
+                    #endregion
+
+                    #region 場のユニット
+                    foreach (FieldUnitCard fieldUnitCard in gameContext.TurnPlayer.FieldUnitObjects)
+                    {
+                        if (fieldUnitCard.thisUnit.CanAttack || fieldUnitCard.thisUnit.CanMoveDurinAction || fieldUnitCard.thisUnit.CanDeclareSkill())
+                        {
                             fieldUnitCard.AddClickTarget((_fieldUnitCard) => StartCoroutine(OnClick_Select()));
 
                             fieldUnitCard.OnSelectEffect(1.1f);
@@ -1443,6 +1666,11 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                                 }
                                 #endregion
 
+                                #region 絆ゾーンクリックした時の処理をリセット
+                                OnClickBondAction = null;
+                                OpenTrashCardPanelAction = null;
+                                #endregion
+
                                 List<FieldUnitCommand> FieldUnitCommands = new List<FieldUnitCommand>();
 
                                 #region 攻撃コマンド
@@ -1451,9 +1679,9 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
                                 IEnumerator SelectDefender()
                                 {
-                                    foreach(FieldUnitCard fieldUnitCard1 in gameContext.TurnPlayer.FieldUnitObjects)
+                                    foreach (FieldUnitCard fieldUnitCard1 in gameContext.TurnPlayer.FieldUnitObjects)
                                     {
-                                        if(fieldUnitCard1 != fieldUnitCard)
+                                        if (fieldUnitCard1 != fieldUnitCard)
                                         {
                                             fieldUnitCard1.RemoveDragTarget();
                                         }
@@ -1466,9 +1694,9 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
                                     GManager.instance.commandText.OpenCommandText("Select the opponent's unit to be attacked.");
 
-                                    foreach(FieldUnitCard OpponentFieldUnitCard in gameContext.NonTurnPlayer.FieldUnitObjects)
+                                    foreach (FieldUnitCard OpponentFieldUnitCard in gameContext.NonTurnPlayer.FieldUnitObjects)
                                     {
-                                        if(fieldUnitCard.thisUnit.CanAttachTargetUnit(OpponentFieldUnitCard.thisUnit))
+                                        if (fieldUnitCard.thisUnit.CanAttachTargetUnit(OpponentFieldUnitCard.thisUnit))
                                         {
                                             //敵ユニットクリックで防御側決定
                                             OpponentFieldUnitCard.AddClickTarget((_fieldUnitCard) => SetAttackerDefender_RPC());
@@ -1496,10 +1724,10 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                                     }
 
                                     //自ユニットクリックでコマンドパネルを閉じて選択し直しに戻る
-                                    fieldUnitCard.AddClickTarget((_fieldUnitCard) => StartCoroutine(SetActionUnit()));
+                                    fieldUnitCard.AddClickTarget((_fieldUnitCard) => StartCoroutine(SetAction()));
 
                                     //戻るボタン表示(選択し直しに戻る)
-                                    GManager.instance.BackButton.OpenSelectCommandButton("Return", () => StartCoroutine(SetActionUnit()), 0);
+                                    GManager.instance.BackButton.OpenSelectCommandButton("Return", () => StartCoroutine(SetAction()), 0);
                                 }
                                 #endregion
 
@@ -1528,19 +1756,21 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                                 #region 起動効果コマンド
 
                                 List<ICardEffect> cardEffects = new List<ICardEffect>();
+                                List<ICardEffect> cardEffects1 = new List<ICardEffect>();
 
-                                foreach(ICardEffect cardEffect in fieldUnitCard.thisUnit.EffectList(EffectTiming.OnDeclaration))
+                                foreach (ICardEffect cardEffect in fieldUnitCard.thisUnit.Character.cEntity_EffectController.GetCardEffects(EffectTiming.OnDeclaration))
                                 {
                                     cardEffects.Add(cardEffect);
+                                    cardEffects1.Add(cardEffect);
                                 }
 
                                 cardEffects.Reverse();
 
                                 foreach (ICardEffect cardEffect in cardEffects)
                                 {
-                                    if (cardEffect is ActivateICardEffect)
+                                    if (cardEffect is ActivateICardEffect && !cardEffect.isBS)
                                     {
-                                        FieldUnitCommand SkillCommand = new FieldUnitCommand(cardEffect.EffectName, OnClick_SetUseSkillUnit_RPC, fieldUnitCard.thisUnit.CanDeclareThisSkill(cardEffect,null));
+                                        FieldUnitCommand SkillCommand = new FieldUnitCommand(cardEffect.GetEffectName(), OnClick_SetUseSkillUnit_RPC, cardEffect.CanUse(null));
                                         FieldUnitCommands.Add(SkillCommand);
 
                                         void OnClick_SetUseSkillUnit_RPC()
@@ -1557,51 +1787,65 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                                             }
                                             #endregion
 
-                                            photonView.RPC("SetUseSkillUnit", RpcTarget.All, gameContext.TurnPlayer.FieldUnit.IndexOf(fieldUnitCard.thisUnit), fieldUnitCard.thisUnit.Character.cEntity_EffectController.GetCardEffects(EffectTiming.OnDeclaration).IndexOf(cardEffect));
+                                            photonView.RPC("SetUseSkillUnit", RpcTarget.All, gameContext.TurnPlayer.FieldUnit.IndexOf(fieldUnitCard.thisUnit), cardEffects1.IndexOf(cardEffect));
                                         }
                                     }
                                 }
                                 #endregion
 
                                 //コマンドパネルを開く
-                                fieldUnitCard.fieldUnitCommandPanel.SetUpFieldUnitCommandPanel(FieldUnitCommands,fieldUnitCard);
+                                fieldUnitCard.fieldUnitCommandPanel.SetUpFieldUnitCommandPanel(FieldUnitCommands, fieldUnitCard);
 
                                 //再度クリックするとコマンドパネルを閉じて選択し直しに戻る
-                                fieldUnitCard.AddClickTarget((_fieldUnitCard) => StartCoroutine(SetActionUnit()));
+                                fieldUnitCard.AddClickTarget((_fieldUnitCard) => StartCoroutine(SetAction()));
 
-                                //閉じるボタンを押してもコマンドパネルを閉じて選択し直しに戻る
-                                //fieldUnitCard.OnClickCloseFieldUnitCommandPanelButtonAction = () => StartCoroutine(SetActionUnit());
+                                #region 絆ゾーンのクリック表示をオフ
+                                foreach (Player player in gameContext.Players)
+                                {
+                                    if (player.bondObject.ShowClickTargetObject != null)
+                                    {
+                                        player.bondObject.ShowClickTargetObject.SetActive(false);
+                                    }
+                                }
+                                #endregion
 
                                 yield return null;
                             }
 
                             AddAttackDragTarget(fieldUnitCard);
                         }
-
-                        else
-                        {
-                            GManager.instance.commandText.OpenCommandText("Action Phase : The opponent is selecting a unit.");
-                        }
-
                     }
+                    #endregion
                 }
+                #endregion
             }
             #endregion
 
-            #region ドラッグターゲット
+            #region ドラッグ処理を追加
             void AddAttackDragTarget(FieldUnitCard fieldUnitCard)
             {
                 if(fieldUnitCard.thisUnit.CanAttack || fieldUnitCard.thisUnit.CanMoveDurinAction)
                 {
                     fieldUnitCard.AddDragTarget(OnBeginDragAction,OnDragAction,OnEndDragAction);
 
+                    #region ドラッグ開始
                     void OnBeginDragAction(FieldUnitCard _fieldUnitCard)
                     {
                         if(gameContext.TurnPlayer.FieldUnitObjects.Count((_fieldUnitCard1) => _fieldUnitCard1.fieldUnitCommandPanel.CommandPanel.activeSelf) == 0)
                         {
+                            #region 絆ゾーンのクリック表示をオフ
+                            foreach (Player player in gameContext.Players)
+                            {
+                                if (player.bondObject.ShowClickTargetObject != null)
+                                {
+                                    player.bondObject.ShowClickTargetObject.SetActive(false);
+                                }
+                            }
+                            #endregion
+
                             IsSelecting = true;
 
-                            GManager.instance.commandText.OpenCommandText("Select the opponent's unit to be attacked or move.");
+                            GManager.instance.commandText.OpenCommandText("Select the unit to be attacked or move your unit.");
 
                             _fieldUnitCard.CloseFieldUnitCommandPanel();
 
@@ -1618,6 +1862,8 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                                     fieldUnitCard1.RemoveDragTarget();
                                 }
                             }
+
+                            OnClickBondAction = null;
 
                             foreach (FieldUnitCard enemyFieldUnitCard in gameContext.NonTurnPlayer.FieldUnitObjects)
                             {
@@ -1644,7 +1890,9 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                             }
                         }
                     }
+                    #endregion
 
+                    #region ドラッグ中
                     void OnDragAction(FieldUnitCard _fieldUnitCard,List<DropArea> dropAreas)
                     {
                         _fieldUnitCard.CloseFieldUnitCommandPanel();
@@ -1661,6 +1909,8 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
                         if(targetArrow != null)
                         {
+                            OnClickBondAction = null;
+
                             targetArrow.SetTargetArrow(fieldUnitCard.GetLocalCanvasPosition(), Draggable.GetLocalPosition(Input.mousePosition, targetArrow.transform));
 
                             foreach (FieldUnitCard enemyFieldUnitCard in GManager.instance.Opponent.FieldUnitObjects)
@@ -1725,9 +1975,10 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                                 }
                             }
                         }
-                        
                     }
+                    #endregion
 
+                    #region ドラッグ終了
                     void OnEndDragAction(FieldUnitCard _fieldUnitCard, List<DropArea> dropAreas)
                     {
                         IsSelecting = false;
@@ -1744,6 +1995,18 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
                         if (targetArrow != null)
                         {
+                            #region 絆ゾーンのクリック表示をオフ
+                            foreach (Player player in gameContext.Players)
+                            {
+                                if (player.bondObject.ShowClickTargetObject != null)
+                                {
+                                    player.bondObject.ShowClickTargetObject.SetActive(false);
+                                }
+                            }
+                            #endregion
+
+                            OnClickBondAction = null;
+
                             GManager.instance.You.PlayMat_Front_Select.gameObject.SetActive(false);
                             GManager.instance.You.PlayMat_Back_Select.gameObject.SetActive(false);
 
@@ -1797,10 +2060,10 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                                 }
                             }
 
-                            StartCoroutine(SetActionUnit());
-                        }
-                            
+                            StartCoroutine(SetAction());
+                        }   
                     }
+                    #endregion
                 }
             }
             #endregion
@@ -1808,7 +2071,7 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
             #endregion
 
             #region 攻撃・移動・スキル使用ユニット選択待機
-            while (AttackingUnit == null && MovingUnit == null && UseSkillUnit == null)
+            while (AttackingUnit == null && MovingUnit == null && UseSkillUnit == null && UseSkillCard == null)
             {
                 yield return null;
 
@@ -1837,7 +2100,7 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                             }
                         }
 
-                        if (gameContext.TurnPlayer.FieldUnit.Count((unit) => DoAttackTargets(unit).Count > 0 || unit.CanMoveDurinAction || unit.CanDeclareSkill(null)) == 0)
+                        if (gameContext.TurnPlayer.FieldUnit.Count((unit) => DoAttackTargets(unit).Count > 0 || unit.CanMoveDurinAction || unit.CanDeclareSkill()) == 0)
                         {
                             //Debug.Log("行動できるユニットがいないので終了");
                             goto EndActionPhase;
@@ -1993,6 +2256,8 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                 }
             }
 
+            Debug.Log("行動フェイズ待機終了");
+
             #region フィールドカードをリセット
             foreach(Player player in gameContext.Players)
             {
@@ -2002,6 +2267,24 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                     _fieldUnitCard.CloseFieldUnitCommandPanel();
                     _fieldUnitCard.OffClickTarget();
                     _fieldUnitCard.RemoveSelectEffect();
+                }
+            }
+            #endregion
+
+            #region 絆カードをリセット
+            if(gameContext.TurnPlayer.isYou)
+            {
+                yield return ContinuousController.instance.StartCoroutine(GManager.instance.trashCardPanel.CloseSelectCardPanelCoroutine());
+            }
+            
+            OnClickBondAction = null;
+            OpenTrashCardPanelAction = null;
+
+            foreach(Player player in gameContext.Players)
+            {
+                if (player.bondObject.ShowClickTargetObject != null)
+                {
+                    player.bondObject.ShowClickTargetObject.SetActive(false);
                 }
             }
             #endregion
@@ -2053,8 +2336,12 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                     GManager.instance.turnStateMachine.DefendingUnit.ShowingFieldUnitCard);
                     #endregion
 
-                    #region 「他のユニットが攻撃した時」効果を使用
+                    #region 攻撃時の効果
+
+                    #region 場のユニットの効果
                     skillInfos = new List<SkillInfo>();
+
+                    #region 「他のユニットが攻撃した時」効果
                     foreach (Player player in gameContext.Players_ForTurnPlayer)
                     {
                         foreach(Unit unit in player.FieldUnit)
@@ -2066,17 +2353,14 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                                     if (cardEffect.CanUse(null))
                                     {
                                         skillInfos.Add(new SkillInfo(cardEffect, null));
-                                        //yield return ContinuousController.instance.StartCoroutine(((ActivateICardEffect)effect).Activate_Effect_Optional_Cost_Execute(null));
                                     }
                                 }
                             }
                         }
                     }
-                    yield return ContinuousController.instance.StartCoroutine(GManager.instance.availableMultipleSkills.ActivateMultipleSkills(skillInfos));
                     #endregion
 
-                    #region 「他のユニットが攻撃された時」効果を使用
-                    skillInfos = new List<SkillInfo>();
+                    #region 「他のユニットが攻撃された時」効果
                     foreach (Unit _unit in gameContext.NonTurnPlayer.FieldUnit)
                     {
                         foreach (ICardEffect cardEffect in _unit.Character.cEntity_EffectController.GetCardEffects(EffectTiming.OnAttackedAlly))
@@ -2086,13 +2370,15 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                                 if (cardEffect.CanUse(null))
                                 {
                                     skillInfos.Add(new SkillInfo(cardEffect, null));
-                                    //yield return ContinuousController.instance.StartCoroutine(((ActivateICardEffect)effect).Activate_Effect_Optional_Cost_Execute(null));
                                 }
                             }
                         }
                     }
+                    #endregion
+
                     yield return ContinuousController.instance.StartCoroutine(GManager.instance.availableMultipleSkills.ActivateMultipleSkills(skillInfos));
 
+                    #region 手札のカードの効果(フローラ)
                     List<CardSource> HandCards = new List<CardSource>();
 
                     foreach (CardSource cardSource in gameContext.NonTurnPlayer.HandCards)
@@ -2114,6 +2400,11 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                         }
                     }
                     #endregion
+
+                    #endregion
+
+                    #endregion
+
 
                     #region 支援
                     foreach (Player player in gameContext.Players_ForTurnPlayer)
@@ -2232,7 +2523,16 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
                         if (GetComponent<Critical_Evasion>().DiscardCard != null)
                         {
-                            AttackingUnit.UntilEndBattleEffects.Add(new Critical());
+                            //AttackingUnit.UntilEndBattleEffects.Add((_timing) => new Critical());
+
+                            #region 必殺攻撃のパワー倍加
+                            int AttackingUnitPower = AttackingUnit.Power;
+                            int CriticalMagnification = AttackingUnit.CriricalMagnification;
+                            PowerModifyClass powerModifyClass = new PowerModifyClass();
+                            powerModifyClass.SetUpICardEffect("必殺攻撃","Critical",null,null,-1,false, AttackingUnit.Character);
+                            powerModifyClass.SetUpPowerUpClass((unit,Power) => Power + AttackingUnitPower * (CriticalMagnification - 1),(unit) => unit == AttackingUnit,true);
+                            AttackingUnit.UntilEndBattleEffects.Add((_timing) => powerModifyClass);
+                            #endregion
 
                             yield return StartCoroutine(GManager.instance.cutIn.OpenCutIn(Critical_EvasionMode.Critical, GetComponent<Critical_Evasion>().DiscardCard));
 
@@ -2279,22 +2579,9 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
                     bool NotHit = GetComponent<Critical_Evasion>().DiscardCard != null && AttackingUnit.CanBeEvaded(DefendingUnit);
 
-                    for (int i = 0; i < 5; i++)
+                    if(NotHit)
                     {
-                        GManager.instance.OffTargetArrow();
-                        yield return new WaitForSeconds(Time.deltaTime);
-                    }
-
-                    yield return StartCoroutine(GManager.instance.GetComponent<Effects>().AttackAnimationCoroutine());
-
-                    if (!NotHit)
-                    {
-                        yield return StartCoroutine(new IBattle(AttackingUnit, DefendingUnit).Battle());
-                    }
-
-                    else
-                    {
-                        #region 「味方が神速回避した時」効果
+                        #region 「場のユニットが神速回避した時」効果
                         skillInfos = new List<SkillInfo>();
                         foreach (Player player in gameContext.Players_ForTurnPlayer)
                         {
@@ -2314,6 +2601,19 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                         }
                         yield return ContinuousController.instance.StartCoroutine(GManager.instance.availableMultipleSkills.ActivateMultipleSkills(skillInfos));
                         #endregion
+                    }
+
+                    for (int i = 0; i < 5; i++)
+                    {
+                        GManager.instance.OffTargetArrow();
+                        yield return new WaitForSeconds(Time.deltaTime);
+                    }
+
+                    yield return StartCoroutine(GManager.instance.GetComponent<Effects>().AttackAnimationCoroutine());
+
+                    if (!NotHit)
+                    {
+                        yield return StartCoroutine(new IBattle(AttackingUnit, DefendingUnit).Battle());
                     }
 
                     #region 支援エリアのカードが退避に落ちる時の効果
@@ -2371,20 +2671,7 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                     skillInfos = new List<SkillInfo>();
                     foreach (Player player in gameContext.Players_ForTurnPlayer)
                     {
-                        foreach (Func<EffectTiming, ActivateICardEffect> UntilTurnEndAction in player.UntilTurnEndActions)
-                        {
-                            ActivateICardEffect activateICardEffect = UntilTurnEndAction(EffectTiming.OnEndAttackAnyone);
-
-                            if (activateICardEffect != null)
-                            {
-                                if (((ICardEffect)activateICardEffect).CanUse(null))
-                                {
-                                    skillInfos.Add(new SkillInfo((ICardEffect)activateICardEffect, null));
-                                    //yield return ContinuousController.instance.StartCoroutine(activateICardEffect.Activate_Effect_Optional_Cost_Execute(null));
-                                }
-                            }
-                        }
-
+                        #region ユニットの効果
                         foreach (Unit unit in player.FieldUnit)
                         {
                             foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.OnEndAttackAnyone))
@@ -2394,11 +2681,27 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                                     if (cardEffect.CanUse(null))
                                     {
                                         skillInfos.Add(new SkillInfo(cardEffect, null));
-                                        //yield return ContinuousController.instance.StartCoroutine(((ActivateICardEffect)cardEffect).Activate_Effect_Optional_Cost_Execute(null));
                                     }
                                 }
                             }
                         }
+                        #endregion
+
+                        #region 支援カードの効果
+                        foreach (CardSource cardSource in player.SupportCards)
+                        {
+                            foreach (ICardEffect cardEffect in cardSource.cEntity_EffectController.GetSupportEffects(EffectTiming.OnEndAttackAnyone))
+                            {
+                                if (cardEffect is ActivateICardEffect)
+                                {
+                                    if (cardEffect.CanUse(null))
+                                    {
+                                        skillInfos.Add(new SkillInfo(cardEffect, null));
+                                    }
+                                }
+                            }
+                        }
+                        #endregion
                     }
                     yield return ContinuousController.instance.StartCoroutine(GManager.instance.availableMultipleSkills.ActivateMultipleSkills(skillInfos));
                     #endregion
@@ -2407,7 +2710,7 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
             #endregion
 
             #region 起動効果
-            else if (UseSkillUnit != null)
+            else if (UseSkillUnit != null||UseSkillCard != null)
             {
                 if(CardEffect != null)
                 {
@@ -2418,11 +2721,9 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                             yield return StartCoroutine(((ActivateICardEffect)CardEffect).Activate_Effect_Optional_Cost_Execute(null));
                         }
                     }
-                    
                 }
             }
             #endregion
-
         }
 
     EndActionPhase:;
@@ -2454,10 +2755,10 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
             foreach (Unit unit in player.FieldUnit)
             {
-                unit.UntilEndBattleEffects = new List<ICardEffect>();
+                unit.UntilEndBattleEffects = new List<Func<EffectTiming, ICardEffect>>();
             }
 
-            player.UntilEndBattleEffects = new List<ICardEffect>();
+            player.UntilEndBattleEffects = new List<Func<EffectTiming, ICardEffect>>();
         }
         #endregion
 
@@ -2466,13 +2767,25 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
         OffFieldCardTarget(gameContext.TurnPlayer);
         #endregion
 
+        #region 絆ゾーンのクリック表示をオフ
+        foreach (Player player in gameContext.Players)
+        {
+            if (player.bondObject.ShowClickTargetObject != null)
+            {
+                player.bondObject.ShowClickTargetObject.SetActive(false);
+            }
+        }
+        #endregion
+
         AttackingUnit = null;
         DefendingUnit = null;
         MovingUnit = null;
         UseSkillUnit = null;
+        UseSkillCard = null;
         CardEffect = null;
         isDestroydeByBattle = false;
         endTapAttackingUnit = false;
+        OpenTrashCardPanelAction = null;
         IsSelecting = false;
         isSync = false;
         
@@ -2500,12 +2813,29 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
     [PunRPC]
     public void SetUseSkillUnit(int unitIndex,int skillIndex)
     {
-        UseSkillUnit = gameContext.TurnPlayer.FieldUnit[unitIndex];
+        Unit _UseSkillUnit = gameContext.TurnPlayer.FieldUnit[unitIndex]; ;
 
-        if(0 <= skillIndex && skillIndex < UseSkillUnit.Character.cEntity_EffectController.GetCardEffects(EffectTiming.OnDeclaration).Count)
+        if (0 <= skillIndex && skillIndex < _UseSkillUnit.Character.cEntity_EffectController.GetCardEffects(EffectTiming.OnDeclaration).Count)
         {
-            CardEffect = UseSkillUnit.Character.cEntity_EffectController.GetCardEffects(EffectTiming.OnDeclaration)[skillIndex];
+            CardEffect = _UseSkillUnit.EffectList(EffectTiming.OnDeclaration)[skillIndex];
         }
+
+        UseSkillUnit = _UseSkillUnit;
+    }
+    #endregion
+
+    #region 場以外の起動スキル使用カード決定
+    [PunRPC]
+    public void SetUseSkillCard(int cardID,int skillIndex)
+    {
+        CardSource _UseSkillCard = gameContext.ActiveCardList[cardID];
+
+        if (0 <= skillIndex && skillIndex < _UseSkillCard.cEntity_EffectController.GetCardEffects(EffectTiming.OnDeclaration).Count)
+        {
+            CardEffect = _UseSkillCard.cEntity_EffectController.GetCardEffects(EffectTiming.OnDeclaration)[skillIndex];
+        }
+
+        UseSkillCard = _UseSkillCard;
     }
     #endregion
 
@@ -2536,15 +2866,13 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
         List<SkillInfo> skillInfos = new List<SkillInfo>();
         foreach(Player player in gameContext.Players_ForTurnPlayer)
         {
-            foreach(Func<EffectTiming, ActivateICardEffect> UntilTurnEndAction in player.UntilTurnEndActions)
+            foreach(ICardEffect cardEffect in player.PlayerEffects(EffectTiming.OnEndTurn))
             {
-                ActivateICardEffect activateICardEffect = UntilTurnEndAction(EffectTiming.OnEndTurn);
-
-                if (activateICardEffect != null)
+                if (cardEffect is ActivateICardEffect)
                 {
-                    if(((ICardEffect)activateICardEffect).CanUse(null))
+                    if (cardEffect.CanUse(null))
                     {
-                        skillInfos.Add(new SkillInfo((ICardEffect)activateICardEffect, null));
+                        skillInfos.Add(new SkillInfo(cardEffect, null));
                     }
                 }
             }
@@ -2557,8 +2885,6 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
                     {
                         if (cardEffect.CanUse(null))
                         {
-                            //skillInfos.Add(new SkillInfo(cardEffect, null));
-
                             if (cardEffect.isNotCheck_Effect)
                             {
                                 yield return ContinuousController.instance.StartCoroutine(((ActivateICardEffect)cardEffect).Activate(null));
@@ -2579,14 +2905,11 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
         #region ターン終了時までの効果をリセット
         foreach (Player player in gameContext.Players)
         {
-            player.UntilTurnEndEffects = new List<ICardEffect>();
-            //player.OnTurnEndEffects = new List<ICardEffect>();
-
-            player.UntilTurnEndActions = new List<Func<EffectTiming, ActivateICardEffect>>();
+            player.UntilEachTurnEndEffects = new List<Func<EffectTiming, ICardEffect>>();
 
             foreach (Unit unit in player.FieldUnit)
             {
-                unit.UntilEachTurnEndUnitEffects = new List<ICardEffect>();
+                unit.UntilEachTurnEndUnitEffects = new List<Func<EffectTiming, ICardEffect>>();
                 unit.DoneAttackThisTurn = false;
                 unit.DoneMoveThisTurn = false;
             }
@@ -2594,14 +2917,14 @@ public class TurnStateMachine : MonoBehaviourPunCallbacks
 
         foreach(Unit unit in gameContext.TurnPlayer.FieldUnit)
         {
-            unit.UntilOwnerTurnEndUnitEffects = new List<ICardEffect>();
+            unit.UntilOwnerTurnEndUnitEffects = new List<Func<EffectTiming, ICardEffect>>();
         }
 
-        gameContext.NonTurnPlayer.UntilOpponentTurnEndEffects = new List<ICardEffect>();
+        gameContext.NonTurnPlayer.UntilOpponentTurnEndEffects = new List<Func<EffectTiming, ICardEffect>>();
 
         foreach (Unit unit in gameContext.NonTurnPlayer.FieldUnit)
         {
-            unit.UntilOpponentTurnEndEffects = new List<ICardEffect>();
+            unit.UntilOpponentTurnEndEffects = new List<Func<EffectTiming, ICardEffect>>();
         }
         #endregion
 

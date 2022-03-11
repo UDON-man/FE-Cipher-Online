@@ -6,24 +6,20 @@ using System.Linq;
 
 public class Yashiro_FirstClassBeyondFirstClass : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[0].SetUpICardEffect("因果切断", new List<Cost>() { new ReverseCost(1, (cardSource) => true), new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("剣弥代") || cardSource.UnitNames.Contains("ナバール")) },new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Black Rain";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("因果切断", "Black Rain", new List<Cost>() { new ReverseCost(1, (cardSource) => true), new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("剣弥代") || cardSource.UnitNames.Contains("ナバール")) },new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -49,14 +45,15 @@ public class Yashiro_FirstClassBeyondFirstClass : CEntity_Effect
                 foreach (Unit unit in targetUnits)
                 {
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass[0]);
+                    hashtable.Add("cardEffect", activateClass);
+                    hashtable.Add("Unit", new Unit(unit.Characters));
                     yield return ContinuousController.instance.StartCoroutine(new IDestroyUnit(unit, 1, BreakOrbMode.Hand, hashtable).Destroy());
                 }
             }
         }
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("一流の輝き", (enemyUnit, Power) => Power + 10, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Character.PlayCost <= 2, PowerUpByEnemy.Mode.Defending);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("一流の輝き", (enemyUnit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Character.PlayCost <= 2, PowerUpByEnemy.Mode.Defending,card);
         cardEffects.Add(powerUpByEnemy);
 
         return cardEffects;

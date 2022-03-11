@@ -7,32 +7,28 @@ using System;
 
 public class Thiamo_SkyRushGeniusGirl : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("大空を舞う者", (enemyUnit, Power) => Power + 20, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => !enemyUnit.Weapons.Contains(Weapon.Wing), PowerUpByEnemy.Mode.Defending);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("大空を舞う者", (enemyUnit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => !enemyUnit.Weapons.Contains(Weapon.Wing), PowerUpByEnemy.Mode.Defending,card);
         cardEffects.Add(powerUpByEnemy);
 
         return cardEffects;
     }
 
     #region 天空の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpICardEffect("天空の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Flying Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("天空の紋章", "Flying Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true, card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -70,7 +66,8 @@ public class Thiamo_SkyRushGeniusGirl : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass_Support);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

@@ -6,18 +6,18 @@ using System;
 
 public class Sigrun_CommanderOfTheHolyGuard : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("銀翼の将", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10 * (card.UnitContainingThisCharacter().Characters.Count - 1), CanPowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("銀翼の将","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10 * (card.UnitContainingThisCharacter().Characters.Count - 1), CanPowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool CanPowerUpCondition(Unit unit)
         {
-            if (IsExistOnField(null))
+            if (IsExistOnField(null,card))
             {
                 if (card.UnitContainingThisCharacter() != unit && unit.Weapons.Contains(Weapon.Wing) && unit.Character.Owner == card.Owner)
                 {
@@ -34,18 +34,14 @@ public class Sigrun_CommanderOfTheHolyGuard : CEntity_Effect
 
         if (timing == EffectTiming.OnEvadeAnyone)
         {
-            activateClass[1].SetUpICardEffect("優美なる翼", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Graceful Wing";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("優美なる翼", "Graceful Wing",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.DefendingUnit != null)
                     {
@@ -86,7 +82,9 @@ public class Sigrun_CommanderOfTheHolyGuard : CEntity_Effect
                     mode: SelectCardEffect.Mode.Custom,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 IEnumerator AfterSelectCardCoroutine(List<CardSource> cardSources)
                 {

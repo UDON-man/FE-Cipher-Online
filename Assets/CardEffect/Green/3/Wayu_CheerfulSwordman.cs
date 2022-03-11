@@ -6,19 +6,14 @@ using System.Linq;
 
 public class Wayu_CheerfulSwordman : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("剣の修行", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("剣の修行","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition, true);
         cardEffects.Add(powerUpClass);
-
-        if (ContinuousController.instance.language == Language.ENG)
-        {
-            activateClass[0].EffectName = "Sword Training";
-        }
 
         bool PowerUpCondition(Unit unit)
         {
@@ -46,20 +41,16 @@ public class Wayu_CheerfulSwordman : CEntity_Effect
     }
 
     #region 攻撃の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("攻撃の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Attack Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("攻撃の紋章", "Attack Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -82,9 +73,9 @@ public class Wayu_CheerfulSwordman : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner == card.Owner);
-                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner == card.Owner, true);
+                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }

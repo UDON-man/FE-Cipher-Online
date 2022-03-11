@@ -6,20 +6,16 @@ using System.Linq;
 
 public class Leon_DarknessPrince : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("神器 ブリュンヒルデ", new List<Cost>() { new ReverseCost(2, (cardSource) => true), new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("レオン")) }, null, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Brynhildr";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("神器 ブリュンヒルデ", "Brynhildr", new List<Cost>() { new ReverseCost(2, (cardSource) => true), new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("レオン")) }, null, 1, false, card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -56,7 +52,7 @@ public class Leon_DarknessPrince : CEntity_Effect
                 foreach(CardSource cardSource in DiscardCards)
                 {
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass[0]);
+                    hashtable.Add("cardEffect", activateClass);
 
                     yield return StartCoroutine(cardSource.cardOperation.DiscardFromHand(hashtable));
                 }
@@ -65,15 +61,11 @@ public class Leon_DarknessPrince : CEntity_Effect
 
         else if(timing == EffectTiming.OnDiscardHand)
         {
-            activateClass[1].SetUpICardEffect("神蝕む闇", new List<Cost>() ,new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine(hashtable));
-            activateClass[1].SetCCS(card.UnitContainingThisCharacter());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Soulcrushing Darkness";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("神蝕む闇", "Soulcrushing Darkness",new List<Cost>() ,new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine(hashtable));
+            activateClass.SetCCS(card.UnitContainingThisCharacter());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -91,7 +83,7 @@ public class Leon_DarknessPrince : CEntity_Effect
 
                                     if (cardEffect.card() != null)
                                     {
-                                        if (cardEffect.card() == this.card)
+                                        if (cardEffect.card() == card)
                                         {
                                             if (hashtable.ContainsKey("Card"))
                                             {
@@ -149,7 +141,8 @@ public class Leon_DarknessPrince : CEntity_Effect
                                     CanEndNotMax: false,
                                     SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                                     AfterSelectUnitCoroutine: null,
-                                    mode: SelectUnitEffect.Mode.Custom);
+                                    mode: SelectUnitEffect.Mode.Custom,
+                                    cardEffect: activateClass);
 
                                 yield return StartCoroutine(selectUnitEffect.Activate(null));
 
@@ -171,9 +164,9 @@ public class Leon_DarknessPrince : CEntity_Effect
 
                                 IEnumerator SelectUnitCoroutine(Unit unit)
                                 {
-                                    PowerUpClass powerUpClass = new PowerUpClass();
-                                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power - 20, (_unit) => _unit == unit);
-                                    unit.UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                                    PowerModifyClass powerUpClass = new PowerModifyClass();
+                                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power - 20, (_unit) => _unit == unit, true);
+                                    unit.UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                                     yield return null;
                                 }

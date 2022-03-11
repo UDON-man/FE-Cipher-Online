@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30C7\u30A3\u30A2\u30C9\u30E9_\u60B2\u5287\u306E\u8056\u5973 \u30C7\u30A3\u30A2\u30C9\u30E9Plus"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: e1c7e4f37adf0e545b0ae5cad816523c, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 9dc5d82454adfdc44914c30e33ee97fb, type: 3}
+  CardName: "\u60B2\u5287\u306E\u8056\u5973 \u30C7\u30A3\u30A2\u30C9\u30E9"
+  UnitName: "\u30C7\u30A3\u30A2\u30C9\u30E9"
+  UnitName_English: Deirdre
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 03000000
+  Power: 50
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 1
+  Weapons: 03000000
+  ClassName: Dhiadora_TragicSaint
+  SkillNames:
+  - "\u30AA\u30FC\u30E9"
+  - "\u30C7\u30A3\u30A2\u30C9\u30E9\u306E\u6D99"
+  SupportSkillNames: []
+  CardID: 734
+  MaxCountInDeck: 4

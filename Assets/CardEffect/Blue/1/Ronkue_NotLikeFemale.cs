@@ -5,33 +5,29 @@ using System;
 
 public class Ronkue_NotLikeFemale : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         CanNotSupportClass canNotSupportClass = new CanNotSupportClass();
-        canNotSupportClass.SetUpCanNotSupportClass((cardSource) => cardSource.sex.Contains(Sex.female), (unit) => unit == this.card.UnitContainingThisCharacter());
-        canNotSupportClass.SetUpICardEffect("女は近づくな", null, null, -1, false);
+        canNotSupportClass.SetUpCanNotSupportClass((cardSource) => cardSource.sex.Contains(Sex.female), (unit) => unit == card.UnitContainingThisCharacter());
+        canNotSupportClass.SetUpICardEffect("女は近づくな", "",null, null, -1, false,card);
         cardEffects.Add(canNotSupportClass);
 
         return cardEffects;
     }
 
     #region 攻撃の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("攻撃の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Attack Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("攻撃の紋章", "Attack Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -54,9 +50,9 @@ public class Ronkue_NotLikeFemale : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner == card.Owner);
-                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner == card.Owner, true);
+                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }

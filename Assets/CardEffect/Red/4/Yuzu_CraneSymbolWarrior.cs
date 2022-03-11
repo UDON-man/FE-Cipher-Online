@@ -6,13 +6,13 @@ using System.Linq;
 
 public class Yuzu_CraneSymbolWarrior : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("武芸百般", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("武芸百般","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool PowerUpCondition(Unit unit)
@@ -39,18 +39,14 @@ public class Yuzu_CraneSymbolWarrior : CEntity_Effect
 
         if(timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[0].SetUpICardEffect("巧みな手綱", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition  }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Skillful Reins";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("巧みな手綱", "Skillful Reins",new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition  }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -85,7 +81,8 @@ public class Yuzu_CraneSymbolWarrior : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

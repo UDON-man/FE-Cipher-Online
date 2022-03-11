@@ -5,20 +5,16 @@ using System;
 using System.Linq;
 public class Laura_DeeplyDevotedPriestess : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("天然の聖女", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Natural Saint";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("天然の聖女", "Natural Saint", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -38,7 +34,9 @@ public class Laura_DeeplyDevotedPriestess : CEntity_Effect
                     mode: SelectCardEffect.Mode.AddHand,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -99,8 +97,7 @@ public class Laura_DeeplyDevotedPriestess : CEntity_Effect
                     foreach (CardSource cardSource in DiscardCards)
                     {
                         Hashtable hashtable = new Hashtable();
-                        hashtable.Add("cardEffect", activateClass[0]);
-
+                        hashtable.Add("cardEffect", activateClass);
                         yield return StartCoroutine(cardSource.cardOperation.DiscardFromHand(hashtable));
                     }
                 }

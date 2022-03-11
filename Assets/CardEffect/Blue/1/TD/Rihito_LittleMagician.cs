@@ -5,26 +5,22 @@ using System;
 
 public class Rihito_LittleMagician : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("エルウインド", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Elwind";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("エルウインド", "Elwind", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
                 PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-                powerUpByEnemy.SetUpPowerUpByEnemyWeapon("飛行特効", (enemyUnit, Power) => Power + 30, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Wing), PowerUpByEnemy.Mode.Attacking);
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpByEnemy);
+                powerUpByEnemy.SetUpPowerUpByEnemyWeapon("飛行特効", (enemyUnit, Power) => Power + 30, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Wing), PowerUpByEnemy.Mode.Attacking, card);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpByEnemy);
 
                 yield return null;
             }
@@ -33,19 +29,17 @@ public class Rihito_LittleMagician : CEntity_Effect
         return cardEffects;
     }
 
-
     #region 魔術の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-
-            activateClass_Support[0].SetUpICardEffect("魔術の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-
-            supportEffects.Add(activateClass_Support[0]);
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("魔術の紋章", "Magic Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -85,7 +79,8 @@ public class Rihito_LittleMagician : CEntity_Effect
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Discard);
+                        mode: SelectHandEffect.Mode.Discard,
+                        cardEffect: activateClass_Support);
 
                     yield return StartCoroutine(selectHandEffect.Activate(null));
                 }

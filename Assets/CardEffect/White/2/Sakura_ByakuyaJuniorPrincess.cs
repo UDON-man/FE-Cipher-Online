@@ -5,20 +5,16 @@ using System;
 using System.Linq;
 public class Sakura_ByakuyaJuniorPrincess : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("春祭", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Bloom Festal";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("春祭", "Bloom Festal", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -38,7 +34,9 @@ public class Sakura_ByakuyaJuniorPrincess : CEntity_Effect
                     mode: SelectCardEffect.Mode.AddHand,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect:activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
             }
@@ -48,20 +46,16 @@ public class Sakura_ByakuyaJuniorPrincess : CEntity_Effect
     }
 
     #region 祈りの紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("祈りの紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Miracle Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("祈りの紋章", "Miracle Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -90,12 +84,11 @@ public class Sakura_ByakuyaJuniorPrincess : CEntity_Effect
             {
                 CanNotCriticalClass canNotCriticalClass = new CanNotCriticalClass();
                 canNotCriticalClass.SetUpCanNotCriticalClass((unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner != card.Owner);
-                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add(canNotCriticalClass);
+                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add((_timing) => canNotCriticalClass);
 
                 yield return null;
             }
         }
-        
 
         return supportEffects;
     }

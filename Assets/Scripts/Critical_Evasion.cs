@@ -15,7 +15,7 @@ public class Critical_Evasion : MonoBehaviourPunCallbacks
 {
     bool endSelect;
     public CardSource DiscardCard { get; set; }
-    public SelectCardEffect.Mode handmode { get; set; }
+    public SelectHandEffect.Mode handmode { get; set; }
     
    public IEnumerator CriticalCoroutine(Critical_EvasionMode mode)
    {
@@ -37,7 +37,7 @@ public class Critical_Evasion : MonoBehaviourPunCallbacks
         DiscardCard = null;
         endSelect = false;
 
-        handmode = SelectCardEffect.Mode.DiscardFromHand;
+        handmode = SelectHandEffect.Mode.Discard;
 
         yield return GManager.instance.photonWaitController.StartWait("SelectCritical_Evade");
 
@@ -306,7 +306,7 @@ public class Critical_Evasion : MonoBehaviourPunCallbacks
                         {
                             if (CardSource.IsSameUnitName(TargetUnit().Character, cardSource))
                             {
-                                SetDiscardCard_Critical_Evasion(cardSource.cardIndex,(int)SelectCardEffect.Mode.DiscardFromHand);
+                                SetDiscardCard_Critical_Evasion(cardSource.cardIndex,(int)SelectHandEffect.Mode.Discard);
 
                                 break;
                             }
@@ -377,18 +377,20 @@ public class Critical_Evasion : MonoBehaviourPunCallbacks
         yield return new WaitWhile(() => !endSelect);
         endSelect = false;
 
+        GManager.instance.BackButton.CloseSelectCommandButton();
+
         GManager.instance.commandText.CloseCommandText();
         yield return new WaitWhile(() => GManager.instance.commandText.gameObject.activeSelf);
 
         #region 選択された手札のカードを捨てる
         if (DiscardCard != null)
         {
-            if(handmode == SelectCardEffect.Mode.DiscardFromHand)
+            if(handmode == SelectHandEffect.Mode.Discard)
             {
                 yield return StartCoroutine(DiscardCard.cardOperation.DiscardFromHand(null));
             }
 
-            else if(handmode == SelectCardEffect.Mode.PutLibraryTop)
+            else if(handmode == SelectHandEffect.Mode.PutLibraryTop)
             {
                 yield return StartCoroutine(DiscardCard.cardOperation.PutLibraryTopFromHand());
             }
@@ -407,18 +409,18 @@ public class Critical_Evasion : MonoBehaviourPunCallbacks
         }
    }
 
-    IEnumerator ShowHandCard(SelectCardEffect.Mode handmode,CardSource DiscardCard)
+    IEnumerator ShowHandCard(SelectHandEffect.Mode handmode,CardSource DiscardCard)
     {
         yield return new WaitForSeconds(1.7f);
 
         string Message()
         {
-            if(handmode == SelectCardEffect.Mode.DiscardFromHand)
+            if(handmode == SelectHandEffect.Mode.Discard)
             {
                 return "Discarded Card";
             }
 
-            else if (handmode == SelectCardEffect.Mode.PutLibraryTop)
+            else if (handmode == SelectHandEffect.Mode.PutLibraryTop)
             {
                 return "Deck Top Card";
             }
@@ -432,7 +434,7 @@ public class Critical_Evasion : MonoBehaviourPunCallbacks
     [PunRPC]
     public void SetDiscardCard_Critical_Evasion(int _cardIndex,int handmodeID)
     {
-        handmode = (SelectCardEffect.Mode)Enum.ToObject(typeof(SelectCardEffect.Mode), handmodeID);
+        handmode = (SelectHandEffect.Mode)Enum.ToObject(typeof(SelectHandEffect.Mode), handmodeID);
         DiscardCard = GManager.instance.turnStateMachine.gameContext.ActiveCardList[_cardIndex];
         EndSelect();
     }

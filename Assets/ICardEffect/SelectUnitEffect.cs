@@ -7,9 +7,20 @@ using Photon.Pun;
 using System;
 
 
-public class SelectUnitEffect : ICardEffect, ActivateICardEffect
+public class SelectUnitEffect : MonoBehaviourPunCallbacks
 {
-    public void SetUp(Player SelectPlayer,Func<Unit, bool> CanTargetCondition, Func<List<Unit>, Unit, bool> CanTargetCondition_ByPreSelecetedList, Func<List<Unit>, bool> CanEndSelectCondition, int MaxCount, bool CanNoSelect, bool CanEndNotMax, Func<Unit, IEnumerator> SelectUnitCoroutine, Func<List<Unit>, IEnumerator> AfterSelectUnitCoroutine, Mode mode)
+    public void SetUp
+        (Player SelectPlayer,
+        Func<Unit, bool> CanTargetCondition, 
+        Func<List<Unit>, Unit, bool> CanTargetCondition_ByPreSelecetedList, 
+        Func<List<Unit>, bool> CanEndSelectCondition,
+        int MaxCount, 
+        bool CanNoSelect, 
+        bool CanEndNotMax, 
+        Func<Unit, IEnumerator> SelectUnitCoroutine, 
+        Func<List<Unit>, IEnumerator> AfterSelectUnitCoroutine,
+        Mode mode,
+        ICardEffect cardEffect)
     {
         this.SelectPlayer = SelectPlayer;
         this.CanTargetCondition = CanTargetCondition;
@@ -21,6 +32,7 @@ public class SelectUnitEffect : ICardEffect, ActivateICardEffect
         this.SelectUnitCoroutine = SelectUnitCoroutine;
         this.AfterSelectUnitCoroutine = AfterSelectUnitCoroutine;
         this.mode = mode;
+        this.cardEffect = cardEffect;
     }
 
     //選択するプレイヤー
@@ -43,6 +55,10 @@ public class SelectUnitEffect : ICardEffect, ActivateICardEffect
     Func<List<Unit>, IEnumerator> AfterSelectUnitCoroutine;
     //選択してする処理の分類
     Mode mode;
+    //スキル
+    ICardEffect cardEffect;
+
+    public List<IDestroyUnit> destroyUnits = new List<IDestroyUnit>();
     public enum Mode
     {
         Move,
@@ -56,6 +72,8 @@ public class SelectUnitEffect : ICardEffect, ActivateICardEffect
     public List<Unit> targetUnits { get; set; } = new List<Unit>();
     //選択しないフラグ
     bool NoSelect;
+
+    bool endSelect;
 
     #region 選択が可能であるか
     public bool active()
@@ -89,15 +107,16 @@ public class SelectUnitEffect : ICardEffect, ActivateICardEffect
 
     public virtual IEnumerator Activate(Hashtable hash)
     {
-        if(GManager.instance.IsAI && !SelectPlayer.isYou)
+        targetUnits = new List<Unit>();
+        destroyUnits = new List<IDestroyUnit>();
+
+        if (GManager.instance.IsAI && !SelectPlayer.isYou)
         {
             yield break;
         }
 
         if (active())
         {
-            targetUnits = new List<Unit>();
-
             NoSelect = false;
 
             yield return GManager.instance.photonWaitController.StartWait("SelectUnitEffect");
@@ -377,7 +396,7 @@ public class SelectUnitEffect : ICardEffect, ActivateICardEffect
             #endregion
 
             Hashtable hashtable = new Hashtable();
-            hashtable.Add("cardEffect", this);
+            hashtable.Add("cardEffect", cardEffect);
 
             if (!NoSelect)
             {
@@ -387,80 +406,102 @@ public class SelectUnitEffect : ICardEffect, ActivateICardEffect
 
                     fieldUnitCard.OnSelectEffect(1.1f);
 
-                    //ターゲット矢印表示
-                    if(card() != null)
+                    #region ターゲット矢印表示
+                    if (cardEffect != null)
                     {
-                        if (card().UnitContainingThisCharacter() == null)
+                        if(cardEffect.card() != null)
                         {
-                            if (card().Owner.SupportCards.Contains(card()))
+                            if (cardEffect.card().UnitContainingThisCharacter() == null)
                             {
-                                if (card().Owner.isYou)
+                                if (cardEffect.card().Owner.SupportCards.Contains(cardEffect.card()))
                                 {
-                                    yield return GManager.instance.OnTargetArrow(
-                                    new Vector3(840, -120, 0),
-                                    fieldUnitCard.GetLocalCanvasPosition(),
-                                    null,
-                                    null);
+                                    if (cardEffect.card().Owner.isYou)
+                                    {
+                                        yield return GManager.instance.OnTargetArrow(
+                                        new Vector3(840, -120, 0),
+                                        fieldUnitCard.GetLocalCanvasPosition(),
+                                        null,
+                                        null);
+                                    }
+
+                                    else
+                                    {
+                                        yield return GManager.instance.OnTargetArrow(
+                                        new Vector3(840, 327, 0),
+                                        fieldUnitCard.GetLocalCanvasPosition(),
+                                        null,
+                                        null);
+                                    }
+                                }
+
+                                else if (cardEffect.card().Owner.TrashCards.Contains(cardEffect.card()) || cardEffect.card().Owner.InfinityCards.Contains(cardEffect.card()))
+                                {
+                                    if (cardEffect.card().Owner.isYou)
+                                    {
+                                        yield return GManager.instance.OnTargetArrow(
+                                        new Vector3(-720, -150, 0),
+                                        fieldUnitCard.GetLocalCanvasPosition(),
+                                        null,
+                                        null);
+                                    }
+
+                                    else
+                                    {
+                                        yield return GManager.instance.OnTargetArrow(
+                                        new Vector3(-720, 150, 0),
+                                        fieldUnitCard.GetLocalCanvasPosition(),
+                                        null,
+                                        null);
+                                    }
+                                }
+
+                                else if (cardEffect.card().Owner.BondCards.Contains(cardEffect.card()))
+                                {
+                                    if (cardEffect.card().Owner.isYou)
+                                    {
+                                        yield return GManager.instance.OnTargetArrow(
+                                        new Vector3(-690, -320, 0),
+                                        fieldUnitCard.GetLocalCanvasPosition(),
+                                        null,
+                                        null);
+                                    }
+
+                                    else
+                                    {
+                                        yield return GManager.instance.OnTargetArrow(
+                                        new Vector3(-690, 320, 0),
+                                        fieldUnitCard.GetLocalCanvasPosition(),
+                                        null,
+                                        null);
+                                    }
                                 }
 
                                 else
                                 {
                                     yield return GManager.instance.OnTargetArrow(
-                                    new Vector3(840, 327, 0),
-                                    fieldUnitCard.GetLocalCanvasPosition(),
-                                    null,
-                                    null);
-                                }
-                            }
-
-                            else if (card().Owner.TrashCards.Contains(card()) || card().Owner.InfinityCards.Contains(card()))
-                            {
-                                if (card().Owner.isYou)
-                                {
-                                    yield return GManager.instance.OnTargetArrow(
-                                    new Vector3(-720, -150, 0),
-                                    fieldUnitCard.GetLocalCanvasPosition(),
-                                    null,
-                                    null);
-                                }
-
-                                else
-                                {
-                                    yield return GManager.instance.OnTargetArrow(
-                                    new Vector3(-720, 150, 0),
-                                    fieldUnitCard.GetLocalCanvasPosition(),
-                                    null,
-                                    null);
+                                        GManager.instance.ExecuteTransform.localPosition,
+                                        fieldUnitCard.GetLocalCanvasPosition(),
+                                        null,
+                                        null);
                                 }
                             }
 
                             else
                             {
-                                yield return GManager.instance.OnTargetArrow(
-                                    GManager.instance.ExecuteTransform.localPosition,
-                                    fieldUnitCard.GetLocalCanvasPosition(),
-                                    null,
-                                    null);
-                            }
-                        }
-
-                        else
-                        {
-                            if (card().UnitContainingThisCharacter().ShowingFieldUnitCard != null)
-                            {
-                                yield return GManager.instance.OnTargetArrow(
-                                    card().UnitContainingThisCharacter().ShowingFieldUnitCard.GetLocalCanvasPosition(),
-                                    fieldUnitCard.GetLocalCanvasPosition(),
-                                    card().UnitContainingThisCharacter().ShowingFieldUnitCard,
-                                    fieldUnitCard);
+                                if (cardEffect.card().UnitContainingThisCharacter().ShowingFieldUnitCard != null)
+                                {
+                                    yield return GManager.instance.OnTargetArrow(
+                                        cardEffect.card().UnitContainingThisCharacter().ShowingFieldUnitCard.GetLocalCanvasPosition(),
+                                        fieldUnitCard.GetLocalCanvasPosition(),
+                                        cardEffect.card().UnitContainingThisCharacter().ShowingFieldUnitCard,
+                                        fieldUnitCard);
+                                }
                             }
                         }
                     }
-                    
-                    yield return new WaitForSeconds(0.2f);
 
-                    //色毎にエフェクト
-                    //GManager.instance.GetComponent<Effects>().CreatePlayerDamageEffect(fieldUnitCard.transform.position + new Vector3(0, 0.15f, 0), card.cEntity_Base.cardColor);
+                    yield return new WaitForSeconds(0.2f);
+                    #endregion
 
                     #region 選択されたユニットに対して処理を行う
                     switch (mode)
@@ -480,7 +521,11 @@ public class SelectUnitEffect : ICardEffect, ActivateICardEffect
 
                         case Mode.Destroy:
 
-                            yield return ContinuousController.instance.StartCoroutine(new IDestroyUnit(targetUnit,1,BreakOrbMode.Hand,hashtable).Destroy());
+                            Hashtable hashtable1 = new Hashtable();
+                            hashtable1.Add("cardEffect", cardEffect);
+                            hashtable1.Add("Unit", new Unit(targetUnit.Characters));
+                            destroyUnits.Add(new IDestroyUnit(targetUnit, 1, BreakOrbMode.Hand, hashtable1));
+                            //yield return ContinuousController.instance.StartCoroutine(new IDestroyUnit(targetUnit,1,BreakOrbMode.Hand,hashtable1).Destroy());
                             break;
 
                         case Mode.Custom:
@@ -504,13 +549,20 @@ public class SelectUnitEffect : ICardEffect, ActivateICardEffect
                         fieldUnitCard.RemoveSelectEffect();
                     }
                 }
+
+                if(destroyUnits.Count > 0)
+                {
+                    foreach (IDestroyUnit destroyUnit in destroyUnits)
+                    {
+                        yield return ContinuousController.instance.StartCoroutine(destroyUnit.Destroy());
+                    }
+                }
             }
 
             if (AfterSelectUnitCoroutine != null)
             {
                 yield return StartCoroutine(AfterSelectUnitCoroutine(targetUnits));
             }
-
         }
 
         GManager.instance.turnStateMachine.IsSelecting = false;

@@ -4,21 +4,22 @@ using UnityEngine;
 using System;
 public class Kiria_SpecialCharisma : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("Reincarnation", new List<Cost>() { new DiscardHandCost(1, (cardSource) => cardSource.Weapons.Contains(Weapon.Sharp)) }, null, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("Reincarnation", "Reincarnation", new List<Cost>() { new DiscardHandCost(1, (cardSource) => cardSource.Weapons.Contains(Weapon.Sharp)) }, null, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }
@@ -26,9 +27,10 @@ public class Kiria_SpecialCharisma : CEntity_Effect
 
         else if (timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[1].SetUpICardEffect("Give Me!!", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("Give Me!!", "Give Me!!", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true, card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -44,7 +46,7 @@ public class Kiria_SpecialCharisma : CEntity_Effect
                             {
                                 if (Unit.Character != null)
                                 {
-                                    if (Unit.Character.Owner == this.card.Owner)
+                                    if (Unit.Character.Owner == card.Owner)
                                     {
                                         if(hashtable.ContainsKey("cardEffect"))
                                         {
@@ -54,7 +56,7 @@ public class Kiria_SpecialCharisma : CEntity_Effect
 
                                                 if(cardEffect != null)
                                                 {
-                                                    if(cardEffect.EffectName == "幻影の紋章"|| cardEffect.EffectName == "Mirage Emblem")
+                                                    if(cardEffect.EffectName == "幻影の紋章")
                                                     {
                                                         return true;
                                                     }

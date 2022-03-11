@@ -7,13 +7,13 @@ using System.Linq;
 
 public class Nono_EternalYoung : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("長寿な竜一族", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, CanPowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("長寿な竜一族","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, CanPowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool CanPowerUpCondition(Unit unit)
@@ -31,18 +31,14 @@ public class Nono_EternalYoung : CEntity_Effect
 
         if(timing == EffectTiming.OnEndTurn)
         {
-            if(card.Owner.BondCards.Count > 0)
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("幼き竜", "Immature Dragon", new List<Cost>(), new List<Func<Hashtable, bool>>() { (hashtable) => GManager.instance.turnStateMachine.gameContext.TurnPlayer == card.Owner }, -1, false, card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
+
+            IEnumerator ActivateCoroutine()
             {
-                activateClass[0].SetUpICardEffect("幼き竜", new List<Cost>(), new List<Func<Hashtable, bool>>() { (hashtable) => GManager.instance.turnStateMachine.gameContext.TurnPlayer == card.Owner }, -1, false);
-                activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-                cardEffects.Add(activateClass[0]);
-
-                if (ContinuousController.instance.language == Language.ENG)
-                {
-                    activateClass[0].EffectName = "Immature Dragon";
-                }
-
-                IEnumerator ActivateCoroutine()
+                if (card.Owner.BondCards.Count > 0)
                 {
                     SelectCardEffect selectCardEffect = GetComponent<SelectCardEffect>();
 
@@ -60,7 +56,9 @@ public class Nono_EternalYoung : CEntity_Effect
                         mode: SelectCardEffect.Mode.AddHand,
                         root: SelectCardEffect.Root.Bond,
                         CustomRootCardList: null,
-                        CanLookReverseCard: true);
+                        CanLookReverseCard: true,
+                        SelectPlayer: card.Owner,
+                        cardEffect: activateClass);
 
                     yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
                 }

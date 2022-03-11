@@ -42,6 +42,7 @@ public class DataBase : MonoBehaviour
         { Weapon.Wing,"羽" },
         { Weapon.Beast,"獣" },
         { Weapon.Sharp,"シャープ" },
+        { Weapon.Demon,"魔物" },
     };
 
     public static Dictionary<CardColor, Color> CardColor_ColorLightDictionary = new Dictionary<CardColor, Color>()
@@ -71,6 +72,8 @@ public class DataBase : MonoBehaviour
         { CardColor.Brown,new Color32(164,54,0,255)},
         { CardColor.Colorless,new Color32(125,243,247,255)},
     };
+
+    public static Color32 BondColor = new Color32(231, 255, 42, 255);
 
     public ColorSpriteDic CardColorIconDictionary;
 

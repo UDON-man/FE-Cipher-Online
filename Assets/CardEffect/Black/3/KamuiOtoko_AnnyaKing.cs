@@ -6,13 +6,13 @@ using System.Linq;
 
 public class KamuiOtoko_AnnyaKing : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("夜刀神・幻夜", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("夜刀神・幻夜", "",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
         cardEffects.Add(powerUpClass);
 
         bool CanUseCondition1(Hashtable hashtable)
@@ -35,26 +35,35 @@ public class KamuiOtoko_AnnyaKing : CEntity_Effect
     }
 
     #region 英雄の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("英雄の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Hero Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("英雄の紋章", "Hero Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
             IEnumerator ActivateCoroutine()
             {
-                StrikeUpClass strikeUpClass = new StrikeUpClass();
-                strikeUpClass.SetUpStrikeUpClass((unit, Strike) => 2, (unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner == card.Owner);
-                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add(strikeUpClass);
+                StrikeModifyClass strikeModifyClass = new StrikeModifyClass();
+                strikeModifyClass.SetUpStrikeModifyClass((unit, Strike) => 2, CanStrikeModifyCondition, false);
+                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add((_timing) => strikeModifyClass);
+
+                bool CanStrikeModifyCondition(Unit unit)
+                {
+                    if (unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character != null)
+                    {
+                        if (unit.Character.Owner == card.Owner)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
 
                 yield return null;
             }
@@ -82,7 +91,7 @@ public class KamuiOtoko_AnnyaKing : CEntity_Effect
                 return false;
             }
         }
-        
+
 
         return supportEffects;
     }

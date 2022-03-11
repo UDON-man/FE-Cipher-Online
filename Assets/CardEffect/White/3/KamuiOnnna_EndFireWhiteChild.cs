@@ -6,20 +6,16 @@ using System.Linq;
 
 public class KamuiOnnna_EndFireWhiteChild : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("光と闇の炎刃", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() , 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Flaming Blade of Light and Darkness";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("光と闇の炎刃", "Flaming Blade of Light and Darkness",new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() , 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -39,7 +35,9 @@ public class KamuiOnnna_EndFireWhiteChild : CEntity_Effect
                     mode: SelectCardEffect.Mode.Deploy,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -70,7 +68,7 @@ public class KamuiOnnna_EndFireWhiteChild : CEntity_Effect
                                 if(cardSource.UnitContainingThisCharacter().Character.cardColors.Contains(CardColor.Black))
                                 {
                                     Hashtable hashtable = new Hashtable();
-                                    hashtable.Add("cardEffect", activateClass[0]);
+                                    hashtable.Add("cardEffect", activateClass);
                                     yield return ContinuousController.instance.StartCoroutine(card.UnitContainingThisCharacter().UnTap(hashtable));
                                     yield break;
                                 }
@@ -82,8 +80,8 @@ public class KamuiOnnna_EndFireWhiteChild : CEntity_Effect
         }
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpICardEffect("白夜の夜刀神・終夜",new List<Cost>(),new List<Func<Hashtable, bool>>() { CanUseCondition },-1,false);
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("白夜の夜刀神・終夜", (enemyUnit, Power) => Power + 40, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Dragon), PowerUpByEnemy.Mode.Attacking);
+        powerUpByEnemy.SetUpICardEffect("白夜の夜刀神・終夜","",new List<Cost>(),new List<Func<Hashtable, bool>>() { CanUseCondition },-1,false,card);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("白夜の夜刀神・終夜", (enemyUnit, Power) => Power + 40, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Dragon), PowerUpByEnemy.Mode.Attacking,card);
         cardEffects.Add(powerUpByEnemy);
 
         bool CanUseCondition(Hashtable hashtable)

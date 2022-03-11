@@ -6,20 +6,16 @@ using System.Linq;
 
 public class Esto_YoungSisterKnightOnHorse : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("ペガサス三姉妹", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "The Three Pegasus Sisters";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("ペガサス三姉妹", "The Three Pegasus Sisters", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), -1, false, card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -32,14 +28,16 @@ public class Esto_YoungSisterKnightOnHorse : CEntity_Effect
                 CanNoSelect: () => true,
                 SelectCardCoroutine: null,
                 AfterSelectCardCoroutine: null,
-                Message: "Select a card to deploy.",
+                Message: "Select a card to be deployed.",
                 MaxCount: 1,
                 CanEndNotMax: false,
                 isShowOpponent: true,
                 mode: SelectCardEffect.Mode.Deploy,
                 root: SelectCardEffect.Root.Library,
                 CustomRootCardList: null,
-                CanLookReverseCard: true);
+                CanLookReverseCard: true,
+                SelectPlayer: card.Owner,
+                cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -47,7 +45,7 @@ public class Esto_YoungSisterKnightOnHorse : CEntity_Effect
                 {
                     if (cardSource.Owner == card.Owner)
                     {
-                        if (cardSource.UnitNames.Contains("カチュア")|| cardSource.UnitNames.Contains("パオラ"))
+                        if (cardSource.UnitNames.Contains("カチュア") || cardSource.UnitNames.Contains("パオラ"))
                         {
                             if (cardSource.cEntity_Base.PlayCost <= 2)
                             {
@@ -68,20 +66,16 @@ public class Esto_YoungSisterKnightOnHorse : CEntity_Effect
     }
 
     #region 天空の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpICardEffect("天空の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Flying Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("天空の紋章", "Flying Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true, card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -119,7 +113,8 @@ public class Esto_YoungSisterKnightOnHorse : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass_Support);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

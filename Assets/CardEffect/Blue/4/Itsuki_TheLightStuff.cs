@@ -6,37 +6,33 @@ using System.Linq;
 
 public class Itsuki_TheLightStuff : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("揺るぎなき決意", new List<Cost>() { new ReverseCost(3, (cardSource) => true), new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("蒼井樹") || cardSource.UnitNames.Contains("クロム")) }, null, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Firm Resolve";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("揺るぎなき決意", "Firm Resolve", new List<Cost>() { new ReverseCost(3, (cardSource) => true), new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("蒼井樹") || cardSource.UnitNames.Contains("クロム")) }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
                 foreach (Unit unit in card.Owner.FieldUnit)
                 {
-                    PowerUpClass powerUpClass = new PowerUpClass();
-                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 30, (_unit) => _unit == unit);
-                    unit.UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                    PowerModifyClass powerUpClass = new PowerModifyClass();
+                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 30, (_unit) => _unit == unit, true);
+                    unit.UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
                 }
 
                 yield return null;
             }
         }
 
-        PowerUpClass powerUpClass1 = new PowerUpClass();
-        powerUpClass1.SetUpICardEffect("ロードオブローズ",new List<Cost>(),new List<System.Func<Hashtable, bool>>(),-1,false);
-        powerUpClass1.SetUpPowerUpClass((unit,Power) => Power + 40, CanPowerUpCondition);
+        PowerModifyClass powerUpClass1 = new PowerModifyClass();
+        powerUpClass1.SetUpICardEffect("ロードオブローズ","",new List<Cost>(),new List<System.Func<Hashtable, bool>>(),-1,false,card);
+        powerUpClass1.SetUpPowerUpClass((unit,Power) => Power + 40, CanPowerUpCondition, true);
         cardEffects.Add(powerUpClass1);
 
         bool CanPowerUpCondition(Unit unit)

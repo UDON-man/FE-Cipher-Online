@@ -7,21 +7,16 @@ using System;
 
 public class KamuiOtoko_EndFireBlackGodChild : CEntity_Effect
 {
-    
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("闇と光の炎刃", new List<Cost>() { new TapCost() }, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Flaming Blade of Darkness and Light";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("闇と光の炎刃", "Flaming Blade of Darkness and Light",new List<Cost>() { new TapCost() }, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
@@ -49,7 +44,8 @@ public class KamuiOtoko_EndFireBlackGodChild : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Custom);
+                    mode: SelectUnitEffect.Mode.Custom,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
@@ -72,25 +68,27 @@ public class KamuiOtoko_EndFireBlackGodChild : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Destroy);
+                    mode: SelectUnitEffect.Mode.Destroy,
+                    cardEffect: activateClass);
 
                     yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
                     if(TappedUnits.Count == TappedUnits.Count((unit) => unit.Character.cardColors.Contains(CardColor.White)))
                     {
-                        activateClass[1].SetUpICardEffect("", new List<Cost>() { new ReverseCost(1, (_cardSource) => true) }, null, -1, true);
-                        activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine1());
+                        ActivateClass activateClass1 = new ActivateClass();
+                        activateClass1.SetUpICardEffect("","", new List<Cost>() { new ReverseCost(1, (_cardSource) => true) }, null, -1, true,card);
+                        activateClass1.SetUpActivateClass((hashtable) => ActivateCoroutine1());
 
                         IEnumerator ActivateCoroutine1()
                         {
                             Hashtable hashtable = new Hashtable();
-                            hashtable.Add("cardEffect", activateClass[0]);
+                            hashtable.Add("cardEffect", activateClass);
                             yield return ContinuousController.instance.StartCoroutine(card.UnitContainingThisCharacter().UnTap(hashtable));
                         }
 
-                        if (activateClass[1].CanUse(null))
+                        if (activateClass1.CanUse(null))
                         {
-                            yield return ContinuousController.instance.StartCoroutine(activateClass[1].Activate_Optional_Cost_Execute(null, "Do you pay cost?"));
+                            yield return ContinuousController.instance.StartCoroutine(activateClass1.Activate_Optional_Cost_Execute(null, "Do you pay cost?"));
                         }
                     }
                 }
@@ -98,8 +96,8 @@ public class KamuiOtoko_EndFireBlackGodChild : CEntity_Effect
         }
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpICardEffect("暗夜の夜刀神・終夜", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("暗夜の夜刀神・終夜", (enemyUnit, Power) => Power + 40, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Dragon), PowerUpByEnemy.Mode.Attacking);
+        powerUpByEnemy.SetUpICardEffect("暗夜の夜刀神・終夜", "",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("暗夜の夜刀神・終夜", (enemyUnit, Power) => Power + 40, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Dragon), PowerUpByEnemy.Mode.Attacking,card);
         cardEffects.Add(powerUpByEnemy);
 
         bool CanUseCondition(Hashtable hashtable)
@@ -114,7 +112,6 @@ public class KamuiOtoko_EndFireBlackGodChild : CEntity_Effect
 
             return false;
         }
-
 
         return cardEffects;
     }

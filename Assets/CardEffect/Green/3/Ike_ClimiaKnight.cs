@@ -5,20 +5,16 @@ using System;
 
 public class Ike_ClimiaKnight : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnCCAnyone)
         {
-            activateClass[0].SetUpICardEffect("将軍の参陣", new List<Cost>() ,new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "General Enters the Fray";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("将軍の参陣", "General Enters the Fray", new List<Cost>() ,new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -30,7 +26,7 @@ public class Ike_ClimiaKnight : CEntity_Effect
                         {
                             Unit CCUnit = (Unit)hashtable["Unit"];
 
-                            return CCUnit.Character == this.card;
+                            return CCUnit.Character == card;
                         }
                     }
                 }
@@ -42,7 +38,7 @@ public class Ike_ClimiaKnight : CEntity_Effect
             {
                 RangeUpClass rangeUpClass = new RangeUpClass();
                 rangeUpClass.SetUpRangeUpClass((unit, Range) => { Range.Add(1); Range.Add(2); return Range; }, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(rangeUpClass);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => rangeUpClass);
 
                 yield return null;
             }

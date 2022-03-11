@@ -6,20 +6,16 @@ using System;
 
 public class Oguma_GoukenUser : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[0].SetUpICardEffect("タリス王国軍の隊長", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine(hashtable));
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Captain of the Royal Talysian Army";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("タリス王国軍の隊長", "Captain of the Royal Talysian Army", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine(hashtable));
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -29,9 +25,15 @@ public class Oguma_GoukenUser : CEntity_Effect
                     {
                         if (hashtable["Unit"] is Unit)
                         {
-                            Unit EnterUnit = (Unit)hashtable["Unit"];
+                            Unit Unit = (Unit)hashtable["Unit"];
 
-                            return EnterUnit.Character.Owner == this.card.Owner && EnterUnit.Character.PlayCost <= 2;
+                            if(Unit.Character != null)
+                            {
+                                if(Unit.Character.Owner == card.Owner && Unit.Character.PlayCost <= 2)
+                                {
+                                    return true;
+                                }
+                            }
                         }
                     }
                 }
@@ -43,13 +45,13 @@ public class Oguma_GoukenUser : CEntity_Effect
             {
                 Unit EnterUnit = (Unit)hashtable["Unit"];
 
-                PowerUpClass powerUpClass1 = new PowerUpClass();
-                powerUpClass1.SetUpPowerUpClass((unit,Power) => Power + 10,(unit) => unit == EnterUnit);
-                EnterUnit.UntilEachTurnEndUnitEffects.Add(powerUpClass1);
+                PowerModifyClass powerUpClass1 = new PowerModifyClass();
+                powerUpClass1.SetUpPowerUpClass((unit,Power) => Power + 10,(unit) => unit == EnterUnit, true);
+                EnterUnit.UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass1);
 
-                PowerUpClass powerUpClass2 = new PowerUpClass();
-                powerUpClass2.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass2);
+                PowerModifyClass powerUpClass2 = new PowerModifyClass();
+                powerUpClass2.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass2);
 
                 yield return null;
             }
@@ -57,20 +59,16 @@ public class Oguma_GoukenUser : CEntity_Effect
 
         else if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[1].SetUpICardEffect("サンダーソード", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Levin Sword";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("サンダーソード", "Levin Sword", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
                 WeaponChangeClass weaponChangeClass = new WeaponChangeClass();
                 weaponChangeClass.SetUpWeaponChangeClass((CardSource, Weapons) => { Weapons.Add(Weapon.MagicBook); return Weapons; }, CanWeaponChangeCondition);
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(weaponChangeClass);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => weaponChangeClass);
 
                 bool CanWeaponChangeCondition(CardSource cardSource)
                 {
@@ -87,11 +85,11 @@ public class Oguma_GoukenUser : CEntity_Effect
 
                 RangeUpClass rangeUpClass = new RangeUpClass();
                 rangeUpClass.SetUpRangeUpClass((unit, Range) => { Range.Add(1); Range.Add(2); return Range; }, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(rangeUpClass);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => rangeUpClass);
 
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power - 10, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power - 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }

@@ -5,20 +5,16 @@ using System;
 
 public class LufureOnna_SaintKingGunshi : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnCCAnyone)
         {
-            activateClass[0].SetUpICardEffect("神軍師の采配", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Grandmaster's Command";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("神軍師の采配", "Grandmaster's Command", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -30,9 +26,9 @@ public class LufureOnna_SaintKingGunshi : CEntity_Effect
                         {
                             Unit Unit = (Unit)hashtable["Unit"];
 
-                            if(Unit.Character.Owner == this.card.Owner)
+                            if(Unit.Character.Owner == card.Owner)
                             {
-                                if(Unit != this.card.UnitContainingThisCharacter())
+                                if(Unit != card.UnitContainingThisCharacter())
                                 {
                                     return true;
                                 }
@@ -50,7 +46,7 @@ public class LufureOnna_SaintKingGunshi : CEntity_Effect
 
                 selectUnitEffect.SetUp(
                 SelectPlayer: card.Owner,
-                CanTargetCondition: (unit) => unit.Character.Owner != this.card.Owner,
+                CanTargetCondition: (unit) => unit.Character.Owner != card.Owner,
                 CanTargetCondition_ByPreSelecetedList: null,
                 CanEndSelectCondition: null,
                 MaxCount: 1,
@@ -58,7 +54,8 @@ public class LufureOnna_SaintKingGunshi : CEntity_Effect
                 CanEndNotMax: false,
                 SelectUnitCoroutine: null,
                 AfterSelectUnitCoroutine: null,
-                mode: SelectUnitEffect.Mode.Move);
+                mode: SelectUnitEffect.Mode.Move,
+                cardEffect:activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }
@@ -66,15 +63,11 @@ public class LufureOnna_SaintKingGunshi : CEntity_Effect
 
         else if(timing == EffectTiming.OnDeclaration)
         {
-            activateClass[1].SetUpICardEffect("これも、策のうちです", new List<Cost>() { new ReverseCost(3, (cardSource) => true) }, null, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass[1].SetCCS(card.UnitContainingThisCharacter());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "This is all part of the plan.";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("これも、策のうちです", "This is all part of the plan.", new List<Cost>() { new ReverseCost(3, (cardSource) => true) }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass.SetCCS(card.UnitContainingThisCharacter());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {

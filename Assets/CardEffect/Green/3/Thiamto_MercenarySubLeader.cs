@@ -6,13 +6,13 @@ using System.Linq;
 
 public class Thiamto_MercenarySubLeader : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("副長の務め", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("副長の務め","", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
         cardEffects.Add(powerUpClass);
 
         bool CanUseCondition(Hashtable hashtable)
@@ -27,14 +27,10 @@ public class Thiamto_MercenarySubLeader : CEntity_Effect
 
         if (timing == EffectTiming.OnDiscardSuppot)
         {
-            activateClass[1].SetUpICardEffect("後進の育成", null, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Maternal Nature";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("後進の育成", "Maternal Nature",null, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
@@ -84,26 +80,30 @@ public class Thiamto_MercenarySubLeader : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Custom);
+                    mode: SelectUnitEffect.Mode.Custom,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
                 bool CanTargetCondition(Unit unit)
                 {
-                    if (unit.Character.Owner == card.Owner)
+                    if(unit.Character != null)
                     {
-                        foreach(CardSource SupportCard in SupportCards)
+                        if (unit.Character.Owner == card.Owner)
                         {
-                            foreach (string SupportUnitName in SupportCard.UnitNames)
+                            foreach (CardSource SupportCard in SupportCards)
                             {
-                                if (unit.Character.UnitNames.Contains(SupportUnitName))
+                                foreach (string SupportUnitName in SupportCard.UnitNames)
                                 {
-                                    return true;
+                                    if (unit.Character.UnitNames.Contains(SupportUnitName))
+                                    {
+                                        return true;
+                                    }
                                 }
                             }
                         }
                     }
-
+                    
                     return false;
                 }
 

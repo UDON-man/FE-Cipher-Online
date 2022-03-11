@@ -282,6 +282,11 @@ public class SelectCardPanel : MonoBehaviour
             else
             {
                 handCard.SetUpReverseCard();
+
+                if (cardSource.Owner.BondCards.Contains(cardSource))
+                {
+                    handCard.SetShowFaceCard();
+                }
             }
 
             handCard.AddClickTarget(OnClickHandCard);
@@ -418,31 +423,6 @@ public class SelectCardPanel : MonoBehaviour
     #region 選択終了できるか判定
     bool CanEndSelection()
     {
-        /*
-        if(CanEndSelectCondition != null)
-        {
-            if(!CanEndSelectCondition(PreSelectedList))
-            {
-                return false;
-            }
-        }
-
-        if (CanEndNotMax)
-        {
-            return true;
-        }
-
-        else
-        {
-            if (PreSelectedList.Count == MaxCount)
-            {
-                return true;
-            }
-        }
-
-        return false;
-        */
-
         List<CardSource> _PreSelectedList = new List<CardSource>();
 
         foreach (HandCard handCard1 in PreSelectedHandCardList)
@@ -501,21 +481,6 @@ public class SelectCardPanel : MonoBehaviour
     {
         if (CanEndSelection())
         {
-            /*
-            SelectedList = new List<CardSource>();
-
-            foreach (CardSource cardSource in PreSelectedList)
-            {
-                SelectedList.Add(cardSource);
-            }
-
-            CloseSelectCardPanel();
-
-            SetIsEndSelection(true);
-
-            ContinuousController.instance.StartCoroutine(OnClickButtonActionCoroutine(OnClickEndSelectButtonAction));
-            */
-
             List<CardSource> _PreSelectedList = new List<CardSource>();
 
             foreach (HandCard handCard1 in PreSelectedHandCardList)

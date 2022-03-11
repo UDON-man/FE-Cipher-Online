@@ -6,20 +6,16 @@ using System.Linq;
 
 public class Kamyu_BlackKnight : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("神槍 グラディウス", new List<Cost>() {new ReverseCost(4, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Gradivus, the Divine Lance";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("神槍 グラディウス", "Gradivus, the Divine Lance",new List<Cost>() {new ReverseCost(4, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -33,13 +29,14 @@ public class Kamyu_BlackKnight : CEntity_Effect
                     EnemyUnits.Add(unit);
                 }
 
-                Hashtable hashtable = new Hashtable();
-                hashtable.Add("cardEffect", activateClass[0]);
-
+                
                 foreach (Unit unit in EnemyUnits)
                 {
                     if(unit.Character.PlayCost <= 2)
                     {
+                        Hashtable hashtable = new Hashtable();
+                        hashtable.Add("cardEffect", activateClass);
+                        hashtable.Add("Unit", new Unit(unit.Characters));
                         IDestroyUnit destroyUnit = new IDestroyUnit(unit, 1, BreakOrbMode.Hand, hashtable);
                         destroyUnits.Add(destroyUnit);
                     }
@@ -56,11 +53,11 @@ public class Kamyu_BlackKnight : CEntity_Effect
                 {
                     RangeUpClass rangeUpClass = new RangeUpClass();
                     rangeUpClass.SetUpRangeUpClass((unit, Range) => { Range.Add(1); Range.Add(2); return Range; },(unit) => unit == card.UnitContainingThisCharacter());
-                    card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(rangeUpClass);
+                    card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => rangeUpClass);
 
-                    PowerUpClass powerUpClass = new PowerUpClass();
-                    powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10 * DestroyCount, (unit) => unit == card.UnitContainingThisCharacter());
-                    card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                    PowerModifyClass powerUpClass = new PowerModifyClass();
+                    powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10 * DestroyCount, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                    card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
                 }
                 
             }

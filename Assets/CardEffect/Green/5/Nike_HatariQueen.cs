@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 public class Nike_HatariQueen : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
@@ -13,18 +13,14 @@ public class Nike_HatariQueen : CEntity_Effect
         {
             if (card.Owner.Enemy.HandCards.Count > 0)
             {
-                activateClass[0].SetUpICardEffect("邪眼", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-                activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-                cardEffects.Add(activateClass[0]);
-
-                if (ContinuousController.instance.language == Language.ENG)
-                {
-                    activateClass[0].EffectName = "Glare";
-                }
+                ActivateClass activateClass = new ActivateClass();
+                activateClass.SetUpICardEffect("邪眼", "Glare", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+                activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+                cardEffects.Add(activateClass);
 
                 bool CanUseCondition(Hashtable hashtable)
                 {
-                    if(IsExistOnField(hashtable))
+                    if(IsExistOnField(hashtable,card))
                     {
                         if(GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                         {
@@ -43,17 +39,18 @@ public class Nike_HatariQueen : CEntity_Effect
                     SelectHandEffect selectHandEffect = GetComponent<SelectHandEffect>();
 
                     selectHandEffect.SetUp(
-                            SelectPlayer: card.Owner.Enemy,
-                            CanTargetCondition: (cardSource) => cardSource.Owner.HandCards.Contains(cardSource),
-                            CanTargetCondition_ByPreSelecetedList: null,
-                            CanEndSelectCondition: null,
-                            MaxCount: 1,
-                            CanNoSelect: false,
-                            CanEndNotMax: false,
-                            isShowOpponent: true,
-                            SelectCardCoroutine: null,
-                            AfterSelectCardCoroutine: null,
-                            mode: SelectHandEffect.Mode.Discard);
+                        SelectPlayer: card.Owner.Enemy,
+                        CanTargetCondition: (cardSource) => cardSource.Owner.HandCards.Contains(cardSource),
+                        CanTargetCondition_ByPreSelecetedList: null,
+                        CanEndSelectCondition: null,
+                        MaxCount: 1,
+                        CanNoSelect: false,
+                        CanEndNotMax: false,
+                        isShowOpponent: true,
+                        SelectCardCoroutine: null,
+                        AfterSelectCardCoroutine: null,
+                        mode: SelectHandEffect.Mode.Discard,
+                        cardEffect: activateClass);
 
                     yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
                 }
@@ -62,8 +59,8 @@ public class Nike_HatariQueen : CEntity_Effect
         }
 
         CanNotAttackClass canNotAttackClass = new CanNotAttackClass();
-        canNotAttackClass.SetUpICardEffect("威風", null, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false);
-        canNotAttackClass.SetUpCanNotAttackClass((AttackingUnit) => AttackingUnit.Character.Owner != this.card.Owner && AttackingUnit.Character.Owner.GetBackUnits().Contains(AttackingUnit), (DefendingUnit) => DefendingUnit == this.card.UnitContainingThisCharacter());
+        canNotAttackClass.SetUpICardEffect("威風","", null, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false,card);
+        canNotAttackClass.SetUpCanNotAttackClass(AttackingCondition, DefendingCondition);
         cardEffects.Add(canNotAttackClass);
 
         bool CanUseCondition1(Hashtable hashtable)
@@ -73,6 +70,38 @@ public class Nike_HatariQueen : CEntity_Effect
                 if (card.Owner.FieldUnit.Count((_unit) => _unit != card.UnitContainingThisCharacter() && _unit.Weapons.Contains(Weapon.Beast)) >= 2)
                 {
                     return true;
+                }
+            }
+
+            return false;
+        }
+
+        bool AttackingCondition(Unit AttackingUnit)
+        {
+            if(AttackingUnit != null)
+            {
+                if(AttackingUnit.Character != null)
+                {
+                    if(AttackingUnit.Character.Owner != card.Owner && AttackingUnit.Character.Owner.GetBackUnits().Contains(AttackingUnit))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        bool DefendingCondition(Unit DefendingUnit)
+        {
+            if (DefendingUnit != null)
+            {
+                if (DefendingUnit.Character != null)
+                {
+                    if (DefendingUnit == card.UnitContainingThisCharacter())
+                    {
+                        return true;
+                    }
                 }
             }
 

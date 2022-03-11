@@ -5,20 +5,16 @@ using System;
 
 public class Sophia_ProPhetOfTheHiddenVillage : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("予言", new List<Cost>() { new TapCost() }, new List<Func<Hashtable, bool>>(), -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Prophecy";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("予言", "Prophecy",new List<Cost>() { new TapCost() }, new List<Func<Hashtable, bool>>(), -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -55,7 +51,9 @@ public class Sophia_ProPhetOfTheHiddenVillage : CEntity_Effect
                     mode: SelectCardEffect.Mode.Custom,
                     root: SelectCardEffect.Root.Custom,
                     CustomRootCardList: TopCards,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -104,15 +102,16 @@ public class Sophia_ProPhetOfTheHiddenVillage : CEntity_Effect
     }
 
     #region 暗闇の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpICardEffect("暗闇の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            supportEffects.Add(activateClass_Support[0]);
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("暗闇の紋章", "Darkness Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -138,22 +137,26 @@ public class Sophia_ProPhetOfTheHiddenVillage : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                SelectHandEffect selectHandEffect = GetComponent<SelectHandEffect>();
+                if (card.Owner.Enemy.HandCards.Count >= 5)
+                {
+                    SelectHandEffect selectHandEffect = GetComponent<SelectHandEffect>();
 
-                selectHandEffect.SetUp(
-                        SelectPlayer: card.Owner.Enemy,
-                        CanTargetCondition: (cardSource) => cardSource.Owner.HandCards.Contains(cardSource),
-                        CanTargetCondition_ByPreSelecetedList: null,
-                        CanEndSelectCondition: null,
-                        MaxCount: 1,
-                        CanNoSelect: false,
-                        CanEndNotMax: false,
-                        isShowOpponent: true,
-                        SelectCardCoroutine: null,
-                        AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Discard);
+                    selectHandEffect.SetUp(
+                                    SelectPlayer: card.Owner.Enemy,
+                                    CanTargetCondition: (cardSource) => cardSource.Owner.HandCards.Contains(cardSource),
+                                    CanTargetCondition_ByPreSelecetedList: null,
+                                    CanEndSelectCondition: null,
+                                    MaxCount: 1,
+                                    CanNoSelect: false,
+                                    CanEndNotMax: false,
+                                    isShowOpponent: true,
+                                    SelectCardCoroutine: null,
+                                    AfterSelectCardCoroutine: null,
+                                    mode: SelectHandEffect.Mode.Discard,
+                                    cardEffect: activateClass_Support);
 
-                yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
+                    yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
+                }
             }
         }
 

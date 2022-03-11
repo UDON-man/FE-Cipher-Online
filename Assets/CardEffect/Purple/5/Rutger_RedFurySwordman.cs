@@ -4,25 +4,20 @@ using UnityEngine;
 using System;
 public class Rutger_RedFurySwordman : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[0].SetUpICardEffect("血旋風", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Blood Whirlwind";
-
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("血旋風", "Blood Whirlwind",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable, card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -54,7 +49,7 @@ public class Rutger_RedFurySwordman : CEntity_Effect
             IEnumerator ActivateCoroutine()
             {
                 Hashtable hashtable = new Hashtable();
-                hashtable.Add("cardEffect", activateClass[0]);
+                hashtable.Add("cardEffect", activateClass);
                 yield return ContinuousController.instance.StartCoroutine(card.UnitContainingThisCharacter().UnTap(hashtable));
 
                 yield return new WaitForSeconds(0.2f);
@@ -63,14 +58,10 @@ public class Rutger_RedFurySwordman : CEntity_Effect
 
         else if (timing == EffectTiming.OnUnTappedAnyone)
         {
-            activateClass[1].SetUpICardEffect("死神の誘い", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Death Temptation";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("死神の誘い", "Death Temptation",new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -84,7 +75,7 @@ public class Rutger_RedFurySwordman : CEntity_Effect
 
                             if (Unit.Character != null)
                             {
-                                if(Unit.Character == this.card)
+                                if(Unit.Character == card)
                                 {
                                     if(hashtable.ContainsKey("cardEffect"))
                                     {
@@ -94,7 +85,7 @@ public class Rutger_RedFurySwordman : CEntity_Effect
 
                                             if(cardEffect != null)
                                             {
-                                                if(cardEffect.card() == this.card)
+                                                if(cardEffect.card() == card)
                                                 {
                                                     return true;
                                                 }
@@ -116,7 +107,7 @@ public class Rutger_RedFurySwordman : CEntity_Effect
 
                 selectUnitEffect.SetUp(
                     SelectPlayer: card.Owner,
-                    CanTargetCondition: (unit) => unit.Character.Owner != this.card.Owner && unit.Character.Owner.GetBackUnits().Contains(unit) && unit.Power >= 70,
+                    CanTargetCondition: (unit) => unit.Character.Owner != card.Owner && unit.Character.Owner.GetBackUnits().Contains(unit) && unit.Power >= 70,
                     CanTargetCondition_ByPreSelecetedList: null,
                     CanEndSelectCondition: null,
                     MaxCount: 1,
@@ -124,7 +115,8 @@ public class Rutger_RedFurySwordman : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect:activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

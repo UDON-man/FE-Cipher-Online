@@ -5,20 +5,17 @@ using System;
 using System.Linq;
 public class Rena_CharitySaint : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[0].SetUpICardEffect("聖者の祝福", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("聖者の祝福", "Saintly Blessing" ,new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Saintly Blessing";
-            }
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -28,9 +25,18 @@ public class Rena_CharitySaint : CEntity_Effect
                     {
                         if (hashtable["Unit"] is Unit)
                         {
-                            Unit EnterUnit = (Unit)hashtable["Unit"];
+                            Unit Unit = (Unit)hashtable["Unit"];
 
-                            return EnterUnit.Character.Owner == this.card.Owner && EnterUnit.Character.cEntity_Base.PlayCost <= 2;
+                            if(Unit.Character != null)
+                            {
+                                if(Unit.Character.Owner == card.Owner)
+                                {
+                                    if(Unit.Character.cEntity_Base.PlayCost <= 2)
+                                    {
+                                        return true;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -56,7 +62,9 @@ public class Rena_CharitySaint : CEntity_Effect
                     mode: SelectCardEffect.Mode.AddHand,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
             }

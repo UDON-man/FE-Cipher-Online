@@ -6,18 +6,18 @@ using System.Linq;
 
 public class Land_SmileWind : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         ChangeSkillActivateCountClass changeSkillActivateCountClass = new ChangeSkillActivateCountClass();
-        changeSkillActivateCountClass.SetUpICardEffect("もう一本残ってるぜ", null, null, -1, false);
+        changeSkillActivateCountClass.SetUpICardEffect("もう一本残ってるぜ","", null, null, -1, false,card);
         changeSkillActivateCountClass.SetUpChangeSkillActivateCountClass(SkillCondition,(cardEffect,ActivateCount) => 2);
         cardEffects.Add(changeSkillActivateCountClass);
 
         bool SkillCondition(ICardEffect cardEffect)
         {
-            if(IsExistOnField(null))
+            if(IsExistOnField(null, card))
             {
                 if (GManager.instance.turnStateMachine.AttackingUnit != null && GManager.instance.turnStateMachine.DefendingUnit != null)
                 {
@@ -43,9 +43,9 @@ public class Land_SmileWind : CEntity_Effect
             return false;
         }
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("ちょっと本気を出すか", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("ちょっと本気を出すか","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool PowerUpCondition(Unit unit)

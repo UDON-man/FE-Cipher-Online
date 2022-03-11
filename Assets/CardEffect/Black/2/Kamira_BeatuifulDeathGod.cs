@@ -5,20 +5,16 @@ using System;
 
 public class Kamira_BeatuifulDeathGod : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnStartTurn)
         {
-            activateClass[0].SetUpICardEffect("死の吐息", new List<Cost>() , new List<Func<Hashtable, bool>>(){ CanUseCondition  }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Aura of Death";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("死の吐息", "Aura of Death", new List<Cost>() , new List<Func<Hashtable, bool>>(){ CanUseCondition  }, -1, false, card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -44,15 +40,16 @@ public class Kamira_BeatuifulDeathGod : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Destroy);
+                    mode: SelectUnitEffect.Mode.Destroy,
+                    cardEffect: activateClass);
 
                 yield return StartCoroutine(selectUnitEffect.Activate(null));
             }
         }
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("鮮血の闇姫", null, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 60, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("鮮血の闇姫", "",null, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false, card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 60, (unit) => unit == card.UnitContainingThisCharacter(), true);
         powerUpClass.SetCCS(card.UnitContainingThisCharacter());
         cardEffects.Add(powerUpClass);
 

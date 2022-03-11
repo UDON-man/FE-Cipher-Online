@@ -5,27 +5,28 @@ using System;
 
 public class Tsukuyomi_BoyCurseUser : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("尊大", (enemyUnit, Power) => Power + 10, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Character.PlayCost >= 2, PowerUpByEnemy.Mode.Attacking);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("尊大", (enemyUnit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Character.PlayCost >= 2, PowerUpByEnemy.Mode.Attacking,card);
         cardEffects.Add(powerUpByEnemy);
 
         return cardEffects;
     }
 
     #region 魔術の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("魔術の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("魔術の紋章", "Magic Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -65,7 +66,8 @@ public class Tsukuyomi_BoyCurseUser : CEntity_Effect
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Discard);
+                        mode: SelectHandEffect.Mode.Discard,
+                        cardEffect: activateClass_Support);
 
                     yield return StartCoroutine(selectHandEffect.Activate(null));
                 }

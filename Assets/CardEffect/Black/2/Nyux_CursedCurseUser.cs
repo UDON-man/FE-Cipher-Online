@@ -5,20 +5,16 @@ using System;
 
 public class Nyux_CursedCurseUser : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEndTurn)
         {
-            activateClass[0].SetUpICardEffect("幼子の姿", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition  }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Youthful Figure";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("幼子の姿", "Youthful Figure",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition  }, -1, false, card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -49,7 +45,8 @@ public class Nyux_CursedCurseUser : CEntity_Effect
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Discard);
+                        mode: SelectHandEffect.Mode.Discard,
+                        cardEffect: activateClass);
 
                     yield return StartCoroutine(selectHandEffect.Activate(null));
                 }

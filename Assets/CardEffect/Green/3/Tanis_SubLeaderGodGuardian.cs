@@ -6,13 +6,13 @@ using System.Linq;
 
 public class Tanis_SubLeaderGodGuardian : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("鬼の副長", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("鬼の副長", "",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
         cardEffects.Add(powerUpClass);
 
         bool CanUseCondition(Hashtable hashtable)
@@ -27,14 +27,10 @@ public class Tanis_SubLeaderGodGuardian : CEntity_Effect
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("援軍", new List<Cost>() { new TapCost() }, null, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Reinforce";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("援軍", "Reinforce", new List<Cost>() { new TapCost() }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine1()
             {
@@ -53,7 +49,8 @@ public class Tanis_SubLeaderGodGuardian : CEntity_Effect
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Deploy);
+                        mode: SelectHandEffect.Mode.Deploy,
+                        cardEffect: activateClass);
 
                     bool CanSelectCondition(CardSource cardSource)
                     {

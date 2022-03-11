@@ -5,24 +5,20 @@ using System;
 using System.Linq;
 public class Mikaya_DawnTeamGirl : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[0].SetUpICardEffect("大いなる希望", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Unyielding Hope";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("大いなる希望", "Unyielding Hope", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (hashtable != null)
                     {
@@ -55,14 +51,10 @@ public class Mikaya_DawnTeamGirl : CEntity_Effect
 
         else if (timing == EffectTiming.OnLevelUpAnyone || timing == EffectTiming.OnGrowAnyone)
         {
-            activateClass[1].SetUpICardEffect("光の鼓動", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Pulsing Light";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("光の鼓動", "Pulsing Light",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -74,11 +66,14 @@ public class Mikaya_DawnTeamGirl : CEntity_Effect
                         {
                             Unit Unit = (Unit)hashtable["Unit"];
 
-                            if (Unit.Character.Owner == this.card.Owner)
+                            if(Unit.Character != null)
                             {
-                                if (Unit != this.card.UnitContainingThisCharacter())
+                                if (Unit.Character.Owner == card.Owner)
                                 {
-                                    return true;
+                                    if (Unit != card.UnitContainingThisCharacter())
+                                    {
+                                        return true;
+                                    }
                                 }
                             }
                         }
@@ -90,9 +85,9 @@ public class Mikaya_DawnTeamGirl : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }

@@ -8,31 +8,27 @@ using System.Linq;
 
 public class Erese_CuteShinobi : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if(timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[0].SetUpICardEffect("がんばっちゃうよ!", new List<Cost>() { new BreakOrbCost(card.Owner, 1, BreakOrbMode.Hand)  }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "I'm all in!";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("がんばっちゃうよ!", "I'm all in!", new List<Cost>() { new BreakOrbCost(card.Owner, 1, BreakOrbMode.Hand)  }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
                 Hashtable hashtable = new Hashtable();
-                hashtable.Add("cardEffect", activateClass[0]);
+                hashtable.Add("cardEffect", activateClass);
                 yield return ContinuousController.instance.StartCoroutine(card.UnitContainingThisCharacter().UnTap(hashtable));
             }
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (hashtable != null)
                     {
@@ -54,7 +50,7 @@ public class Erese_CuteShinobi : CEntity_Effect
                                             {
                                                 if (cardEffect.card() != null)
                                                 {
-                                                    if (cardEffect.card() == this.card)
+                                                    if (cardEffect.card() == card)
                                                     {
                                                         if (card.Owner.OrbCards.Count > 0)
                                                         {
@@ -79,20 +75,16 @@ public class Erese_CuteShinobi : CEntity_Effect
     }
 
     #region 忍術の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDiscardSuppot)
         {
-            activateClass_Support[0].SetUpICardEffect("忍術の紋章", new List<Cost>() { new DiscardHandCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Ninja Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("忍術の紋章", "Ninja Emblem", new List<Cost>() { new DiscardHandCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true, card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -140,8 +132,8 @@ public class Erese_CuteShinobi : CEntity_Effect
                 card.Owner.SupportHandCard.gameObject.SetActive(false);
 
                 Hashtable hashtable = new Hashtable();
-                hashtable.Add("cardEffect", activateClass_Support[0]);
-                yield return StartCoroutine(new IPlayUnit(card, null, isFront, true, hashtable,true).PlayUnit());
+                hashtable.Add("cardEffect", activateClass_Support);
+                yield return StartCoroutine(new IPlayUnit(card, null, isFront, true, hashtable, true).PlayUnit());
                 card.Owner.SupportCards = new List<CardSource>();
             }
         }

@@ -6,20 +6,16 @@ using System.Linq;
 
 public class Fericia_GreatMaid : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("いっきますよー!", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine0());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Here I go!";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("いっきますよー!", "Here I go!",new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine0());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -36,19 +32,15 @@ public class Fericia_GreatMaid : CEntity_Effect
                 yield return ContinuousController.instance.StartCoroutine(card.Owner.Lord.Tap());
                 yield return new WaitForSeconds(0.2f);
                 Hashtable hashtable = new Hashtable();
-                hashtable.Add("cardEffect", activateClass[0]);
+                hashtable.Add("cardEffect", activateClass);
                 yield return ContinuousController.instance.StartCoroutine(card.UnitContainingThisCharacter().UnTap(hashtable));
                 yield return new WaitForSeconds(0.2f);
             }
 
-            activateClass[1].SetUpICardEffect("容赦しませーん!", new List<Cost>() { new DiscardHandCost(1, CanTargetCondition) }, null, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "I won't go easy!";
-            }
+            ActivateClass activateClass1 = new ActivateClass();
+            activateClass1.SetUpICardEffect("容赦しませーん!", "I won't go easy!", new List<Cost>() { new DiscardHandCost(1, CanTargetCondition) }, null, -1, false,card);
+            activateClass1.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            cardEffects.Add(activateClass1);
 
             bool CanTargetCondition(CardSource cardSource)
             {
@@ -65,9 +57,9 @@ public class Fericia_GreatMaid : CEntity_Effect
 
             IEnumerator ActivateCoroutine1()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power * 2, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power * 2, (unit) => unit == card.UnitContainingThisCharacter(), false);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }

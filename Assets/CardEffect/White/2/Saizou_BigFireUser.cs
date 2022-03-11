@@ -7,7 +7,7 @@ using Photon.Pun;
 
 public class Saizou_BigFireUser : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
@@ -25,20 +25,16 @@ public class Saizou_BigFireUser : CEntity_Effect
                 AfterSelectUnitCoroutine: null,
                 mode: SelectUnitEffect.Mode.Tap);
 
-            activateClass[0].SetUpICardEffect("炎魔の陣", new List<Cost>() { selectAllyCost }, null, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Fire Demon's Formation";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("炎魔の陣", "Fire Demon's Formation",new List<Cost>() { selectAllyCost }, null, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }
@@ -46,32 +42,20 @@ public class Saizou_BigFireUser : CEntity_Effect
 
         else if (timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[1].SetUpICardEffect("強行偵察", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Forced Reconnaissance";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("強行偵察", "Forced Reconnaissance", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
-                        if (GetCardEffects(EffectTiming.OnDeclaration).Count > 0)
+                        if (card.cEntity_EffectController.GetUseCountThisTurn("炎魔の陣") > 0)
                         {
-                            ICardEffect cardEffect = GetCardEffects(EffectTiming.OnDeclaration)[0];
-
-                            if (cardEffect.EffectName == "炎魔の陣"|| cardEffect.EffectName == "Fire Demon's Formation")
-                            {
-                                if (cardEffect.UseCountThisTurn > 0)
-                                {
-                                    return true;
-                                }
-                            }
+                            return true;
                         }
                     }
                 }
@@ -87,10 +71,8 @@ public class Saizou_BigFireUser : CEntity_Effect
                 {
                     CardSource cardSource = card.Owner.Enemy.LibraryCards[0];
 
-                    //ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ShowCardEffect(new List<CardSource>() { cardSource }, "Library Card", false));
-
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass[1]);
+                    hashtable.Add("cardEffect", activateClass);
                     yield return ContinuousController.instance.StartCoroutine(new IShowLibraryCard(new List<CardSource>() { cardSource }, hashtable, false).ShowLibraryCard());
 
                     if (card.Owner.isYou)

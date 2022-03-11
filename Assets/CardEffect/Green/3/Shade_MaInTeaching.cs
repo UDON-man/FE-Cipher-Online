@@ -6,13 +6,13 @@ using System.Linq;
 
 public class Shade_MaInTeaching : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("個人レッスン", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit.Character.Owner == card.Owner);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("個人レッスン","", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit.Character.Owner == card.Owner, true);
         cardEffects.Add(powerUpClass);
 
         bool CanUseCondition(Hashtable hashtable)

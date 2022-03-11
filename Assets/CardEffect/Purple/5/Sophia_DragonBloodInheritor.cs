@@ -5,24 +5,20 @@ using System;
 
 public class Sophia_DragonBloodInheritor : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            if (card.Owner.Enemy.HandCards.Count > 0)
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("神竜の巫術", "Divination of the Divine Dragon", new List<Cost>() { new ReverseCost(3, (cardSource) => true), new PutHandLibraryTopCost(1, (cardSource) => cardSource.UnitNames.Contains("ソフィーヤ"), true) }, null, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
+
+            IEnumerator ActivateCoroutine()
             {
-                activateClass[0].SetUpICardEffect("神竜の巫術", new List<Cost>() { new ReverseCost(3, (cardSource) => true), new PutHandLibraryTopCost(1, (cardSource) => cardSource.UnitNames.Contains("ソフィーヤ"),true) }, null, 1, false);
-                activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-                cardEffects.Add(activateClass[0]);
-
-                if (ContinuousController.instance.language == Language.ENG)
-                {
-                    activateClass[0].EffectName = "Divination of the Divine Dragon";
-                }
-
-                IEnumerator ActivateCoroutine()
+                if (card.Owner.Enemy.HandCards.Count > 0)
                 {
                     SelectHandEffect selectHandEffect = GetComponent<SelectHandEffect>();
 
@@ -44,11 +40,11 @@ public class Sophia_DragonBloodInheritor : CEntity_Effect
                             isShowOpponent: true,
                             SelectCardCoroutine: null,
                             AfterSelectCardCoroutine: null,
-                            mode: SelectHandEffect.Mode.Discard);
+                            mode: SelectHandEffect.Mode.Discard,
+                            cardEffect: activateClass);
 
                     yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
                 }
-
             }
         }
 
@@ -56,20 +52,16 @@ public class Sophia_DragonBloodInheritor : CEntity_Effect
     }
 
     #region 竜血の脈動
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("竜血の脈動", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Coursing Dragon Blood";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("竜血の脈動", "Coursing Dragon Blood", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -95,9 +87,9 @@ public class Sophia_DragonBloodInheritor : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner == card.Owner);
-                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner == card.Owner, true);
+                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }

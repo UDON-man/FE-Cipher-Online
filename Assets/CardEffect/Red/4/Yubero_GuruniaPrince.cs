@@ -5,13 +5,13 @@ using System;
 using System.Linq;
 public class Yubero_GuruniaPrince : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("魔道の学び手", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, PowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("魔道の学び手","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, PowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool PowerUpCondition(Unit unit)
@@ -40,15 +40,16 @@ public class Yubero_GuruniaPrince : CEntity_Effect
     }
 
     #region 魔術の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("魔術の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("魔術の紋章", "Magic Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -88,7 +89,8 @@ public class Yubero_GuruniaPrince : CEntity_Effect
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Discard);
+                        mode: SelectHandEffect.Mode.Discard,
+                        cardEffect: activateClass_Support);
 
                     yield return StartCoroutine(selectHandEffect.Activate(null));
                 }

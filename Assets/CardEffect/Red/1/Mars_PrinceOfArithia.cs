@@ -6,7 +6,7 @@ using System;
 
 public class Mars_PrinceOfArithia : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
@@ -24,14 +24,10 @@ public class Mars_PrinceOfArithia : CEntity_Effect
                  AfterSelectUnitCoroutine: null,
                  mode: SelectUnitEffect.Mode.Tap);
 
-            activateClass[0].SetUpICardEffect("若き英雄", new List<Cost>() { new TapCost(), selectAllyCost }, new List<Func<Hashtable, bool>>() { (hash) => card.Owner.GetFrontUnits().Contains(card.UnitContainingThisCharacter()) }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Young Hero";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("若き英雄", "Young Hero",new List<Cost>() { new TapCost(), selectAllyCost }, new List<Func<Hashtable, bool>>() { (hash) => card.Owner.GetFrontUnits().Contains(card.UnitContainingThisCharacter()) }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -47,7 +43,8 @@ public class Mars_PrinceOfArithia : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }
@@ -57,26 +54,35 @@ public class Mars_PrinceOfArithia : CEntity_Effect
     }
 
     #region 英雄の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
-        if(timing == EffectTiming.OnSetSupport)
+        if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("英雄の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Hero Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("英雄の紋章", "Hero Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
             IEnumerator ActivateCoroutine()
             {
-                StrikeUpClass strikeUpClass = new StrikeUpClass();
-                strikeUpClass.SetUpStrikeUpClass((unit, Strike) => 2, (unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner == card.Owner);
-                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add(strikeUpClass);
+                StrikeModifyClass strikeModifyClass = new StrikeModifyClass();
+                strikeModifyClass.SetUpStrikeModifyClass((unit, Strike) => 2, CanStrikeModifyCondition, false);
+                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add((_timing) => strikeModifyClass);
+
+                bool CanStrikeModifyCondition(Unit unit)
+                {
+                    if (unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character != null)
+                    {
+                        if (unit.Character.Owner == card.Owner)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
 
                 yield return null;
             }
@@ -104,7 +110,7 @@ public class Mars_PrinceOfArithia : CEntity_Effect
                 return false;
             }
         }
-        
+
 
         return supportEffects;
     }

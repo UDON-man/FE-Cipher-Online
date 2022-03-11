@@ -6,12 +6,12 @@ using System.Linq;
 
 public class Belbet_TagelAncestor : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         CanAttackTargetUnitRegardlessRangeClass canAttackTargetUnitRegardlessRangeClass = new CanAttackTargetUnitRegardlessRangeClass();
-        canAttackTargetUnitRegardlessRangeClass.SetUpICardEffect("狩りの呼吸",new List<Cost>(),new List<Func<Hashtable, bool>>() { CanUseCondition },-1,false);
+        canAttackTargetUnitRegardlessRangeClass.SetUpICardEffect("狩りの呼吸","",new List<Cost>(),new List<Func<Hashtable, bool>>() { CanUseCondition },-1,false,card);
         canAttackTargetUnitRegardlessRangeClass.SetUpCanAttackTargetUnitRegardlessRangeClass((AttackingUnit) => AttackingUnit == card.UnitContainingThisCharacter() && AttackingUnit.Character.Owner.GetFrontUnits().Contains(AttackingUnit), (DefendingUnit) => DefendingUnit.Character.Owner.GetBackUnits().Contains(DefendingUnit));
         cardEffects.Add(canAttackTargetUnitRegardlessRangeClass);
 

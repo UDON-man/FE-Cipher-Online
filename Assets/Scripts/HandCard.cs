@@ -33,6 +33,9 @@ public class HandCard : MonoBehaviour
     [Header("スキル名")]
     public Text SkillNameText;
 
+    [Header("表画像表示")]
+    public Image ShowFaceCard;
+
     //このカードが表すカード
     public CardSource cardSource { get; set; }
 
@@ -48,8 +51,6 @@ public class HandCard : MonoBehaviour
     public GameObject SupportSkillIconParent;
     public Image SupportSkillIcon_Attack;
     public Image SupportSkillIcon_Defence;
-    //public Color BlueColor { get; set; } = new Color32(30, 246, 255, 255);
-    //public Color OrangeColor { get; set; } = new Color32(255, 98, 31, 255);
 
     private void Start()
     {
@@ -73,6 +74,13 @@ public class HandCard : MonoBehaviour
         {
             SkillNameText.transform.parent.gameObject.SetActive(false);
         }
+
+        if(handCardCommandPanel != null)
+        {
+            handCardCommandPanel.CloseFieldUnitCommandPanel();
+        }
+
+        
     }
 
     public void SetSkillName(ICardEffect cardEffect)
@@ -80,7 +88,16 @@ public class HandCard : MonoBehaviour
         if(SkillNameText != null)
         {
             SkillNameText.transform.parent.gameObject.SetActive(true);
-            SkillNameText.text = cardEffect.EffectName;
+            SkillNameText.text = cardEffect.GetEffectName();
+        }
+    }
+
+    public void SetShowFaceCard()
+    {
+        if(ShowFaceCard != null && cardSource != null)
+        {
+            ShowFaceCard.gameObject.SetActive(true);
+            ShowFaceCard.sprite = cardSource.cEntity_Base.CardImage;
         }
     }
 
@@ -174,7 +191,11 @@ public class HandCard : MonoBehaviour
         {
             EnglishImage.gameObject.SetActive(false);
         }
-        
+
+        if (ShowFaceCard != null)
+        {
+            ShowFaceCard.gameObject.SetActive(false);
+        }
     }
 
     public bool ShowOpponent { get; set; } = false;
@@ -296,7 +317,14 @@ public class HandCard : MonoBehaviour
         
         //支援力
         if(SupportText!= null)
-        SupportText.transform.parent.gameObject.SetActive(false);
+        {
+            SupportText.transform.parent.gameObject.SetActive(false);
+        }
+
+        if (ShowFaceCard != null)
+        {
+            ShowFaceCard.gameObject.SetActive(false);
+        }
     }
 
     public void AddClickTarget(UnityAction<HandCard> _OnClickAction)
@@ -317,7 +345,6 @@ public class HandCard : MonoBehaviour
     {
         BeginDragAction = _BeginDragAction;
         EndDragAction = _OnDropAction;
-
         OnDragAction = _OnDragAction;
 
         CanDrag = true;
@@ -329,6 +356,7 @@ public class HandCard : MonoBehaviour
     {
         BeginDragAction = null;
         EndDragAction = null;
+        OnDragAction = null;
 
         CanDrag = false;
 
@@ -419,5 +447,73 @@ public class HandCard : MonoBehaviour
             SelectedIndexText.transform.parent.gameObject.SetActive(true);
             SelectedIndexText.text = $"{index}";
         }
+    }
+
+    [Header("絆・手札起動効果表示")]
+    public HandCardCommandPanel handCardCommandPanel;
+}
+
+[System.Serializable]
+public class HandCardCommandPanel
+{
+    [Header("コマンドパネルオブジェクト")]
+    public GameObject CommandPanel;
+
+    [Header("コマンドパネル背景")]
+    public RectTransform CommandPanelBackGround;
+
+    [Header("コマンドボタン")]
+    public List<HandCardCommandButton> Buttons = new List<HandCardCommandButton>();
+
+    public void SetUpHandCardCommandPanel(List<HandCardCommand> HandCardCommands, HandCard handCard,Color32 color)
+    {
+        for (int i = 0; i < Buttons.Count; i++)
+        {
+            if (i < HandCardCommands.Count)
+            {
+                Buttons[i].SetUpHandCardCommandButton(HandCardCommands[i].ButtonMessage, HandCardCommands[i].OnClickAction, HandCardCommands[i].Active,color);
+            }
+
+            else
+            {
+                Buttons[i].CloseFieldUnitCommandButton();
+            }
+        }
+
+        CommandPanelBackGround.sizeDelta = new Vector2(CommandPanelBackGround.sizeDelta.x, 18 * (HandCardCommands.Count + 1));
+
+        CommandPanel.SetActive(true);
+    }
+
+    public void CloseFieldUnitCommandPanel()
+    {
+        if(CommandPanel != null)
+        {
+            CommandPanel.SetActive(false);
+        }
+    }
+}
+
+public class HandCardCommand
+{
+    public HandCardCommand(string ButtonMessage, UnityAction OnClickAction, bool Active)
+    {
+        this.ButtonMessage = ButtonMessage;
+        this.OnClickAction = OnClickAction;
+        this.Active = Active;
+    }
+
+    public string ButtonMessage { get; set; }
+    public UnityAction OnClickAction { get; set; }
+    public bool Active { get; set; }
+}
+
+[System.Serializable]
+public class HandCardCommandButton : FieldUnitCommandButton
+{
+    public void SetUpHandCardCommandButton(string ButtonMessage, UnityAction OnClickAtion, bool Active,Color color)
+    {
+        SetUpFieldUnitCommandButton(ButtonMessage, OnClickAtion, Active);
+        button.GetComponent<Image>().color = color;
     }
 }

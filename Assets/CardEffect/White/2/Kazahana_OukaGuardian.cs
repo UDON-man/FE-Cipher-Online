@@ -6,24 +6,20 @@ using System.Linq;
 
 public class Kazahana_OukaGuardian : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEvadeAnyone)
         {
-            activateClass[0].SetUpICardEffect("桜花吹雪", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition1 }, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Warrior of the Wind";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("桜花吹雪", "Warrior of the Wind", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition1 }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.DefendingUnit != null)
                     {
@@ -71,7 +67,9 @@ public class Kazahana_OukaGuardian : CEntity_Effect
                     mode: SelectCardEffect.Mode.AddHand,
                     root: SelectCardEffect.Root.Custom,
                     CustomRootCardList: TopCards,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -100,9 +98,9 @@ public class Kazahana_OukaGuardian : CEntity_Effect
             }
         }
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("切磋琢磨", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("切磋琢磨", "",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
         powerUpClass.SetCCS(card.UnitContainingThisCharacter());
         cardEffects.Add(powerUpClass);
 

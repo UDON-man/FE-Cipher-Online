@@ -6,12 +6,12 @@ using System.Linq;
 
 public class MarkOnnna_GirlFromAnotherWorld : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         WeaponChangeClass weaponChangeClass = new WeaponChangeClass();
-        weaponChangeClass.SetUpICardEffect("すべての可能性", new List<Cost>(), new List<Func<Hashtable, bool>>() , -1, false);
+        weaponChangeClass.SetUpICardEffect("すべての可能性","", new List<Cost>(), new List<Func<Hashtable, bool>>() , -1, false,card);
         weaponChangeClass.SetUpWeaponChangeClass(ChangeWeapon, (cardSource) => cardSource == card);
         cardEffects.Add(weaponChangeClass);
 
@@ -38,20 +38,16 @@ public class MarkOnnna_GirlFromAnotherWorld : CEntity_Effect
     }
 
     #region 計略の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpICardEffect("計略の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Tactical Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("計略の紋章", "Tactical Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true, card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -90,7 +86,8 @@ public class MarkOnnna_GirlFromAnotherWorld : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass_Support);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

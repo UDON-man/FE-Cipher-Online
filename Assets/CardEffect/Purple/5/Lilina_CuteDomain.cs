@@ -5,20 +5,16 @@ using System;
 using System.Linq;
 public class Lilina_CuteDomain : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("業火の理 フォルブレイズ", new List<Cost>() {new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("リリーナ")) }, null, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Infernal Element: Forblaze";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("業火の理 フォルブレイズ", "Infernal Element: Forblaze", new List<Cost>() {new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("リリーナ")) }, null, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine1()
             {
@@ -34,26 +30,23 @@ public class Lilina_CuteDomain : CEntity_Effect
                     CanEndNotMax: true,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Destroy);
+                    mode: SelectUnitEffect.Mode.Destroy,
+                    cardEffect:activateClass);
 
                 yield return StartCoroutine(selectUnitEffect.Activate(null));
 
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 60, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 60, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
             }
         }
 
         else if (timing == EffectTiming.OnDiscardHand)
         {
-            activateClass[1].SetUpICardEffect("大魔導士の素質", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "The Making of a Great Sorcerer";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("大魔導士の素質", "The Making of a Great Sorcerer", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {

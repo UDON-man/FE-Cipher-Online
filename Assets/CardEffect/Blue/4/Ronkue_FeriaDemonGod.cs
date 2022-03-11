@@ -6,20 +6,16 @@ using System.Linq;
 
 public class Ronkue_FeriaDemonGod : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEndAttackAnyone)
         {
-            activateClass[0].SetUpICardEffect("双鬼斬", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Double-edged Fury";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("双鬼斬", "Double-edged Fury", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -39,20 +35,20 @@ public class Ronkue_FeriaDemonGod : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power - 20, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power - 20, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 Hashtable hashtable = new Hashtable();
-                hashtable.Add("cardEffect", activateClass[0]);
+                hashtable.Add("cardEffect", activateClass);
                 yield return ContinuousController.instance.StartCoroutine(card.UnitContainingThisCharacter().UnTap(hashtable));
                 yield return new WaitForSeconds(0.2f);
             }
         }
 
-        PowerUpClass _powerUpClass = new PowerUpClass();
-        _powerUpClass.SetUpICardEffect("剣の冴え", null, null, -1, false);
-        _powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition);
+        PowerModifyClass _powerUpClass = new PowerModifyClass();
+        _powerUpClass.SetUpICardEffect("剣の冴え","", null, null, -1, false,card);
+        _powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition, true);
         cardEffects.Add(_powerUpClass);
 
         bool PowerUpCondition(Unit unit)
@@ -77,7 +73,6 @@ public class Ronkue_FeriaDemonGod : CEntity_Effect
                 }
             }
             
-
             return false;
         }
 

@@ -5,27 +5,36 @@ using System;
 public class Roy_FeresNobleBoy : CEntity_Effect
 {
     #region 支援スキル
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         #region 英雄の紋章
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("英雄の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Hero Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("英雄の紋章", "Hero Emblem",null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            supportEffects.Add(activateClass_Support);
 
             IEnumerator ActivateCoroutine()
             {
-                StrikeUpClass strikeUpClass = new StrikeUpClass();
-                strikeUpClass.SetUpStrikeUpClass((unit, Strike) => 2, (unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner == card.Owner);
-                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add(strikeUpClass);
+                StrikeModifyClass strikeModifyClass = new StrikeModifyClass();
+                strikeModifyClass.SetUpStrikeModifyClass((unit, Strike) => 2, CanStrikeModifyCondition, false);
+                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add((_timing) => strikeModifyClass);
+
+                bool CanStrikeModifyCondition(Unit unit)
+                {
+                    if (unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character != null)
+                    {
+                        if (unit.Character.Owner == card.Owner)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
 
                 yield return null;
             }
@@ -58,9 +67,10 @@ public class Roy_FeresNobleBoy : CEntity_Effect
         #region 希望の紋章
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[1].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            activateClass_Support[1].SetUpICardEffect("希望の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false);
-            supportEffects.Add(activateClass_Support[1]);
+            ActivateClass activateClass_Support1 = new ActivateClass();
+            activateClass_Support1.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            activateClass_Support1.SetUpICardEffect("希望の紋章", "Hope Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false,card);
+            supportEffects.Add(activateClass_Support1);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
@@ -105,7 +115,9 @@ public class Roy_FeresNobleBoy : CEntity_Effect
                     mode: SelectCardEffect.Mode.Custom,
                     root: SelectCardEffect.Root.Orb,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: false,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass_Support1);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -116,7 +128,6 @@ public class Roy_FeresNobleBoy : CEntity_Effect
                         ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ShowCardEffect(new List<CardSource>() { cardSource }, "Orb Card", true));
                     }
 
-                    cardSource.SetReverse();
                     yield return new WaitForSeconds(0.5f);
                 }
             }
@@ -126,5 +137,4 @@ public class Roy_FeresNobleBoy : CEntity_Effect
         return supportEffects;
     }
     #endregion
-
 }

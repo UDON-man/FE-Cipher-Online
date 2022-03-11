@@ -5,13 +5,13 @@ using System;
 using System.Linq;
 public class Tsukuyomi_YoungOnmyoushi : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("好奇心", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit,Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("好奇心","", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit,Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
         cardEffects.Add(powerUpClass);
 
         bool CanUseCondition(Hashtable hashtable)
@@ -28,7 +28,7 @@ public class Tsukuyomi_YoungOnmyoushi : CEntity_Effect
         }
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("龍神・辰", (enemyUnit, Power) => Power + 20, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Dragon), PowerUpByEnemy.Mode.Attacking);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("龍神・辰", (enemyUnit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Dragon), PowerUpByEnemy.Mode.Attacking,card);
         cardEffects.Add(powerUpByEnemy);
 
         return cardEffects;

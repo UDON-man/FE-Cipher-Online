@@ -5,24 +5,20 @@ using System;
 using System.Linq;
 public class Sanaki_BegnionEmperor : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[0].SetUpICardEffect("皇帝の檄", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine(hashtable));
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "The Empress's Exhortation";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("皇帝の檄", "The Empress's Exhortation",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine(hashtable));
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (hashtable != null)
                     {
@@ -36,7 +32,7 @@ public class Sanaki_BegnionEmperor : CEntity_Effect
                                 {
                                     if (Unit.Character != null)
                                     {
-                                        if (Unit.Character.Owner == this.card.Owner)
+                                        if (Unit.Character.Owner == card.Owner)
                                         {
                                             if (Unit != card.UnitContainingThisCharacter())
                                             {
@@ -81,7 +77,9 @@ public class Sanaki_BegnionEmperor : CEntity_Effect
                             mode: SelectCardEffect.Mode.Custom,
                             root: SelectCardEffect.Root.Trash,
                             CustomRootCardList: null,
-                            CanLookReverseCard: true);
+                            CanLookReverseCard: true,
+                            SelectPlayer: card.Owner,
+                            cardEffect: activateClass);
 
                         bool CanTargetCondition(CardSource cardSource)
                         {
@@ -107,9 +105,9 @@ public class Sanaki_BegnionEmperor : CEntity_Effect
             }
         }
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("頂に立つ者", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit,Power) => Power + 10 * card.Owner.FieldUnit.Count((_unit) => _unit != card.UnitContainingThisCharacter() && _unit.IsLevelUp()),(unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("頂に立つ者", "",null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit,Power) => Power + 10 * card.Owner.FieldUnit.Count((_unit) => _unit != card.UnitContainingThisCharacter() && _unit.IsLevelUp()),(unit) => unit == card.UnitContainingThisCharacter(), true);
         powerUpClass.SetCCS(card.UnitContainingThisCharacter());
         cardEffects.Add(powerUpClass);
 

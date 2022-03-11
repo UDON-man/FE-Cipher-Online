@@ -6,9 +6,20 @@ using Photon;
 using Photon.Pun;
 using System;
 
-public class SelectHandEffect : ICardEffect,ActivateICardEffect
+public class SelectHandEffect : MonoBehaviourPunCallbacks
 {
-    public void SetUp(Player SelectPlayer,Func<CardSource, bool> CanTargetCondition, Func<List<CardSource>, CardSource, bool> CanTargetCondition_ByPreSelecetedList, Func<List<CardSource>, bool> CanEndSelectCondition, int MaxCount, bool CanNoSelect, bool CanEndNotMax,bool isShowOpponent, Func<CardSource, IEnumerator> SelectCardCoroutine, Func<List<CardSource>, IEnumerator> AfterSelectCardCoroutine, Mode mode)
+    public void SetUp(
+        Player SelectPlayer,Func<CardSource, bool> CanTargetCondition, 
+        Func<List<CardSource>, CardSource, bool> CanTargetCondition_ByPreSelecetedList, 
+        Func<List<CardSource>, bool> CanEndSelectCondition, 
+        int MaxCount, 
+        bool CanNoSelect, 
+        bool CanEndNotMax,
+        bool isShowOpponent, 
+        Func<CardSource, IEnumerator> SelectCardCoroutine, 
+        Func<List<CardSource>, IEnumerator> AfterSelectCardCoroutine, 
+        Mode mode,
+        ICardEffect cardEffect)
     {
         this.SelectPlayer = SelectPlayer;
         this.CanTargetCondition = CanTargetCondition;
@@ -21,6 +32,7 @@ public class SelectHandEffect : ICardEffect,ActivateICardEffect
         this.SelectCardCoroutine = SelectCardCoroutine;
         this.AfterSelectCardCoroutine = AfterSelectCardCoroutine;
         this.mode = mode;
+        this.cardEffect = cardEffect;
     }
 
     //手札を選択するプレイヤー
@@ -45,6 +57,8 @@ public class SelectHandEffect : ICardEffect,ActivateICardEffect
     Func<List<CardSource>, IEnumerator> AfterSelectCardCoroutine;
     //選択してする処理の分類
     Mode mode;
+    //スキル
+    ICardEffect cardEffect;
     public enum Mode
     {
         Discard,
@@ -60,18 +74,16 @@ public class SelectHandEffect : ICardEffect,ActivateICardEffect
     bool NoSelect;
 
     bool isFront;
+    bool endSelect;
 
     #region 選択が可能であるか
     public bool active()
     {
-        //if (!GManager.instance.IsAI || card.Owner.isYou)
+        if (SelectPlayer != null)
         {
-            if(SelectPlayer != null)
+            if (SelectPlayer.HandCards.Count((cardSource) => CanTargetCondition(cardSource)) > 0)
             {
-                if (SelectPlayer.HandCards.Count((cardSource) => CanTargetCondition(cardSource)) > 0)
-                {
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -464,9 +476,10 @@ public class SelectHandEffect : ICardEffect,ActivateICardEffect
 
             if (!NoSelect)
             {
+                #region 選択したカードを表示
                 if (targetCards.Count > 0)
                 {
-                    if (isShowOpponent||card().Owner.isYou)
+                    if (isShowOpponent||SelectPlayer.isYou)
                     {
                         switch(mode)
                         {
@@ -497,16 +510,14 @@ public class SelectHandEffect : ICardEffect,ActivateICardEffect
                         }
                     }
                 }
-                    
+                #endregion
+
                 Hashtable hashtable = new Hashtable();
-                hashtable.Add("cardEffect", this);
+                hashtable.Add("cardEffect", cardEffect);
 
                 #region 選択されたカードに対して処理を行う
                 foreach (CardSource cardSource in targetCards)
                 {
-                    //色毎にエフェクト
-                    //GManager.instance.GetComponent<Effects>().CreatePlayerDamageEffect(fieldUnitCard.transform.position + new Vector3(0, 0.15f, 0), card.cEntity_Base.cardColor);
-
                     switch (mode)
                     {
                         case Mode.Discard:

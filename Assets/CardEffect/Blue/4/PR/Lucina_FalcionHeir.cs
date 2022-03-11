@@ -5,24 +5,20 @@ using System;
 
 public class Lucina_FalcionHeir : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[0].SetUpICardEffect("未来の君主", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Princess of the Future";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("未来の君主", "Princess of the Future", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (hashtable != null)
                     {
@@ -50,9 +46,9 @@ public class Lucina_FalcionHeir : CEntity_Effect
                 {
                     if(unit.IsClassChanged() && unit != card.UnitContainingThisCharacter())
                     {
-                        PowerUpClass powerUpClass = new PowerUpClass();
-                        powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 10, (_unit) => _unit == unit);
-                        unit.UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                        PowerModifyClass powerUpClass = new PowerModifyClass();
+                        powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 10, (_unit) => _unit == unit, true);
+                        unit.UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
                     }
                 }
 
@@ -61,7 +57,7 @@ public class Lucina_FalcionHeir : CEntity_Effect
         }
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("裏剣 ファルシオン", (enemyUnit, Power) => Power + 20, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Dragon), PowerUpByEnemy.Mode.Attacking);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("裏剣 ファルシオン", (enemyUnit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Dragon), PowerUpByEnemy.Mode.Attacking,card);
         cardEffects.Add(powerUpByEnemy);
 
         return cardEffects;

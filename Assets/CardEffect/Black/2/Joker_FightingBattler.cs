@@ -6,38 +6,29 @@ using System.Linq;
 
 public class Joker_FightingBattler : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("どうぞこちらへ", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine0());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "By your leave.";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("どうぞこちらへ", "By your leave.", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine0());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine0()
             {
                 Hashtable hashtable = new Hashtable();
-                hashtable.Add("cardEffect", activateClass[0]);
+                hashtable.Add("cardEffect", activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(new IMoveUnit(new List<Unit>() { card.Owner.Lord }, true,hashtable).MoveUnits());
             }
 
-
-            activateClass[1].SetUpICardEffect("すぐに手当てを", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), 1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Are you hurt?";
-            }
+            ActivateClass activateClass1 = new ActivateClass();
+            activateClass1.SetUpICardEffect("すぐに手当てを", "Are you hurt?", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), 1, false,card);
+            activateClass1.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            cardEffects.Add(activateClass1);
 
             IEnumerator ActivateCoroutine1()
             {
@@ -57,7 +48,9 @@ public class Joker_FightingBattler : CEntity_Effect
                     mode: SelectCardEffect.Mode.AddHand,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -75,21 +68,17 @@ public class Joker_FightingBattler : CEntity_Effect
                 }
             }
 
-            activateClass[2].SetUpICardEffect("貴方のために", new List<Cost>() { new ReverseCost(3, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), 1, false);
-            activateClass[2].SetUpActivateClass((hashtable) => ActivateCoroutine2());
-            cardEffects.Add(activateClass[2]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[2].EffectName = "After you.";
-            }
+            ActivateClass activateClass2 = new ActivateClass();
+            activateClass2.SetUpICardEffect("貴方のために", "After you.", new List<Cost>() { new ReverseCost(3, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), 1, false,card);
+            activateClass2.SetUpActivateClass((hashtable) => ActivateCoroutine2());
+            cardEffects.Add(activateClass2);
 
             IEnumerator ActivateCoroutine2()
             {
                if(card.Owner.Lord.DoneAttackThisTurn)
                {
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass[2]);
+                    hashtable.Add("cardEffect", activateClass2);
                     yield return ContinuousController.instance.StartCoroutine(card.Owner.Lord.UnTap(hashtable));
                     yield return new WaitForSeconds(0.2f);
                }

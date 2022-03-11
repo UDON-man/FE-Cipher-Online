@@ -6,7 +6,7 @@ using System.Linq;
 
 public class Rutger_RedRevengeDemon : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
@@ -14,7 +14,7 @@ public class Rutger_RedRevengeDemon : CEntity_Effect
         {
             int Cost()
             {
-                if(IsExistOnField(null))
+                if(IsExistOnField(null,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit != null && GManager.instance.turnStateMachine.DefendingUnit != null)
                     {
@@ -38,18 +38,14 @@ public class Rutger_RedRevengeDemon : CEntity_Effect
                 Costs = new List<Cost>() { new ReverseCost(Cost(), (cardSource) => true) };
             }
 
-            activateClass[1].SetUpICardEffect("血に飢えた剣",Costs, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Bloodthirsty Sword";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("血に飢えた剣", "Bloodthirsty Sword",Costs, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -66,7 +62,7 @@ public class Rutger_RedRevengeDemon : CEntity_Effect
 
                 selectUnitEffect.SetUp(
                     SelectPlayer: card.Owner,
-                    CanTargetCondition: (unit) => unit.Character.Owner.Lord != unit && unit.Character.Owner != this.card.Owner && unit.Character.cEntity_Base.PlayCost == 1,
+                    CanTargetCondition: (unit) => unit.Character.Owner.Lord != unit && unit.Character.Owner != card.Owner && unit.Character.cEntity_Base.PlayCost == 1,
                     CanTargetCondition_ByPreSelecetedList: null,
                     CanEndSelectCondition: null,
                     MaxCount: 1,
@@ -74,8 +70,8 @@ public class Rutger_RedRevengeDemon : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    SelectUnitEffect.Mode.Destroy
-                    );
+                    SelectUnitEffect.Mode.Destroy,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

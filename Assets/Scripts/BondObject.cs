@@ -23,6 +23,9 @@ public class BondObject : MonoBehaviour
     [Header("コスト支払い時エフェクト")]
     public GameObject PayCostEffect;
 
+    public GameObject ShowClickTargetObject;
+    public GameObject ShowDropTargetObject;
+
     private void Start()
     {
         ResetBondObject();
@@ -32,6 +35,16 @@ public class BondObject : MonoBehaviour
         PayCostEffect.SetActive(false);
 
         BondText.text = "";
+
+        if(ShowClickTargetObject != null)
+        {
+            ShowClickTargetObject.SetActive(false);
+        }
+
+        if (ShowDropTargetObject != null)
+        {
+            ShowDropTargetObject.SetActive(false);
+        }
     }
 
     private void Update()
@@ -152,8 +165,14 @@ public class BondObject : MonoBehaviour
 
         PayCostEffect.SetActive(true);
 
-        //BondText.text = $"{showingBond}/{player.BondCards.Count}";
-        BondText.text = $"{player.BondCards.Count - player.BondConsumed}/{player.BondCards.Count}";
+        int bond = player.BondCards.Count - player.BondConsumed;
+
+        if(bond <= 0)
+        {
+            bond = 0;
+        }
+
+        BondText.text = $"{bond}/{player.BondCards.Count}";
         yield return new WaitForSeconds(Time.deltaTime / 3);
 
         yield return new WaitWhile(() => !end);

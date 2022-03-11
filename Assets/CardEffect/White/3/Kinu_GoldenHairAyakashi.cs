@@ -6,20 +6,16 @@ using Photon.Pun;
 
 public class Kinu_GoldenHairAyakashi : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[0].SetUpICardEffect("次は次はー？", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Who's That, Who's That?";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("次は次はー?", "Who's That, Who's That?", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -51,9 +47,9 @@ public class Kinu_GoldenHairAyakashi : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }
@@ -61,14 +57,10 @@ public class Kinu_GoldenHairAyakashi : CEntity_Effect
 
         else if (timing == EffectTiming.OnStartTurn)
         {
-            activateClass[1].SetUpICardEffect("妖宴の戯れ", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Masquerade";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("妖宴の戯れ", "Masquerade", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
@@ -97,15 +89,16 @@ public class Kinu_GoldenHairAyakashi : CEntity_Effect
 
                     if (cardSource.CanPlayAsNewUnit())
                     {
-                        activateClass[2].SetUpICardEffect("", new List<Cost>() { new ReverseCost(1, (_cardSource) => true) }, null, -1, true);
-                        activateClass[2].SetUpActivateClass((hashtable) => ActivateCoroutine1());
+                        ActivateClass activateClass1 = new ActivateClass();
+                        activateClass1.SetUpICardEffect("", "",new List<Cost>() { new ReverseCost(1, (_cardSource) => true) }, null, -1, true,card);
+                        activateClass1.SetUpActivateClass((hashtable) => ActivateCoroutine1());
 
                         IEnumerator ActivateCoroutine1()
                         {
                             #region そのユニットの効果は無効化される
                             InvalidationClass invalidationClass = new InvalidationClass();
                             invalidationClass.SetUpInvalidationClass(InvalidateCondition);
-                            card.Owner.UntilTurnEndEffects.Add(invalidationClass);
+                            card.Owner.UntilEachTurnEndEffects.Add((_timing) => invalidationClass);
 
                             bool InvalidateCondition(ICardEffect _cardEffect)
                             {
@@ -149,20 +142,15 @@ public class Kinu_GoldenHairAyakashi : CEntity_Effect
                             #endregion
 
                             Hashtable hashtable = new Hashtable();
-                            hashtable.Add("cardEffect", activateClass[2]);
-
+                            hashtable.Add("cardEffect", activateClass1);
                             card.Owner.TrashCards.Remove(cardSource);
                             yield return StartCoroutine(new IPlayUnit(cardSource, null, isFront, true, hashtable, false).PlayUnit());
 
                             #region ターン終了時にそのユニットは破壊される
-                            activateClass[3].SetUpICardEffect("出撃させたユニットを\n撃破する", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-                            activateClass[3].SetUpActivateClass((hashtable1) => ActivateCoroutine2());
-                            card.Owner.UntilTurnEndActions.Add(UntilTurnEndAction);
-
-                            if (ContinuousController.instance.language == Language.ENG)
-                            {
-                                activateClass[3].EffectName = "Destroy the\ndeployed unit.";
-                            }
+                            ActivateClass activateClass2 = new ActivateClass();
+                            activateClass2.SetUpICardEffect("出撃させたユニットを\n撃破する", "Destroy the\ndeployed unit.", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+                            activateClass2.SetUpActivateClass((hashtable1) => ActivateCoroutine2());
+                            card.Owner.UntilEachTurnEndEffects.Add(TurnEndAction);
 
                             bool CanUseCondition(Hashtable hashtable1)
                             {
@@ -177,16 +165,16 @@ public class Kinu_GoldenHairAyakashi : CEntity_Effect
                             IEnumerator ActivateCoroutine2()
                             {
                                 Hashtable hashtable1 = new Hashtable();
-                                hashtable1.Add("cardEffect", activateClass[3]);
-
+                                hashtable1.Add("cardEffect", activateClass2);
+                                hashtable.Add("Unit", new Unit(cardSource.UnitContainingThisCharacter().Characters));
                                 yield return ContinuousController.instance.StartCoroutine(new IDestroyUnit(cardSource.UnitContainingThisCharacter(), 1, BreakOrbMode.Hand, hashtable1).Destroy());
                             }
 
-                            ActivateICardEffect UntilTurnEndAction(EffectTiming _timing)
+                            ICardEffect TurnEndAction(EffectTiming _timing)
                             {
                                 if(_timing == EffectTiming.OnEndTurn)
                                 {
-                                    return activateClass[3];
+                                    return activateClass2;
                                 }
 
                                 return null;
@@ -196,14 +184,14 @@ public class Kinu_GoldenHairAyakashi : CEntity_Effect
                             #region そのユニットはレベルアップできない
                             CanNotLevelUpClass canNotLevelUpClass = new CanNotLevelUpClass();
                             canNotLevelUpClass.SetUpCanNotLevelUpCondition((unit) => unit == cardSource.UnitContainingThisCharacter());
-                            cardSource.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(canNotLevelUpClass);
+                            cardSource.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => canNotLevelUpClass);
                             #endregion
                         }
 
-                        if (activateClass[2].CanUse(null))
+                        if (activateClass1.CanUse(null))
                         {
                             check = true;
-                            yield return ContinuousController.instance.StartCoroutine(activateClass[2].Activate_Optional_Cost_Execute(null, "Do you pay cost?"));
+                            yield return ContinuousController.instance.StartCoroutine(activateClass1.Activate_Optional_Cost_Execute(null, "Do you pay cost?"));
                         }
                     }
 

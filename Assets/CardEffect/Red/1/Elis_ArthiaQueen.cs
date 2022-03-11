@@ -6,20 +6,16 @@ using System.Linq;
 
 public class Elis_ArthiaQueen : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("オーム", new List<Cost>() { new TapCost(), new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { (hashtable) => !card.Owner.DoneUseOrm }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Aum";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("オーム", "Aum",new List<Cost>() { new TapCost(), new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { (hashtable) => !card.Owner.DoneUseOrm }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -32,14 +28,16 @@ public class Elis_ArthiaQueen : CEntity_Effect
                     CanNoSelect: () => false,
                     SelectCardCoroutine: null,
                     AfterSelectCardCoroutine: null,
-                    Message: "Select a card to deploy.",
+                    Message: "Select a card in your retreat area to deploy.",
                     MaxCount: 1,
                     CanEndNotMax: false,
                     isShowOpponent: true,
                     mode: SelectCardEffect.Mode.Deploy,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -66,9 +64,9 @@ public class Elis_ArthiaQueen : CEntity_Effect
             }
         }
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit.Character.Owner == this.card.Owner && (unit.Character.UnitNames.Contains("マルス") || unit.Character.UnitNames.Contains("マリク")));
-        powerUpClass.SetUpICardEffect("エリスの想い", null, null, -1, false);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit.Character.Owner == card.Owner && (unit.Character.UnitNames.Contains("マルス") || unit.Character.UnitNames.Contains("マリク")), true);
+        powerUpClass.SetUpICardEffect("エリスの想い","", null, null, -1, false,card);
         cardEffects.Add(powerUpClass);
 
         return cardEffects;

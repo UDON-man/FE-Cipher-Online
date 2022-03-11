@@ -5,20 +5,16 @@ using System;
 
 public class Elincia_EsteemedQueen : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("女王の激励", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Queen's Encouragement";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("女王の激励", "Queen's Encouragement", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -36,7 +32,8 @@ public class Elincia_EsteemedQueen : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Custom);
+                    mode: SelectUnitEffect.Mode.Custom,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
@@ -65,7 +62,9 @@ public class Elincia_EsteemedQueen : CEntity_Effect
                         mode: SelectCardEffect.Mode.Custom,
                         root: SelectCardEffect.Root.Library,
                         CustomRootCardList: null,
-                        CanLookReverseCard: true);
+                        CanLookReverseCard: true,
+                        SelectPlayer: card.Owner,
+                        cardEffect: activateClass);
 
                     yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -88,8 +87,7 @@ public class Elincia_EsteemedQueen : CEntity_Effect
                     IEnumerator SelectCardCoroutine(CardSource cardSource)
                     {
                         Hashtable hashtable = new Hashtable();
-                        hashtable.Add("cardEffect", activateClass[0]);
-
+                        hashtable.Add("cardEffect", activateClass);
                         yield return ContinuousController.instance.StartCoroutine(new IPlayUnit(cardSource, targetUnit, false, true, hashtable, false).PlayUnit());
                     }
                 }
@@ -99,14 +97,10 @@ public class Elincia_EsteemedQueen : CEntity_Effect
 
         else if(timing == EffectTiming.OnLevelUpAnyone|| timing == EffectTiming.OnGrowAnyone)
         {
-            activateClass[1].SetUpICardEffect("宝剣 アミーテ", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, 1,true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Sacred Treasure Amiti";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("宝剣 アミーテ", "Sacred Treasure Amiti", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, 1,true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -118,9 +112,9 @@ public class Elincia_EsteemedQueen : CEntity_Effect
                         {
                             Unit Unit = (Unit)hashtable["Unit"];
 
-                            if (Unit.Character.Owner == this.card.Owner)
+                            if (Unit.Character.Owner == card.Owner)
                             {
-                                if (Unit != this.card.UnitContainingThisCharacter())
+                                if (Unit != card.UnitContainingThisCharacter())
                                 {
                                     return true;
                                 }
@@ -135,8 +129,7 @@ public class Elincia_EsteemedQueen : CEntity_Effect
             IEnumerator ActivateCoroutine()
             {
                 Hashtable hashtable = new Hashtable();
-                hashtable.Add("cardEffect", activateClass[1]);
-
+                hashtable.Add("cardEffect", activateClass);
                 yield return ContinuousController.instance.StartCoroutine(card.UnitContainingThisCharacter().UnTap(hashtable));
             }
         }

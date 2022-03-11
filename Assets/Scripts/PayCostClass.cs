@@ -94,6 +94,21 @@ public class PayCostClass : MonoBehaviourPunCallbacks
     }
     #endregion
 
+    #region 自身をリバースするコストの支払い
+    public IEnumerator PayReverseSelfCost(CardSource card)
+    {
+        if(card.Owner.BondCards.Contains(card))
+        {
+            if(!card.IsReverse)
+            {
+                card.SetReverse();
+            }
+        }
+
+        yield return null;
+    }
+    #endregion
+
     #region 手札を捨てる、山札の上に置くコストの支払い
     List<CardSource> SelectedCards = new List<CardSource>();
     public IEnumerator PaySelectHandCost(int SelectCount, Func<CardSource, bool> CanTargetCondition,CardSource card,SelectHandEffect.Mode mode,bool isShowOpponent)
@@ -159,7 +174,22 @@ public class PayCostClass : MonoBehaviourPunCallbacks
             {
                 if (PreSelectHandCard.Count == SelectCount)
                 {
-                    GManager.instance.selectCommandPanel.SetUpCommandButton(new List<Command_SelectCommand>() { new Command_SelectCommand("Discard", SelectDiscardCard, 0) });
+                    string Message()
+                    {
+                        if (mode == SelectHandEffect.Mode.Discard)
+                        {
+                            return "Discard";
+                        }
+
+                        else if (mode == SelectHandEffect.Mode.PutLibraryTop)
+                        {
+                            return "Place deck top";
+                        }
+
+                        return "End Selection";
+                    }
+
+                    GManager.instance.selectCommandPanel.SetUpCommandButton(new List<Command_SelectCommand>() { new Command_SelectCommand(Message(), SelectDiscardCard, 0) });
 
                     void SelectDiscardCard()
                     {
@@ -291,6 +321,8 @@ public class PayCostClass : MonoBehaviourPunCallbacks
     #region 撃破コストの支払い
     public IEnumerator PayDestroyCost(CardSource card)
     {
+        Hashtable hashtable = new Hashtable();
+        hashtable.Add("Unit", new Unit(card.UnitContainingThisCharacter().Characters));
         yield return StartCoroutine(new IDestroyUnit(card.UnitContainingThisCharacter(), 1, BreakOrbMode.Hand,null).Destroy());
     }
     #endregion
@@ -303,8 +335,10 @@ public class PayCostClass : MonoBehaviourPunCallbacks
     #endregion
 
     #region コストを支払う
-    public IEnumerator PayCost(List<Cost> costs,CardSource card)
+    public IEnumerator PayCost(List<Cost> costs,CardSource card,ICardEffect cardEffect)
     {
+        cardEffect.DonePayCost = true;
+
         foreach (Cost cost in costs)
         {
             if (cost != null)
@@ -317,6 +351,11 @@ public class PayCostClass : MonoBehaviourPunCallbacks
                 else if (cost is TapCost)
                 {
                     yield return StartCoroutine(PayTapCost(card));
+                }
+
+                else if (cost is ReverseSelfCost)
+                {
+                    yield return StartCoroutine(PayReverseSelfCost(card));
                 }
 
                 else if(cost is SelectAllyCost)
@@ -332,10 +371,24 @@ public class PayCostClass : MonoBehaviourPunCallbacks
                         CanNoSelect: ((SelectAllyCost)cost).CanNoSelect,
                         CanEndNotMax: ((SelectAllyCost)cost).CanEndNotMax,
                         SelectUnitCoroutine: ((SelectAllyCost)cost).SelectUnitCoroutine,
-                        AfterSelectUnitCoroutine: ((SelectAllyCost)cost).AfterSelectUnitCoroutine,
-                        mode: ((SelectAllyCost)cost).mode);
+                        AfterSelectUnitCoroutine: (targetCards) => AfterSelectUnitCoroutine(targetCards),
+                        mode: ((SelectAllyCost)cost).mode,
+                        cardEffect:null);
 
                     yield return StartCoroutine(selectUnitEffect.Activate(null));
+
+                    IEnumerator AfterSelectUnitCoroutine(List<Unit> targetUnits)
+                    {
+                        if(((SelectAllyCost)cost).mode == SelectUnitEffect.Mode.Destroy)
+                        {
+                            if(selectUnitEffect.destroyUnits.Count((destroyUnit) => !destroyUnit.Destroyed) > 0)
+                            {
+                                cardEffect.DonePayCost = false;
+                            }
+                        }
+
+                        yield return null;
+                    }
                 }
 
                 else if (cost is DiscardHandCost)

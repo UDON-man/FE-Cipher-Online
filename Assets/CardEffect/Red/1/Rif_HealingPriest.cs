@@ -4,26 +4,22 @@ using UnityEngine;
 using System;
 public class Rif_HealingPriest : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnAttackedAlly)
         {
-            activateClass[0].SetUpICardEffect("きずぐすり", new List<Cost>() { new TapCost(),new DestroySelfCost() }, new List<Func<Hashtable, bool>>() { CanUseCondition} , 1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Vulnerary";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("きずぐすり", "Vulnerary",new List<Cost>() { new TapCost(),new DestroySelfCost() }, new List<Func<Hashtable, bool>>() { CanUseCondition} , 1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
                 if (GManager.instance.turnStateMachine.DefendingUnit != null)
                 {
-                    if (GManager.instance.turnStateMachine.DefendingUnit != this.card.UnitContainingThisCharacter())
+                    if (GManager.instance.turnStateMachine.DefendingUnit != card.UnitContainingThisCharacter())
                     {
                         return true;
                     }
@@ -34,10 +30,10 @@ public class Rif_HealingPriest : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == GManager.instance.turnStateMachine.DefendingUnit);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == GManager.instance.turnStateMachine.DefendingUnit, true);
 
-                GManager.instance.turnStateMachine.DefendingUnit.UntilEndBattleEffects.Add(powerUpClass);
+                GManager.instance.turnStateMachine.DefendingUnit.UntilEndBattleEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }
@@ -47,20 +43,16 @@ public class Rif_HealingPriest : CEntity_Effect
     }
 
     #region 祈りの紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("祈りの紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Miracle Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("祈りの紋章", "Miracle Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -89,7 +81,7 @@ public class Rif_HealingPriest : CEntity_Effect
             {
                 CanNotCriticalClass canNotCriticalClass = new CanNotCriticalClass();
                 canNotCriticalClass.SetUpCanNotCriticalClass((unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner != card.Owner);
-                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add(canNotCriticalClass);
+                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add((_timing) => canNotCriticalClass);
 
                 yield return null;
             }

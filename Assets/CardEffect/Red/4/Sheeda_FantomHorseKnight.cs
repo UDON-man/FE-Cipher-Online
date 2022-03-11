@@ -5,20 +5,16 @@ using System;
 using System.Linq;
 public class Sheeda_FantomHorseKnight : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("ツバサと共に", new List<Cost>() { new TapCost() }, null, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Harmonious Wings";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("ツバサと共に", "Harmonious Wings", new List<Cost>() { new TapCost() }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -34,7 +30,8 @@ public class Sheeda_FantomHorseKnight : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Custom);
+                    mode: SelectUnitEffect.Mode.Custom,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
@@ -46,19 +43,20 @@ public class Sheeda_FantomHorseKnight : CEntity_Effect
 
                     if(unit.Character.UnitNames.Contains("織部つばさ"))
                     {
-                        activateClass[1].SetUpICardEffect("", new List<Cost>() , new List<Func<Hashtable, bool>>(), -1, true);
-                        activateClass[1].SetUpActivateClass((_hashtable) => ActivateCoroutine1());
+                        ActivateClass activateClass1 = new ActivateClass();
+                        activateClass1.SetUpICardEffect("","", new List<Cost>() , new List<Func<Hashtable, bool>>(), -1, true,card);
+                        activateClass1.SetUpActivateClass((_hashtable) => ActivateCoroutine1());
 
                         IEnumerator ActivateCoroutine1()
                         {
                             Hashtable _hashtable = new Hashtable();
-                            _hashtable.Add("cardEffect", activateClass[1]);
+                            _hashtable.Add("cardEffect", activateClass1);
                             yield return ContinuousController.instance.StartCoroutine(new IMoveUnit(new List<Unit>() { card.UnitContainingThisCharacter() }, true, _hashtable).MoveUnits());
                         }
 
-                        if (activateClass[1].CanUse(null))
+                        if (activateClass1.CanUse(null))
                         {
-                            yield return ContinuousController.instance.StartCoroutine(activateClass[1].Activate_Optional_Cost_Execute(null, "Do you move the unit?"));
+                            yield return ContinuousController.instance.StartCoroutine(activateClass1.Activate_Optional_Cost_Execute(null, "Do you move the unit?"));
                         }
                     }
                 }
@@ -67,7 +65,7 @@ public class Sheeda_FantomHorseKnight : CEntity_Effect
         }
 
         CanNotDestroyedByBattleClass canNotDestroyedByBattleClass = new CanNotDestroyedByBattleClass();
-        canNotDestroyedByBattleClass.SetUpICardEffect("カルネージフォーム", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
+        canNotDestroyedByBattleClass.SetUpICardEffect("カルネージフォーム","", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
         canNotDestroyedByBattleClass.SetUpCanNotDestroyedByBattleClass((AttackingUnit) => AttackingUnit.Character.Owner == card.Owner.Enemy, (DefendingUnit) => DefendingUnit == card.UnitContainingThisCharacter());
         canNotDestroyedByBattleClass.SetCF();
         cardEffects.Add(canNotDestroyedByBattleClass);
@@ -100,7 +98,7 @@ public class Sheeda_FantomHorseKnight : CEntity_Effect
     }
 
     #region 幻影の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         string _masterUnitName = "織部つばさ";
 
@@ -108,14 +106,10 @@ public class Sheeda_FantomHorseKnight : CEntity_Effect
 
         if (timing == EffectTiming.OnDiscardSuppot)
         {
-            activateClass_Support[0].SetUpICardEffect("幻影の紋章", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine(_masterUnitName));
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Mirage Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("幻影の紋章", "Mirage Emblem", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true, card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine(_masterUnitName));
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -129,7 +123,7 @@ public class Sheeda_FantomHorseKnight : CEntity_Effect
                             {
                                 if (card.CanPlayAsNewUnit())
                                 {
-                                    if(card.Owner.FieldUnit.Count((unit) => unit.Character.UnitNames.Contains(_masterUnitName)) > 0)
+                                    if (card.Owner.FieldUnit.Count((unit) => unit.Character.UnitNames.Contains(_masterUnitName)) > 0)
                                     {
                                         return true;
                                     }
@@ -147,18 +141,18 @@ public class Sheeda_FantomHorseKnight : CEntity_Effect
                 Unit masterUnit = null;
                 bool isFront = false;
 
-                foreach(Unit unit in card.Owner.FieldUnit)
+                foreach (Unit unit in card.Owner.FieldUnit)
                 {
-                    if(unit.Character.UnitNames.Contains(masterUnitName))
+                    if (unit.Character.UnitNames.Contains(masterUnitName))
                     {
                         masterUnit = unit;
                         break;
                     }
                 }
 
-                if(masterUnit != null)
+                if (masterUnit != null)
                 {
-                    if(card.Owner.GetFrontUnits().Contains(masterUnit))
+                    if (card.Owner.GetFrontUnits().Contains(masterUnit))
                     {
                         isFront = true;
                     }
@@ -170,7 +164,7 @@ public class Sheeda_FantomHorseKnight : CEntity_Effect
 
                     card.Owner.SupportHandCard.gameObject.SetActive(false);
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass_Support[0]);
+                    hashtable.Add("cardEffect", activateClass_Support);
                     yield return StartCoroutine(new IPlayUnit(card, null, isFront, true, hashtable, false).PlayUnit());
                     card.Owner.SupportCards = new List<CardSource>();
                 }

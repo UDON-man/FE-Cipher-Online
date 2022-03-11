@@ -5,24 +5,20 @@ using System;
 using System.Linq;
 public class Harl_BlackDragonKnight : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("昼寝", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Afternoon Nap";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("昼寝", "Afternoon Nap", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (card.Owner.TrashCards.Count((cardSource) => cardSource.UnitNames.Contains("ハール")) >= 1)
                     {
@@ -51,7 +47,9 @@ public class Harl_BlackDragonKnight : CEntity_Effect
                     mode: SelectCardEffect.Mode.Custom,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -69,11 +67,12 @@ public class Harl_BlackDragonKnight : CEntity_Effect
                             CanTargetCondition_ByPreSelecetedList: null,
                             CanEndSelectCondition: null,
                             MaxCount: 1,
-                            CanNoSelect: false,
+                            CanNoSelect: true,
                             CanEndNotMax: false,
                             SelectUnitCoroutine: null,
                             AfterSelectUnitCoroutine: null,
-                            mode: SelectUnitEffect.Mode.Move);
+                            mode: SelectUnitEffect.Mode.Move,
+                            cardEffect: activateClass);
 
                         yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
                     }
@@ -85,20 +84,16 @@ public class Harl_BlackDragonKnight : CEntity_Effect
     }
 
     #region 天空の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpICardEffect("天空の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Flying Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("天空の紋章", "Flying Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true, card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -136,7 +131,8 @@ public class Harl_BlackDragonKnight : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass_Support);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

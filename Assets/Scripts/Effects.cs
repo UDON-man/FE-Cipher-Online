@@ -106,6 +106,8 @@ public class Effects : MonoBehaviour
 
         player.SupportHandCard.transform.localScale = new Vector3(1, 1, 1);
 
+        player.SupportHandCard.SkillNameText.transform.parent.gameObject.SetActive(false);
+
         //支援カードを裏面にする
         player.SupportHandCard.SetUpReverseCard();
 
@@ -254,7 +256,7 @@ public class Effects : MonoBehaviour
     #region 場のユニットのスキルが発動した時のエフェクト
     [Header("場のユニットのスキルが発動した時のエフェクト")]
     public GameObject FieldUnitEffectPrefab;
-    public IEnumerator ActivateFieldUnitSkillEffect(Unit unit)
+    public IEnumerator ActivateFieldUnitSkillEffect(Unit unit,ICardEffect cardEffect)
     {
         bool end = false;
         var sequence = DOTween.Sequence();
@@ -263,6 +265,8 @@ public class Effects : MonoBehaviour
         {
             if(unit.ShowingFieldUnitCard.transform.parent.GetComponent<XAxisLayoutGroup3D>() != null)
             {
+                unit.ShowingFieldUnitCard.OnSkillName(cardEffect);
+
                 unit.ShowingFieldUnitCard.transform.parent.GetComponent<XAxisLayoutGroup3D>().enabled = false;
 
                 sequence = DOTween.Sequence();
@@ -300,7 +304,7 @@ public class Effects : MonoBehaviour
     #endregion
 
     #region 墓地・無限ゾーンのカード効果が発動した時のエフェクト
-    public IEnumerator ActivateTrashInfinityCardSkillEffect(CardSource cardSource)
+    public IEnumerator ActivateTrashInfinityCardSkillEffect(CardSource cardSource,ICardEffect cardEffect)
     {
         bool end = false;
         var sequence = DOTween.Sequence();
@@ -313,6 +317,7 @@ public class Effects : MonoBehaviour
             cardSource.Owner.TrashHandCard.OnOutline();
             cardSource.Owner.TrashHandCard.SetBlueOutline();
             cardSource.Owner.TrashHandCard.transform.localScale = new Vector3(1, 1, 1);
+            cardSource.Owner.TrashHandCard.SetSkillName(cardEffect);
 
             Vector3 startPosition = Vector3.zero;
             Vector3 targetPosition = Vector3.zero;
@@ -371,8 +376,80 @@ public class Effects : MonoBehaviour
     }
     #endregion
 
+    #region 絆ゾーンのカード効果が発動した時のエフェクト
+    public IEnumerator ActivateBondCardSkillEffect(CardSource cardSource,ICardEffect cardEffect)
+    {
+        bool end = false;
+        var sequence = DOTween.Sequence();
+
+        if (cardSource.Owner.BondCards.Contains(cardSource))
+        {
+            cardSource.Owner.TrashHandCard.gameObject.SetActive(true);
+            cardSource.Owner.TrashHandCard.SetUpHandCard(cardSource);
+            cardSource.Owner.TrashHandCard.SetUpHandCardImage();
+            cardSource.Owner.TrashHandCard.OnOutline();
+            cardSource.Owner.TrashHandCard.SetBlueOutline();
+            cardSource.Owner.TrashHandCard.transform.localScale = new Vector3(1, 1, 1);
+            cardSource.Owner.TrashHandCard.SetSkillName(cardEffect);
+
+            Vector3 startPosition = Vector3.zero;
+            Vector3 targetPosition = Vector3.zero;
+
+            if (cardSource.Owner.isYou)
+            {
+                startPosition = new Vector3(-35, -280, 0);
+                targetPosition = new Vector3(150, -170, 0);
+            }
+            else
+            {
+                startPosition = new Vector3(-35, 280, 0);
+                targetPosition = new Vector3(150, 170, 0);
+            }
+
+            cardSource.Owner.TrashHandCard.transform.localPosition = startPosition;
+
+            sequence = DOTween.Sequence();
+
+            sequence
+                .Append(cardSource.Owner.TrashHandCard.transform.DOScale(new Vector3(1.4f, 1.4f, 1), 0.3f))
+                .Join(cardSource.Owner.TrashHandCard.transform.DOLocalMove(targetPosition, 0.3f))
+                .AppendCallback(() => end = true);
+
+            sequence.Play();
+
+            yield return new WaitWhile(() => !end);
+            end = false;
+
+            sequence = DOTween.Sequence();
+
+            sequence
+                .Append(cardSource.Owner.TrashHandCard.transform.DOScale(new Vector3(2f, 2f, 1), 0.3f))
+                .AppendCallback(() => end = true);
+            sequence.Play();
+
+            GameObject Effect = Instantiate(FieldUnitEffectPrefab);
+            Effect.transform.position = cardSource.Owner.TrashHandCard.transform.position + new Vector3(0, 1, 0);
+
+            yield return new WaitWhile(() => !end);
+            end = false;
+
+            yield return new WaitForSeconds(0.3f);
+
+            sequence = DOTween.Sequence();
+
+            sequence
+                   .Append(cardSource.Owner.TrashHandCard.transform.DOScale(new Vector3(1.4f, 1.4f, 1), 0.1f))
+                   .AppendCallback(() => end = true);
+
+            sequence.Play();
+
+            StartCoroutine(DeleteCoroutine(Effect));
+        }
+    }
+    #endregion
+
     #region 支援スキルが発動した時のエフェクト
-    public IEnumerator ActivateSupportCardSkillEffect(CardSource cardSource)
+    public IEnumerator ActivateSupportCardSkillEffect(CardSource cardSource,ICardEffect cardEffect)
     {
         bool end = false;
         var sequence = DOTween.Sequence();
@@ -381,6 +458,7 @@ public class Effects : MonoBehaviour
         {
             if(cardSource.Owner.SupportHandCard.cardSource == cardSource)
             {
+                cardSource.Owner.SupportHandCard.SetSkillName(cardEffect);
                 sequence = DOTween.Sequence();
 
                 sequence
@@ -410,7 +488,7 @@ public class Effects : MonoBehaviour
     #endregion
 
     #region 手札のカードの効果が発動した時のエフェクト
-    public IEnumerator ActivateHandCardSkillEffect(CardSource cardSource)
+    public IEnumerator ActivateHandCardSkillEffect(CardSource cardSource, ICardEffect cardEffect)
     {
         bool end = false;
         var sequence = DOTween.Sequence();
@@ -436,6 +514,7 @@ public class Effects : MonoBehaviour
                     handCard.GetComponent<Draggable_HandCard>().CanPointerEnterExitAction = false;
                 }
 
+                cardSource.ShowingHandCard.SetSkillName(cardEffect);
                 cardSource.ShowingHandCard.ShowOpponent = true;
                 cardSource.ShowingHandCard.Outline_Select.SetActive(true);
                 cardSource.ShowingHandCard.SetOrangeOutline();

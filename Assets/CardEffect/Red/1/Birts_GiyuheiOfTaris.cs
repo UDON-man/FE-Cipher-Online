@@ -6,13 +6,13 @@ using System.Linq;
 
 public class Birts_GiyuheiOfTaris : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("戦士の心得", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, CanPowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("戦士の心得","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, CanPowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool CanPowerUpCondition(Unit unit)
@@ -32,28 +32,24 @@ public class Birts_GiyuheiOfTaris : CEntity_Effect
         {
             SelectAllyCost selectAllyCost = new SelectAllyCost(
                 SelectPlayer: card.Owner,
-                    CanTargetCondition: (unit) => unit.Character.Owner == card.Owner && !unit.IsTapped && (unit.Character.UnitNames.Contains("サジ") || unit.Character.UnitNames.Contains("マジ")),
-                    CanTargetCondition_ByPreSelecetedList: CanTargetCondition_ByPreSelecetedList,
-                    CanEndSelectCondition: CanEndSelectCondition,
-                    MaxCount: 2,
-                    CanNoSelect: false,
-                    CanEndNotMax: false,
-                    SelectUnitCoroutine: null,
-                    AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Tap);
+                CanTargetCondition: (unit) => unit.Character.Owner == card.Owner && !unit.IsTapped && (unit.Character.UnitNames.Contains("サジ") || unit.Character.UnitNames.Contains("マジ")),
+                CanTargetCondition_ByPreSelecetedList: CanTargetCondition_ByPreSelecetedList,
+                CanEndSelectCondition: CanEndSelectCondition,
+                MaxCount: 2,
+                CanNoSelect: false,
+                CanEndNotMax: false,
+                SelectUnitCoroutine: null,
+                AfterSelectUnitCoroutine: null,
+                mode: SelectUnitEffect.Mode.Tap);
 
-            activateClass[0].SetUpICardEffect("サジマジバーツ",new List<Cost>() { selectAllyCost },new List<Func<Hashtable, bool>>() { CanUseCondition } ,-1,true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Board, Cord and Barst";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("サジマジバーツ", "Board, Cord and Barst",new List<Cost>() { selectAllyCost },new List<Func<Hashtable, bool>>() { CanUseCondition } ,-1,true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -97,13 +93,13 @@ public class Birts_GiyuheiOfTaris : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass _powerUpClass = new PowerUpClass();
-                _powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 50, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEndBattleEffects.Add(_powerUpClass);
+                PowerModifyClass _powerUpClass = new PowerModifyClass();
+                _powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 50, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEndBattleEffects.Add((_timing) => _powerUpClass);
 
-                StrikeUpClass strikeUpClass = new StrikeUpClass();
-                strikeUpClass.SetUpStrikeUpClass((unit, Strike) => 2, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEndBattleEffects.Add(strikeUpClass);
+                StrikeModifyClass strikeModifyClass = new StrikeModifyClass();
+                strikeModifyClass.SetUpStrikeModifyClass((unit, Strike) => 2, (unit) => unit == card.UnitContainingThisCharacter(), false);
+                card.UnitContainingThisCharacter().UntilEndBattleEffects.Add((_timing) => strikeModifyClass);
 
                 yield return null;
             }

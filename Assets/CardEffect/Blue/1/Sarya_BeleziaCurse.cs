@@ -5,7 +5,7 @@ using System;
 
 public class Sarya_BeleziaCurse : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
@@ -13,20 +13,18 @@ public class Sarya_BeleziaCurse : CEntity_Effect
         {
             if (card.Owner.Enemy.HandCards.Count > 0)
             {
-                activateClass[0].SetUpICardEffect("ミィル", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, null, -1, false);
-                activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-                cardEffects.Add(activateClass[0]);
-
-                if (ContinuousController.instance.language == Language.ENG)
-                {
-                    activateClass[0].EffectName = "Flux";
-                }
+                ActivateClass activateClass = new ActivateClass();
+                activateClass.SetUpICardEffect("ミィル", "Flux", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, null, -1, false,card);
+                activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+                cardEffects.Add(activateClass);
 
                 IEnumerator ActivateCoroutine()
                 {
-                    SelectHandEffect selectHandEffect = GetComponent<SelectHandEffect>();
+                    if(card.Owner.Enemy.HandCards.Count > 0)
+                    {
+                        SelectHandEffect selectHandEffect = GetComponent<SelectHandEffect>();
 
-                    selectHandEffect.SetUp(
+                        selectHandEffect.SetUp(
                             SelectPlayer: card.Owner.Enemy,
                             CanTargetCondition: (cardSource) => cardSource.Owner.HandCards.Contains(cardSource),
                             CanTargetCondition_ByPreSelecetedList: null,
@@ -37,9 +35,11 @@ public class Sarya_BeleziaCurse : CEntity_Effect
                             isShowOpponent: true,
                             SelectCardCoroutine: null,
                             AfterSelectCardCoroutine: null,
-                            mode: SelectHandEffect.Mode.Discard);
+                            mode: SelectHandEffect.Mode.Discard,
+                            cardEffect: activateClass);
 
-                    yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
+                        yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
+                    }
                 }
                 
             }

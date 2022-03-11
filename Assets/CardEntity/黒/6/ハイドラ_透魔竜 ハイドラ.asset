@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30CF\u30A4\u30C9\u30E9_\u900F\u9B54\u7ADC \u30CF\u30A4\u30C9\u30E9"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 8af71ce3a8dc96849bf6c737a33863cd, type: 3}
+  CardImage_English: {fileID: 21300000, guid: beb41976b222f0947bee45134408a8ea, type: 3}
+  CardName: "\u900F\u9B54\u7ADC \u30CF\u30A4\u30C9\u30E9"
+  UnitName: "\u30CF\u30A4\u30C9\u30E9"
+  UnitName_English: Anankos
+  PlayCost: 6
+  HasCC: 0
+  CCCost: 0
+  cardColors: 06000000
+  Power: 0
+  SupportPower: 0
+  Ranges: 00000000
+  sex: 0
+  Weapons: 0500000006000000
+  ClassName: Hydra_SilentDragon
+  SkillNames:
+  - "\u7ADC\u306E\u5668"
+  - "\u8607\u308B\u900F\u9B54\u7ADC"
+  - "\u9ED2\u304D\u592A\u967D"
+  SupportSkillNames: []
+  CardID: 728
+  MaxCountInDeck: 4

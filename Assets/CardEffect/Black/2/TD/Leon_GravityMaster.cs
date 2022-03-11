@@ -6,24 +6,20 @@ using System;
 
 public class Leon_GravityMaster : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[0].SetUpICardEffect("強大なる魔導書", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Sinister Tome";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("強大なる魔導書", "Sinister Tome", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true, card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable, card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -41,17 +37,18 @@ public class Leon_GravityMaster : CEntity_Effect
                     SelectHandEffect selectHandEffect = GetComponent<SelectHandEffect>();
 
                     selectHandEffect.SetUp(
-                                    SelectPlayer: card.Owner.Enemy,
-                                    CanTargetCondition: (cardSource) => cardSource.Owner.HandCards.Contains(cardSource),
-                                    CanTargetCondition_ByPreSelecetedList: null,
-                                    CanEndSelectCondition: null,
-                                    MaxCount: 1,
-                                    CanNoSelect: false,
-                                    CanEndNotMax: false,
-                                    isShowOpponent: true,
-                                    SelectCardCoroutine: null,
-                                    AfterSelectCardCoroutine: null,
-                                    mode: SelectHandEffect.Mode.Discard);
+                        SelectPlayer: card.Owner.Enemy,
+                        CanTargetCondition: (cardSource) => cardSource.Owner.HandCards.Contains(cardSource),
+                        CanTargetCondition_ByPreSelecetedList: null,
+                        CanEndSelectCondition: null,
+                        MaxCount: 1,
+                        CanNoSelect: false,
+                        CanEndNotMax: false,
+                        isShowOpponent: true,
+                        SelectCardCoroutine: null,
+                        AfterSelectCardCoroutine: null,
+                        mode: SelectHandEffect.Mode.Discard,
+                        cardEffect: activateClass);
 
                     yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
                 }

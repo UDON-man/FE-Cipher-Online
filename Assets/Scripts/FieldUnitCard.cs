@@ -56,6 +56,9 @@ public class FieldUnitCard : MonoBehaviour
     [Header("オーブ破壊枚数テキスト")]
     public Text BreakOrbCountText;
 
+    [Header("スキル名テキスト")]
+    public Text SkillNameText;
+
     public GameObject Parent;
 
     public GameObject UsingSkillEffect;
@@ -87,6 +90,46 @@ public class FieldUnitCard : MonoBehaviour
         if(BreakOrbCountText != null)
         {
             BreakOrbCountText.gameObject.SetActive(false);
+        }
+
+        OffSkillName();
+    }
+
+    private void Update()
+    {
+        if (SkillNameText != null && thisUnit != null)
+        {
+            if(SkillNameText.transform.parent.gameObject.activeSelf)
+            {
+                SkillNameText.transform.parent.localRotation = Quaternion.Euler(0, 0, this.transform.localRotation.eulerAngles.y);
+            }
+        }
+    }
+
+    public void OnSkillName(ICardEffect cardEffect)
+    {
+        if (SkillNameText != null && thisUnit != null)
+        {
+            SkillNameText.transform.parent.gameObject.SetActive(true);
+            SkillNameText.text = cardEffect.GetEffectName();
+
+            if(thisUnit.IsTapped)
+            {
+                SkillNameText.transform.parent.localRotation = Quaternion.Euler(0, 0, 20);
+            }
+
+            else
+            {
+                SkillNameText.transform.parent.localRotation = Quaternion.Euler(0, 0, 0);
+            }
+        }
+    }
+
+    public void OffSkillName()
+    {
+        if(SkillNameText != null)
+        {
+            SkillNameText.transform.parent.gameObject.SetActive(false);
         }
     }
 

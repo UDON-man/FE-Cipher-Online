@@ -5,20 +5,16 @@ using System;
 
 public class Aqua_WhiteSinger : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("白夜の賛歌", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, null, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Hymn of Hoshido";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("白夜の賛歌", "Hymn of Hoshido", new List<Cost>() { new TapCost(), new ReverseCost(2, (cardSource) => true) }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -34,21 +30,22 @@ public class Aqua_WhiteSinger : CEntity_Effect
                 CanEndNotMax: false,
                 SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                 AfterSelectUnitCoroutine: null,
-                mode: SelectUnitEffect.Mode.Custom);
+                mode: SelectUnitEffect.Mode.Custom,
+                cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
                 IEnumerator SelectUnitCoroutine(Unit unit)
                 {
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass[0]);
+                    hashtable.Add("cardEffect", activateClass);
                     yield return ContinuousController.instance.StartCoroutine(unit.UnTap(hashtable));
 
                     yield return new WaitForSeconds(0.2f);
 
-                    PowerUpClass powerUpClass = new PowerUpClass();
-                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 20, (_unit) => _unit == unit);
-                    unit.UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                    PowerModifyClass powerUpClass = new PowerModifyClass();
+                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 20, (_unit) => _unit == unit, true);
+                    unit.UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                     yield return null;
                 }

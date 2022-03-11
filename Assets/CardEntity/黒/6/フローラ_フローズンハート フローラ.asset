@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30D5\u30ED\u30FC\u30E9_\u30D5\u30ED\u30FC\u30BA\u30F3\u30CF\u30FC\u30C8
+    \u30D5\u30ED\u30FC\u30E9"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 2a3513f70c2edfb49bdccc3643aa3a79, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 7e5e152c9d3dc584ab7b489fa56992f7, type: 3}
+  CardName: "\u30D5\u30ED\u30FC\u30BA\u30F3\u30CF\u30FC\u30C8 \u30D5\u30ED\u30FC\u30E9"
+  UnitName: "\u30D5\u30ED\u30FC\u30E9"
+  UnitName_English: Flora
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 06000000
+  Power: 50
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 1
+  Weapons: 07000000
+  ClassName: Flora_FrozenHeart
+  SkillNames:
+  - "\u2026\u8A31\u3057\u307E\u305B\u3093"
+  - "\u6C37\u306E\u8B77\u58C1"
+  SupportSkillNames: []
+  CardID: 701
+  MaxCountInDeck: 4

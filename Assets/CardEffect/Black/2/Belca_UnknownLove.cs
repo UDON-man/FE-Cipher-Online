@@ -6,24 +6,20 @@ using System.Linq;
 
 public class Belca_UnknownLove : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[0].SetUpICardEffect("切り込み", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Surgical Strike";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("切り込み", "Surgical Strike",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true, card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if(IsExistOnField(hashtable))
+                if(IsExistOnField(hashtable, card))
                 {
                     if(GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -48,7 +44,8 @@ public class Belca_UnknownLove : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }
@@ -56,25 +53,21 @@ public class Belca_UnknownLove : CEntity_Effect
 
         else if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[1].SetUpICardEffect("トマホーク", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, 1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass[1].SetCCS(card.UnitContainingThisCharacter());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Tomahawk";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("トマホーク", "Tomahawk",new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, 1, true, card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass.SetCCS(card.UnitContainingThisCharacter());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
                 RangeUpClass rangeUpClass = new RangeUpClass();
                 rangeUpClass.SetUpRangeUpClass((unit, Range) => { Range.Add(1); Range.Add(2); return Range; }, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(rangeUpClass);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => rangeUpClass);
 
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), false);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }

@@ -5,20 +5,16 @@ using System;
 
 public class Henley_SmileSorcerer : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnCCAnyone)
         {
-            activateClass[0].SetUpICardEffect("スライム", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Mire";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("スライム", "Mire", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -28,9 +24,15 @@ public class Henley_SmileSorcerer : CEntity_Effect
                     {
                         if(hashtable["Unit"] is Unit)
                         {
-                            Unit CCUnit = (Unit)hashtable["Unit"];
+                            Unit Unit = (Unit)hashtable["Unit"];
 
-                            return CCUnit.Character.Owner == this.card.Owner && CCUnit != this.card.UnitContainingThisCharacter();
+                            if(Unit.Character != null)
+                            {
+                                if(Unit.Character.Owner == card.Owner && Unit != card.UnitContainingThisCharacter())
+                                {
+                                    return true;
+                                }
+                            }
                         }
                     }
                 }
@@ -61,7 +63,8 @@ public class Henley_SmileSorcerer : CEntity_Effect
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Discard);
+                        mode: SelectHandEffect.Mode.Discard,
+                        cardEffect:activateClass);
 
                         yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
                     }
@@ -71,15 +74,11 @@ public class Henley_SmileSorcerer : CEntity_Effect
 
         else if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[1].SetUpICardEffect("死の呪い", new List<Cost>() { new TapCost(),new ReverseCost(1, (cardSource) => true),new DestroySelfCost() }, null, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass[1].SetCCS(card.UnitContainingThisCharacter());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Mortal Hex";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("死の呪い", "Mortal Hex", new List<Cost>() { new TapCost(),new ReverseCost(1, (cardSource) => true),new DestroySelfCost() }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass.SetCCS(card.UnitContainingThisCharacter());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -105,7 +104,8 @@ public class Henley_SmileSorcerer : CEntity_Effect
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Discard);
+                        mode: SelectHandEffect.Mode.Discard,
+                        cardEffect: activateClass);
 
                     yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
                 }

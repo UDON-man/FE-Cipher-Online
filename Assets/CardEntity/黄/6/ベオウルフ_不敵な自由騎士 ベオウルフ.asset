@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30D9\u30AA\u30A6\u30EB\u30D5_\u4E0D\u6575\u306A\u81EA\u7531\u9A0E\u58EB
+    \u30D9\u30AA\u30A6\u30EB\u30D5"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: fb306491c90789f4595aca8bcf70abe1, type: 3}
+  CardImage_English: {fileID: 21300000, guid: f1ea43a6b220ad445b51296c37453104, type: 3}
+  CardName: "\u4E0D\u6575\u306A\u81EA\u7531\u9A0E\u58EB \u30D9\u30AA\u30A6\u30EB\u30D5"
+  UnitName: "\u30D9\u30AA\u30A6\u30EB\u30D5"
+  UnitName_English: Beowulf
+  PlayCost: 2
+  HasCC: 0
+  CCCost: 0
+  cardColors: 03000000
+  Power: 50
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 0000000008000000
+  ClassName: BeoWulf_FreeFearlessKnight
+  SkillNames:
+  - "\u4FFA\u3092\u96C7\u3044\u305F\u3044\u306E\u304B\uFF1F"
+  SupportSkillNames: []
+  CardID: 660
+  MaxCountInDeck: 4

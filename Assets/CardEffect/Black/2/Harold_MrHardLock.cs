@@ -4,13 +4,13 @@ using UnityEngine;
 using System;
 public class Harold_MrHardLock : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("ヒーローの心得", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, CanPowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("ヒーローの心得","", null, null, -1, false, card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, CanPowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool CanPowerUpCondition(Unit unit)
@@ -26,10 +26,10 @@ public class Harold_MrHardLock : CEntity_Effect
             return false;
         }
 
-        StrikeUpClass strikeUpClass = new StrikeUpClass();
-        strikeUpClass.SetUpICardEffect("助けて! ハロルド!", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        strikeUpClass.SetUpStrikeUpClass((unit, Strike) => 2, (unit) => unit == card.UnitContainingThisCharacter());
-        cardEffects.Add(strikeUpClass);
+        StrikeModifyClass strikeModifyClass = new StrikeModifyClass();
+        strikeModifyClass.SetUpICardEffect("助けて! ハロルド!", "",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+        strikeModifyClass.SetUpStrikeModifyClass((unit, Strike) => 2, (unit) => unit == card.UnitContainingThisCharacter(),false);
+        cardEffects.Add(strikeModifyClass);
 
         bool CanUseCondition(Hashtable hashtable)
         {

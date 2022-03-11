@@ -28,13 +28,6 @@ public class CardSource : MonoBehaviour
     {
         get; set;
     }
-
-    /*
-    public CEntity_Effect cEntity_Effect
-    {
-        get; set;
-    }
-    */
     #endregion
 
     #region PhotonView
@@ -73,66 +66,6 @@ public class CardSource : MonoBehaviour
 
     #region カード効果
     public CEntity_EffectController cEntity_EffectController;
-    /*
-    bool first = true;
-    public void SetUpCardEffect()
-    {
-        #region カード効果クラスのインスタンスを生成して登録
-        if (!string.IsNullOrEmpty(cEntity_Base.ClassName))
-        {
-            if (cEntity_Effect == null)
-            {
-                bool CanAttachEffectComponent(string ClassName)
-                {
-                    Type t = null;
-
-                    if (!string.IsNullOrEmpty(ClassName))
-                    {
-                        t = Type.GetType(ClassName);
-
-                        if (t != null)
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                }
-
-                if(CanAttachEffectComponent(cEntity_Base.ClassName))
-                {
-                    Type t = null;
-
-                    if (!string.IsNullOrEmpty(cEntity_Base.ClassName))
-                    {
-                        t = Type.GetType(cEntity_Base.ClassName);
-
-                        if (t != null)
-                        {
-                            cEntity_Effect = (CEntity_Effect)(this.gameObject.AddComponent(t));
-                        }
-                    }
-                }
-
-                else
-                {
-                    cEntity_Effect = this.gameObject.AddComponent<EmptyCEntity_Effect>();
-                }
-
-                //cEntity_Effect = GetComponent<CEntity_Effect>();
-                cEntity_Effect.card = this;
-
-                if (first)
-                {
-                    cEntity_Effect.AttachICardEffectComponent();
-                }
-            }
-        }
-        #endregion
-
-        first = false;
-    }
-    */
     #endregion
 
     #region 表・裏の切り替え
@@ -282,6 +215,13 @@ public class CardSource : MonoBehaviour
             int _PlayCost = cEntity_Base.PlayCost;
 
             #region スキルの効果
+
+            List<IChangePlayCost> changePlayConstEffects = new List<IChangePlayCost>();
+            List<IChangePlayCost> changePlayConstEffects_UpDown = new List<IChangePlayCost>();
+
+            #region プレイコストを特定の値にさせる効果とプレイコストを上下させる効果に分類
+
+            #region 場のユニットの効果
             foreach (Player player in GManager.instance.turnStateMachine.gameContext.Players)
             {
                 foreach (Unit _unit in player.FieldUnit)
@@ -292,26 +232,66 @@ public class CardSource : MonoBehaviour
                         {
                             if (cardEffect.CanUse(null))
                             {
-                                _PlayCost = ((IChangePlayCost)cardEffect).GetPlayCost(_PlayCost,  this);
+                                if(!((IChangePlayCost)cardEffect).isUpDown())
+                                {
+                                    changePlayConstEffects.Add((IChangePlayCost)cardEffect);
+                                }
+
+                                else
+                                {
+                                    changePlayConstEffects_UpDown.Add((IChangePlayCost)cardEffect);
+                                }
                             }
                         }
                     }
                 }
             }
+            #endregion
 
-
+            #region 自身の効果
             foreach (ICardEffect cardEffect in cEntity_EffectController.GetCardEffects(EffectTiming.None))
             {
                 if (cardEffect is IChangePlayCost)
                 {
                     if (cardEffect.CanUse(null))
                     {
-                        _PlayCost = ((IChangePlayCost)cardEffect).GetPlayCost(_PlayCost, this);
+                        if (!((IChangePlayCost)cardEffect).isUpDown())
+                        {
+                            changePlayConstEffects.Add((IChangePlayCost)cardEffect);
+                        }
+
+                        else
+                        {
+                            changePlayConstEffects_UpDown.Add((IChangePlayCost)cardEffect);
+                        }
                     }
                 }
 
             }
             #endregion
+
+            #endregion
+
+            #region プレイコストを特定の値にさせる効果
+            foreach (IChangePlayCost changePlayConstEffect in changePlayConstEffects)
+            {
+                _PlayCost = changePlayConstEffect.GetPlayCost(_PlayCost, this);
+            }
+            #endregion
+
+            #region プレイコストを上下させる効果
+            foreach (IChangePlayCost changePlayConstEffect in changePlayConstEffects_UpDown)
+            {
+                _PlayCost = changePlayConstEffect.GetPlayCost(_PlayCost, this);
+            }
+            #endregion
+
+            #endregion
+
+            if(_PlayCost < 0)
+            {
+                _PlayCost = 0;
+            }
 
             return _PlayCost;
         }
@@ -562,6 +542,44 @@ public class CardSource : MonoBehaviour
     #region 新規プレイができるか
     public bool CanPlayAsNewUnit()
     {
+        #region スキルによって出撃出来ない場合は出撃不可
+        #region 自身のカードのスキル
+        foreach (ICardEffect cardEffect in cEntity_EffectController.GetCardEffects(EffectTiming.None))
+        {
+            if (cardEffect is ICanNotPlayCardEffect)
+            {
+                if (cardEffect.CanUse(null))
+                {
+                    if (((ICanNotPlayCardEffect)cardEffect).CanNotPlay(this))
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region プレイヤーにかかっているスキル
+        foreach(Player player in GManager.instance.turnStateMachine.gameContext.Players)
+        {
+            foreach (ICardEffect cardEffect in player.PlayerEffects(EffectTiming.None))
+            {
+                if (cardEffect is ICanNotPlayCardEffect)
+                {
+                    if (cardEffect.CanUse(null))
+                    {
+                        if (((ICanNotPlayCardEffect)cardEffect).CanNotPlay(this))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        #endregion
+        #endregion
+
+        #region 自分の場に同名ユニットがいるかチェック
         bool Exist = false;
 
         foreach(Unit unit in Owner.FieldUnit)
@@ -574,9 +592,12 @@ public class CardSource : MonoBehaviour
                 }
             }
         }
+        #endregion
 
-        if(Exist)
+        #region 同名ユニットがいる場合
+        if (Exist)
         {
+            #region 同名ユニットがいても出撃出来る場合は出撃可能
             foreach (ICardEffect cardEffect in cEntity_EffectController.GetCardEffects(EffectTiming.None))
             {
                 if (cardEffect is ICanPlayEvenIfExistSameUnit)
@@ -588,31 +609,17 @@ public class CardSource : MonoBehaviour
                             return true;
                         }
                     }
-                        
                 }
             }
+            #endregion
 
+            //基本的には同名ユニットがいれば出撃不可
             return false;
         }
+        #endregion
 
-        else
-        {
-            foreach (ICardEffect cardEffect in cEntity_EffectController.GetCardEffects(EffectTiming.None))
-            {
-                if (cardEffect is ICanNotPlayCardEffect)
-                {
-                    if(cardEffect.CanUse(null))
-                    {
-                        if (((ICanNotPlayCardEffect)cardEffect).CanNotPlay(this))
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-
-            return true;
-        }
+        //同名ユニットが居なければ出撃可能
+        return true;
     }
     #endregion
 
@@ -847,6 +854,21 @@ public class CardSource : MonoBehaviour
             }
 
             return Weapons;
+        }
+    }
+    #endregion
+
+    #region 起動BSを使えるか
+    public bool CanDeclareBS
+    {
+        get
+        {
+            if(cEntity_EffectController.GetBSCardEffect(EffectTiming.OnDeclaration).Count((cardEffect) => cardEffect.CanUse(null)) > 0)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
     #endregion

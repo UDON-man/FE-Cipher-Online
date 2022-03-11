@@ -6,7 +6,7 @@ using System;
 
 public class Yubero_CleverBrotherPrince : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
@@ -24,20 +24,16 @@ public class Yubero_CleverBrotherPrince : CEntity_Effect
                  AfterSelectUnitCoroutine: null,
                  mode: SelectUnitEffect.Mode.Tap);
 
-            activateClass[0].SetUpICardEffect("姉弟の戦い", new List<Cost>() { selectAllyCost }, null, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Fighting Siblings";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("姉弟の戦い", "Fighting Siblings",new List<Cost>() { selectAllyCost }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }
@@ -45,32 +41,20 @@ public class Yubero_CleverBrotherPrince : CEntity_Effect
 
         else if (timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[1].SetUpICardEffect("王族たる知識", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Wisdom of the Royal Family";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("王族たる知識", "Wisdom of the Royal Family", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
-                        if (GetCardEffects(EffectTiming.OnDeclaration).Count > 0)
+                        if (card.cEntity_EffectController.GetUseCountThisTurn("姉弟の戦い") > 0)
                         {
-                            ICardEffect cardEffect = GetCardEffects(EffectTiming.OnDeclaration)[0];
-
-                            if (cardEffect.EffectName == "姉弟の戦い"|| cardEffect.EffectName == "Fighting Siblings")
-                            {
-                                if (cardEffect.UseCountThisTurn > 0)
-                                {
-                                    return true;
-                                }
-                            }
+                            return true;
                         }
                     }
                 }

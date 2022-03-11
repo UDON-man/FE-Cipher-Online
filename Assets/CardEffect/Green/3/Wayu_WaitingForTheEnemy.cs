@@ -7,30 +7,26 @@ using Photon.Pun;
 
 public class Wayu_WaitingForTheEnemy : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         CanNotBeEvadedClass canNotBeEvadedClass = new CanNotBeEvadedClass();
-        canNotBeEvadedClass.SetUpICardEffect("太刀筋絶好調!",new List<Cost>(),new List<Func<Hashtable, bool>>(),-1,false);
+        canNotBeEvadedClass.SetUpICardEffect("太刀筋絶好調!","",new List<Cost>(),new List<Func<Hashtable, bool>>(),-1,false,card);
         canNotBeEvadedClass.SetLvS(card.UnitContainingThisCharacter(),4);
-        canNotBeEvadedClass.SetUpCanNotBeEvadedClass((AttackingUnit) => AttackingUnit == this.card.UnitContainingThisCharacter(), (DefendingUnit) => true);
+        canNotBeEvadedClass.SetUpCanNotBeEvadedClass((AttackingUnit) => AttackingUnit == card.UnitContainingThisCharacter(), (DefendingUnit) => true);
         cardEffects.Add(canNotBeEvadedClass);
 
         if (timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[1].SetUpICardEffect("修行修行!", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Back to sword practice!";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("修行修行!", "Back to sword practice!", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -67,7 +63,9 @@ public class Wayu_WaitingForTheEnemy : CEntity_Effect
                     mode: SelectCardEffect.Mode.Custom,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 SelectHandEffect selectHandEffect = GetComponent<SelectHandEffect>();
 
@@ -82,10 +80,8 @@ public class Wayu_WaitingForTheEnemy : CEntity_Effect
                     isShowOpponent: true,
                     SelectCardCoroutine: null,
                     AfterSelectCardCoroutine: AfterSelectCardCoroutine,
-                    mode: SelectHandEffect.Mode.Custom);
-
-
-                //yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
+                    mode: SelectHandEffect.Mode.Custom,
+                    cardEffect: activateClass);
 
                 IEnumerator AfterSelectCardCoroutine(List<CardSource> cardSources)
                 {
@@ -162,7 +158,6 @@ public class Wayu_WaitingForTheEnemy : CEntity_Effect
         endSelect = true;
         
     }
-
 }
 
 

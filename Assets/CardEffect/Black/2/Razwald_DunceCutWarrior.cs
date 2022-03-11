@@ -7,20 +7,16 @@ using System;
 public class Razwald_DunceCutWarrior : CEntity_Effect
 {
     List<Unit> TappedUnits = new List<Unit>();
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("お茶でも行かない?", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Would you like to go out for tea?";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("お茶でも行かない?", "Would you like to go out for tea?",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -48,7 +44,8 @@ public class Razwald_DunceCutWarrior : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Custom);
+                    mode: SelectUnitEffect.Mode.Custom,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
@@ -59,39 +56,34 @@ public class Razwald_DunceCutWarrior : CEntity_Effect
                     yield return new WaitForSeconds(0.2f);
                 }
 
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
             }
         }
 
         else if (timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[1].SetUpICardEffect("女の子には優しくしなくちゃ", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "You must be nice for girls.";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("女の子には優しくしなくちゃ", "You must be nice for girls.",new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if(IsExistOnField(hashtable))
+                if(IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
-                        if (activateClass[0].UseCountThisTurn >= 1)
+                        if (TappedUnits.Count((unit) => unit.Character != null && card.Owner.FieldUnit.Contains(unit)) > 0)
                         {
-                            if (TappedUnits.Count((unit) => unit.Character != null && card.Owner.FieldUnit.Contains(unit)) > 0)
+                            if (card.cEntity_EffectController.GetUseCountThisTurn("お茶でも行かない?") > 0)
                             {
                                 return true;
                             }
                         }
                     }
                 }
-                
 
                 return false;
             }
@@ -110,7 +102,8 @@ public class Razwald_DunceCutWarrior : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.UnTap);
+                    mode: SelectUnitEffect.Mode.UnTap,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

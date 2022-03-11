@@ -38,7 +38,7 @@ public class NextPhaseButton : MonoBehaviourPunCallbacks
 
     public void OnClick()
     {
-        if (!GManager.instance.turnStateMachine.isSync && !GManager.instance.turnStateMachine.IsSelecting)
+        if (!GManager.instance.turnStateMachine.isSync && !GManager.instance.turnStateMachine.IsSelecting && !GManager.instance.turnStateMachine.isExecuting)
         {
             if(GManager.instance.turnStateMachine.gameContext.TurnPlayer.isYou)
             {
@@ -87,7 +87,7 @@ public class NextPhaseButton : MonoBehaviourPunCallbacks
                     {
                         if (GManager.instance.turnStateMachine.gameContext.TurnPlayer.isYou)
                         {
-                            if (!GManager.instance.turnStateMachine.isSync && !GManager.instance.turnStateMachine.IsSelecting)
+                            if (!GManager.instance.turnStateMachine.isSync && !GManager.instance.turnStateMachine.IsSelecting && !GManager.instance.turnStateMachine.isExecuting)
                             {
                                 switch (GManager.instance.turnStateMachine.gameContext.TurnPhase)
                                 {

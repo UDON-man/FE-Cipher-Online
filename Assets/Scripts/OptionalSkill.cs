@@ -14,7 +14,7 @@ public class OptionalSkill : MonoBehaviourPunCallbacks
         endSelect = false;
         useOptional = false;
 
-        string _Message = $"Do you use {cardEffect.EffectName}?";
+        string _Message = $"Do you use {cardEffect.GetEffectName()}?";
 
         if(!string.IsNullOrEmpty(Message))
         {

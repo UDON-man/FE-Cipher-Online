@@ -6,12 +6,12 @@ using System;
 
 public class Suzukaze_GuardKazenin : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         SupportPowerUpClass supportPowerUpClass = new SupportPowerUpClass();
-        supportPowerUpClass.SetUpICardEffect("影の務め", null, null, -1, false);
+        supportPowerUpClass.SetUpICardEffect("影の務め","", null, null, -1, false,card);
         supportPowerUpClass.SetUpSupportPowerUpClass((cardSource, SupportPower) => SupportPower + 10, ChangeSupportPowerCondition);
         supportPowerUpClass.SetCCS(card.UnitContainingThisCharacter());
         cardEffects.Add(supportPowerUpClass);
@@ -41,14 +41,10 @@ public class Suzukaze_GuardKazenin : CEntity_Effect
 
         if (timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[0].SetUpICardEffect("疾風の陣", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Gale Formation";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("疾風の陣", "Gale Formation",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -64,7 +60,7 @@ public class Suzukaze_GuardKazenin : CEntity_Effect
                             {
                                 if (Unit.Character != null)
                                 {
-                                    if (Unit.Character.Owner == this.card.Owner)
+                                    if (Unit.Character.Owner == card.Owner)
                                     {
                                         if (Unit == card.UnitContainingThisCharacter()||Unit.Weapons.Contains(Weapon.DarkWeapon))
                                         {
@@ -86,16 +82,17 @@ public class Suzukaze_GuardKazenin : CEntity_Effect
                 SelectUnitEffect selectUnitEffect = GetComponent<SelectUnitEffect>();
 
                 selectUnitEffect.SetUp(
-                SelectPlayer: card.Owner,
-                CanTargetCondition: (unit) => unit.Character.Owner == this.card.Owner,
-                CanTargetCondition_ByPreSelecetedList: null,
-                CanEndSelectCondition: null,
-                MaxCount: card.Owner.FieldUnit.Count,
-                CanNoSelect: true,
-                CanEndNotMax: true,
-                SelectUnitCoroutine: null,
-                AfterSelectUnitCoroutine: null,
-                mode: SelectUnitEffect.Mode.Move);
+                    SelectPlayer: card.Owner,
+                    CanTargetCondition: (unit) => unit.Character.Owner == card.Owner,
+                    CanTargetCondition_ByPreSelecetedList: null,
+                    CanEndSelectCondition: null,
+                    MaxCount: card.Owner.FieldUnit.Count,
+                    CanNoSelect: true,
+                    CanEndNotMax: true,
+                    SelectUnitCoroutine: null,
+                    AfterSelectUnitCoroutine: null,
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

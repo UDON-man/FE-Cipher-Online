@@ -5,20 +5,16 @@ using System;
 using System.Linq;
 public class Doga_SolidFantomKnight : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnAttackedAlly)
         {
-            activateClass[0].SetUpICardEffect("慈愛の盾", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Compassionate Shield";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("慈愛の盾", "Compassionate Shield",new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
@@ -85,7 +81,7 @@ public class Doga_SolidFantomKnight : CEntity_Effect
         }
 
         CanNotDestroyedByBattleClass canNotDestroyedByBattleClass = new CanNotDestroyedByBattleClass();
-        canNotDestroyedByBattleClass.SetUpICardEffect("カルネージフォーム", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
+        canNotDestroyedByBattleClass.SetUpICardEffect("カルネージフォーム","", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
         canNotDestroyedByBattleClass.SetUpCanNotDestroyedByBattleClass((AttackingUnit) => AttackingUnit.Character.Owner == card.Owner.Enemy, (DefendingUnit) => DefendingUnit == card.UnitContainingThisCharacter());
         canNotDestroyedByBattleClass.SetCF();
         cardEffects.Add(canNotDestroyedByBattleClass);
@@ -118,7 +114,7 @@ public class Doga_SolidFantomKnight : CEntity_Effect
     }
 
     #region 幻影の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         string _masterUnitName = "源まもり";
 
@@ -126,14 +122,10 @@ public class Doga_SolidFantomKnight : CEntity_Effect
 
         if (timing == EffectTiming.OnDiscardSuppot)
         {
-            activateClass_Support[0].SetUpICardEffect("幻影の紋章", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine(_masterUnitName));
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Mirage Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("幻影の紋章", "Mirage Emblem", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true, card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine(_masterUnitName));
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -188,7 +180,7 @@ public class Doga_SolidFantomKnight : CEntity_Effect
 
                     card.Owner.SupportHandCard.gameObject.SetActive(false);
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass_Support[0]);
+                    hashtable.Add("cardEffect", activateClass_Support);
                     yield return StartCoroutine(new IPlayUnit(card, null, isFront, true, hashtable, false).PlayUnit());
                     card.Owner.SupportCards = new List<CardSource>();
                 }

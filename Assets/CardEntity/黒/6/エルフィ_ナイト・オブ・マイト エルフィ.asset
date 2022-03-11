@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30A8\u30EB\u30D5\u30A3_\u30CA\u30A4\u30C8\u30FB\u30AA\u30D6\u30FB\u30DE\u30A4\u30C8
+    \u30A8\u30EB\u30D5\u30A3"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 275888b8b19a0274ea88105ed5413b7c, type: 3}
+  CardImage_English: {fileID: 21300000, guid: f1dc1110f1e2771418067d9e85da5135, type: 3}
+  CardName: "\u30CA\u30A4\u30C8\u30FB\u30AA\u30D6\u30FB\u30DE\u30A4\u30C8 \u30A8\u30EB\u30D5\u30A3"
+  UnitName: "\u30A8\u30EB\u30D5\u30A3"
+  UnitName_English: Effie
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 06000000
+  Power: 60
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 1
+  Weapons: 01000000080000000a000000
+  ClassName: Elfie_KnightOfMight
+  SkillNames:
+  - "\u525B\u8155\u65CB\u98A8"
+  - "\u91CD\u88C5\u306E\u9A0E\u58EB"
+  SupportSkillNames: []
+  CardID: 694
+  MaxCountInDeck: 4

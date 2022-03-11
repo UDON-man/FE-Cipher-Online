@@ -6,28 +6,24 @@ using System.Linq;
 
 public class Yuzu_PurpleLightningArcher : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("飛行特効", (enemyUnit, Power) => Power + 30, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Wing), PowerUpByEnemy.Mode.Attacking);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("飛行特効", (enemyUnit, Power) => Power + 30, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Wing), PowerUpByEnemy.Mode.Attacking,card);
         cardEffects.Add(powerUpByEnemy);
 
         if (timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[0].SetUpICardEffect("撹乱射撃", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Disruptive Fire";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("撹乱射撃", "Disruptive Fire", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -62,19 +58,16 @@ public class Yuzu_PurpleLightningArcher : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect:activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }
 
-            activateClass[1].SetUpICardEffect("智将の才覚", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition2 }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine2());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Skillful General";
-            }
+            ActivateClass activateClass1 = new ActivateClass();
+            activateClass1.SetUpICardEffect("智将の才覚", "Skillful General", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition2 }, -1, false,card);
+            activateClass1.SetUpActivateClass((hashtable) => ActivateCoroutine2());
+            cardEffects.Add(activateClass1);
 
             bool CanUseCondition2(Hashtable hashtable)
             {
@@ -89,6 +82,7 @@ public class Yuzu_PurpleLightningArcher : CEntity_Effect
                     }
 
                 }
+
                 return false;
             }
 
@@ -100,5 +94,4 @@ public class Yuzu_PurpleLightningArcher : CEntity_Effect
 
         return cardEffects;
     }
-
 }

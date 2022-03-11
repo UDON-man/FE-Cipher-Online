@@ -1,0 +1,68 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System;
+
+public class Holyn_IndomitableGladiator : CEntity_Effect
+{
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
+    {
+        List<ICardEffect> cardEffects = new List<ICardEffect>();
+
+        PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("闘士の矜持", (enemyUnit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit == card.Owner.Enemy.Lord, PowerUpByEnemy.Mode.Both,card);
+        cardEffects.Add(powerUpByEnemy);
+
+        CanNotAttackClass canNotAttackClass = new CanNotAttackClass();
+        canNotAttackClass.SetUpICardEffect("倒すべき対戦者", "",new List<Cost>(), new List<Func<Hashtable, bool>>(), -1, false,card);
+        canNotAttackClass.SetUpCanNotAttackClass((Attacker) => Attacker == card.UnitContainingThisCharacter(), (Defender) => Defender != card.Owner.Enemy.Lord);
+        cardEffects.Add(canNotAttackClass);
+
+        return cardEffects;
+    }
+
+    #region 攻撃の紋章
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
+    {
+        List<ICardEffect> supportEffects = new List<ICardEffect>();
+
+        if (timing == EffectTiming.OnSetSupport)
+        {
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("攻撃の紋章", "Attack Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
+
+            bool CanUseCondition(Hashtable hashtable)
+            {
+                if (card.Owner.SupportCards.Contains(card))
+                {
+                    if (GManager.instance.turnStateMachine.AttackingUnit != null)
+                    {
+                        if (GManager.instance.turnStateMachine.AttackingUnit.Character != null)
+                        {
+                            if (GManager.instance.turnStateMachine.AttackingUnit.Character.Owner == card.Owner)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+
+            IEnumerator ActivateCoroutine()
+            {
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner == card.Owner, true);
+                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add((_timing) => powerUpClass);
+
+                yield return null;
+            }
+        }
+
+        return supportEffects;
+    }
+    #endregion
+}

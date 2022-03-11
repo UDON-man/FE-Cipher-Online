@@ -5,24 +5,20 @@ using System;
 
 public class Senerio_CoolSanbo : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("風の使い手", (enemyUnit, Power) => Power + 20, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Wing), PowerUpByEnemy.Mode.Attacking);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("風の使い手", (enemyUnit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Wing), PowerUpByEnemy.Mode.Attacking,card);
         cardEffects.Add(powerUpByEnemy);
 
         if (timing == EffectTiming.OnLevelUpAnyone)
         {
-            activateClass[0].SetUpICardEffect("力の活用", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Application of Abilities";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("力の活用", "Application of Abilities", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -34,11 +30,14 @@ public class Senerio_CoolSanbo : CEntity_Effect
                         {
                             Unit Unit = (Unit)hashtable["Unit"];
 
-                            if (Unit.Character.Owner == this.card.Owner)
+                            if(Unit.Character != null)
                             {
-                                if (Unit != this.card.UnitContainingThisCharacter())
+                                if (Unit.Character.Owner == card.Owner)
                                 {
-                                    return true;
+                                    if (Unit != card.UnitContainingThisCharacter())
+                                    {
+                                        return true;
+                                    }
                                 }
                             }
                         }
@@ -67,7 +66,8 @@ public class Senerio_CoolSanbo : CEntity_Effect
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Discard);
+                        mode: SelectHandEffect.Mode.Discard,
+                        cardEffect: activateClass);
 
                     yield return StartCoroutine(selectHandEffect.Activate(null));
                 }

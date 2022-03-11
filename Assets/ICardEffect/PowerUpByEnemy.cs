@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using System.Linq;
 
-public class PowerUpByEnemy : ICardEffect, IChangePowerCardEffect
+public class PowerUpByEnemy : ICardEffect, IPowerModifyCardEffect
 {
     public enum Mode
     {
@@ -18,13 +18,14 @@ public class PowerUpByEnemy : ICardEffect, IChangePowerCardEffect
     Func<Unit, bool> EnemyUnitCondition { get; set; }
     Mode mode { get; set; }
 
-    public void SetUpPowerUpByEnemyWeapon(string EffectName, Func<Unit,int ,int> PlusPower,Func<Unit,bool> CanTargetCondition, Func<Unit, bool> EnemyUnitCondition, Mode mode)
+    public void SetUpPowerUpByEnemyWeapon(string EffectName, Func<Unit,int ,int> PlusPower,Func<Unit,bool> CanTargetCondition, Func<Unit, bool> EnemyUnitCondition, Mode mode,CardSource card)
     {
         this.EffectName = EffectName;
         this.PlusPower = PlusPower;
         this.CanTargetCondition = CanTargetCondition;
         this.EnemyUnitCondition = EnemyUnitCondition;
         this.mode = mode;
+        this._card = card;
     }
 
     public int GetPower(int Power, Unit unit)
@@ -89,5 +90,10 @@ public class PowerUpByEnemy : ICardEffect, IChangePowerCardEffect
         }
 
         return Power;
+    }
+
+    public bool isUpDown()
+    {
+        return true;
     }
 }

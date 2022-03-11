@@ -370,56 +370,53 @@ public class Player : MonoBehaviour
     #region プレイヤーにかかる効果
 
     #region プレイヤーに掛かっている全ての効果
-    public List<ICardEffect> PlayerEffects
+    public List<ICardEffect> PlayerEffects(EffectTiming timing)
     {
-        get
-        {
-            List<ICardEffect> PlayerEffects = new List<ICardEffect>();
+        List<ICardEffect> PlayerEffects = new List<ICardEffect>();
 
-            if(UntilEndBattleEffects != null)
+        foreach (Func<EffectTiming, ICardEffect> GetCardEffect in UntilEndBattleEffects)
+        {
+            if (GetCardEffect(timing) != null)
             {
-                foreach (ICardEffect cardEffect in UntilEndBattleEffects)
-                {
-                    PlayerEffects.Add(cardEffect);
-                }
+                PlayerEffects.Add(GetCardEffect(timing));
             }
-            
-            if(UntilTurnEndEffects != null)
-            {
-                foreach (ICardEffect cardEffect in UntilTurnEndEffects)
-                {
-                    PlayerEffects.Add(cardEffect);
-                }
-            }
-            
-            if(UntilOpponentTurnEndEffects != null)
-            {
-                foreach (ICardEffect cardEffect in UntilOpponentTurnEndEffects)
-                {
-                    PlayerEffects.Add(cardEffect);
-                }
-            }
-            
-            return PlayerEffects;
         }
+
+        foreach (Func<EffectTiming, ICardEffect> GetCardEffect in UntilEachTurnEndEffects)
+        {
+            if (GetCardEffect(timing) != null)
+            {
+                PlayerEffects.Add(GetCardEffect(timing));
+            }
+        }
+
+        foreach (Func<EffectTiming, ICardEffect> GetCardEffect in UntilOpponentTurnEndEffects)
+        {
+            if (GetCardEffect(timing) != null)
+            {
+                PlayerEffects.Add(GetCardEffect(timing));
+            }
+        }
+
+        foreach(ICardEffect cardEffect in PlayerEffects)
+        {
+            cardEffect._card = Lord.Character;
+        }
+
+        return PlayerEffects;
     }
     #endregion
 
     #region 攻撃終了時に消える、プレイヤーに掛かる効果
-    public List<ICardEffect> UntilEndBattleEffects = new List<ICardEffect>();
+    public List<Func<EffectTiming, ICardEffect>> UntilEndBattleEffects = new List<Func<EffectTiming, ICardEffect>>();
     #endregion
 
     #region ターン終了時に消える、プレイヤーに掛かる効果
-    public List<ICardEffect> UntilTurnEndEffects = new List<ICardEffect>();
+    public List<Func<EffectTiming, ICardEffect>> UntilEachTurnEndEffects = new List<Func<EffectTiming, ICardEffect>>();
     #endregion
 
     #region 相手のターン終了時に消える、プレイヤーに掛かる効果
-    public List<ICardEffect> UntilOpponentTurnEndEffects = new List<ICardEffect>();
-    #endregion
-
-    #region ターン終了時に消える、ターン終了時の効果
-    //public List<ICardEffect> OnTurnEndEffects = new List<ICardEffect>();
-    public List<Func<EffectTiming, ActivateICardEffect>> UntilTurnEndActions = new List<Func<EffectTiming, ActivateICardEffect>>();
+    public List<Func<EffectTiming, ICardEffect>> UntilOpponentTurnEndEffects = new List<Func<EffectTiming, ICardEffect>>();
     #endregion
 
     #endregion

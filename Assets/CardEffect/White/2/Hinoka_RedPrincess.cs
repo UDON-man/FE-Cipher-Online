@@ -6,7 +6,7 @@ using System.Linq;
 
 public class Hinoka_RedPrincess : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
@@ -25,14 +25,10 @@ public class Hinoka_RedPrincess : CEntity_Effect
                 }
             }
 
-            activateClass[0].SetUpICardEffect("叱咤激励", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, maxCount, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Rallying Cry";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("叱咤激励", "Rallying Cry", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, maxCount, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -48,15 +44,16 @@ public class Hinoka_RedPrincess : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Custom);
+                    mode: SelectUnitEffect.Mode.Custom,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
                 IEnumerator SelectUnitCoroutine(Unit unit)
                 {
-                    PowerUpClass powerUpClass = new PowerUpClass();
-                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 30, (_unit) => _unit == unit);
-                    unit.UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                    PowerModifyClass powerUpClass = new PowerModifyClass();
+                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 30, (_unit) => _unit == unit, true);
+                    unit.UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                     yield return null;
                 }
@@ -64,7 +61,7 @@ public class Hinoka_RedPrincess : CEntity_Effect
         }
 
         ChangeCCCostClass changeCCCostClass = new ChangeCCCostClass();
-        changeCCCostClass.SetUpICardEffect("護りの騎手", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
+        changeCCCostClass.SetUpICardEffect("護りの騎手", "",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
         changeCCCostClass.SetUpChangeCCCostClass((cardSource,targetUnit,CCCost) => 2, (cardSource) => cardSource == card);
         cardEffects.Add(changeCCCostClass);
 

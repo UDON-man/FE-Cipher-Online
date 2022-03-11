@@ -40,19 +40,19 @@ public class Unit
     #endregion
 
     #region 自分のターン終了時にリセットされる効果
-    public List<ICardEffect> UntilOwnerTurnEndUnitEffects = new List<ICardEffect>();
+    public List<Func<EffectTiming, ICardEffect>> UntilOwnerTurnEndUnitEffects = new List<Func<EffectTiming, ICardEffect>>();
     #endregion
 
     #region お互いのターン終了時にリセットされる効果
-    public List<ICardEffect> UntilEachTurnEndUnitEffects = new List<ICardEffect>();
+    public List<Func<EffectTiming,ICardEffect>> UntilEachTurnEndUnitEffects = new List<Func<EffectTiming, ICardEffect>>();
     #endregion
 
     #region 相手ターン終了時にリセットされる効果
-    public List<ICardEffect> UntilOpponentTurnEndEffects = new List<ICardEffect>();
+    public List<Func<EffectTiming, ICardEffect>> UntilOpponentTurnEndEffects = new List<Func<EffectTiming, ICardEffect>>();
     #endregion
 
     #region 攻撃終了時にリセットされる効果
-    public List<ICardEffect> UntilEndBattleEffects = new List<ICardEffect>();
+    public List<Func<EffectTiming, ICardEffect>> UntilEndBattleEffects = new List<Func<EffectTiming, ICardEffect>>();
     #endregion
 
     #region 武器
@@ -82,57 +82,81 @@ public class Unit
         {
             int power = 0;
 
-            if(Character != null)
+            if (Character != null)
             {
                 power = Character.cEntity_Base.Power;
 
-                #region ターン終了時までの効果
-                foreach(Player player in GManager.instance.turnStateMachine.gameContext.Players)
-                {
-                    foreach(Unit unit in player.FieldUnit)
-                    {
-                        foreach (ICardEffect cardEffect in unit.UntilEachTurnEndUnitEffects)
-                        {
-                            if (cardEffect is IChangePowerCardEffect)
-                            {
-                                if (cardEffect.CanUse(null))
-                                {
-                                    power = ((IChangePowerCardEffect)cardEffect).GetPower(power, this);
-                                }
+                List<IPowerModifyCardEffect> powerModifyCardEffects = new List<IPowerModifyCardEffect>();
+                List<IPowerModifyCardEffect> powerModifyCardEffects_UpDown = new List<IPowerModifyCardEffect>();
 
-                            }
-                        }
-                    }
-                }
-
-                #endregion
-
-                #region 相手ターン終了時までの効果
+                #region パワーを特定の値にさせる効果とパワーを上下させる効果に分類
                 foreach (Player player in GManager.instance.turnStateMachine.gameContext.Players)
                 {
+                    #region プレイヤーの効果
+                    foreach (ICardEffect cardEffect in player.PlayerEffects(EffectTiming.None))
+                    {
+                        if (cardEffect is IPowerModifyCardEffect)
+                        {
+                            if (cardEffect.CanUse(null))
+                            {
+                                IPowerModifyCardEffect powerModifyCardEffect = (IPowerModifyCardEffect)cardEffect;
+
+                                if (!powerModifyCardEffect.isUpDown())
+                                {
+                                    powerModifyCardEffects.Add(powerModifyCardEffect);
+                                }
+
+                                else
+                                {
+                                    powerModifyCardEffects_UpDown.Add(powerModifyCardEffect);
+                                }
+                            }
+
+                        }
+                    }
+                    #endregion
+
+                    #region ユニットの効果
                     foreach (Unit unit in player.FieldUnit)
                     {
-                        foreach (ICardEffect cardEffect in unit.UntilOpponentTurnEndEffects)
+                        foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.None))
                         {
-                            if (cardEffect is IChangePowerCardEffect)
+                            if (cardEffect is IPowerModifyCardEffect)
                             {
                                 if (cardEffect.CanUse(null))
                                 {
-                                    power = ((IChangePowerCardEffect)cardEffect).GetPower(power, this);
+                                    IPowerModifyCardEffect powerModifyCardEffect = (IPowerModifyCardEffect)cardEffect;
+
+                                    if (!powerModifyCardEffect.isUpDown())
+                                    {
+                                        powerModifyCardEffects.Add(powerModifyCardEffect);
+                                    }
+
+                                    else
+                                    {
+                                        powerModifyCardEffects_UpDown.Add(powerModifyCardEffect);
+                                    }
                                 }
                             }
                         }
                     }
+                    #endregion
                 }
-                
                 #endregion
 
-                #region 支援
+                #region パワーを特定の値にさせる効果
+                foreach (IPowerModifyCardEffect powerModifyCardEffect in powerModifyCardEffects)
+                {
+                    power = powerModifyCardEffect.GetPower(power, this);
+                }
+                #endregion
+
+                #region 支援値を足す
                 if (GManager.instance != null)
                 {
-                    if(GManager.instance.turnStateMachine != null)
+                    if (GManager.instance.turnStateMachine != null)
                     {
-                        if(GManager.instance.turnStateMachine.AttackingUnit == this || GManager.instance.turnStateMachine.DefendingUnit == this)
+                        if (GManager.instance.turnStateMachine.AttackingUnit == this || GManager.instance.turnStateMachine.DefendingUnit == this)
                         {
                             foreach (CardSource SupportCard in Character.Owner.SupportCards)
                             {
@@ -146,82 +170,10 @@ public class Unit
                 }
                 #endregion
 
-                #region 支援スキル
-                if (GManager.instance != null)
+                #region パワーを上下させる効果(必殺攻撃含む)
+                foreach (IPowerModifyCardEffect powerModifyCardEffect in powerModifyCardEffects_UpDown)
                 {
-                    if (GManager.instance.turnStateMachine != null)
-                    {
-                        if (GManager.instance.turnStateMachine.AttackingUnit == this || GManager.instance.turnStateMachine.DefendingUnit == this)
-                        {
-                            foreach (CardSource SupportCard in Character.Owner.SupportCards)
-                            {
-                                if (!this.CanNotSupportThisUnit(SupportCard))
-                                {
-                                    foreach(ICardEffect cardEffect in SupportCard.cEntity_EffectController.GetSupportEffects(EffectTiming.None))
-                                    {
-                                        if (cardEffect is IChangePowerCardEffect)
-                                        {
-                                            if (cardEffect.CanUse(null))
-                                            {
-                                                power = ((IChangePowerCardEffect)cardEffect).GetPower(power, this);
-                                            }
-                                                
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                #endregion
-
-                #region プレイヤーにかかる効果
-                foreach (Player player in GManager.instance.turnStateMachine.gameContext.Players)
-                {
-                    foreach(ICardEffect cardEffect in player.PlayerEffects)
-                    {
-                        if (cardEffect is IChangePowerCardEffect)
-                        {
-                            if (cardEffect.CanUse(null))
-                            {
-                                power = ((IChangePowerCardEffect)cardEffect).GetPower(power, this);
-                            }
-                                
-                        }
-                    }
-                }
-                #endregion
-
-                #region スキルの効果
-                foreach (Player player in GManager.instance.turnStateMachine.gameContext.Players)
-                {
-                    foreach(Unit unit in player.FieldUnit)
-                    {
-                        foreach(ICardEffect cardEffect in unit.Character.cEntity_EffectController.GetCardEffects(EffectTiming.None))
-                        {
-                            if (cardEffect is IChangePowerCardEffect)
-                            {
-                                if(cardEffect.CanUse(null))
-                                {
-                                    power = ((IChangePowerCardEffect)cardEffect).GetPower(power, this);
-                                }
-                            }
-                        }
-                    }
-                }
-                #endregion
-
-                #region バトル終了時までの効果(必殺攻撃含む)
-                foreach (ICardEffect cardEffect in UntilEndBattleEffects)
-                {
-                    if (cardEffect is IChangePowerCardEffect)
-                    {
-                        if (cardEffect.CanUse(null))
-                        {
-                            power = ((IChangePowerCardEffect)cardEffect).GetPower(power, this);
-                        }
-                           
-                    }
+                    power = powerModifyCardEffect.GetPower(power, this);
                 }
                 #endregion
             }
@@ -241,40 +193,32 @@ public class Unit
     {
         get
         {
-            #region 敵の支援カードの効果
-            foreach (CardSource cardSource in Character.Owner.Enemy.SupportCards)
+            if(Character == null)
             {
-                foreach(ICardEffect cardEffect in cardSource.cEntity_EffectController.GetSupportEffects(EffectTiming.None))
+                return false;
+            }
+
+            #region 場のユニットの効果
+            foreach(Player player in GManager.instance.turnStateMachine.gameContext.Players)
+            {
+                foreach(Unit unit in player.FieldUnit)
                 {
-                    if (cardEffect is ICanNotCriticalCardEffect)
+                    foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.None))
                     {
-                        if (cardEffect.CanUse(null))
+                        if (cardEffect is ICanNotCriticalCardEffect)
                         {
-                            if (((ICanNotCriticalCardEffect)cardEffect).CanNotCritical(this))
+                            if (cardEffect.CanUse(null))
                             {
-                                return false;
+                                if (((ICanNotCriticalCardEffect)cardEffect).CanNotCritical(this))
+                                {
+                                    return false;
+                                }
                             }
                         }
-
                     }
                 }
             }
-            #endregion
-
-            #region 自身の効果
-            foreach (ICardEffect cardEffect in EffectList(EffectTiming.None))
-            {
-                if (cardEffect is ICanNotCriticalCardEffect)
-                {
-                    if (cardEffect.CanUse(null))
-                    {
-                        if (((ICanNotCriticalCardEffect)cardEffect).CanNotCritical(this))
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
+            
             #endregion
 
             return true;
@@ -342,44 +286,49 @@ public class Unit
         {
             int strike = 1;
 
-            foreach (ICardEffect effect in EffectList(EffectTiming.None))
-            {
-                if (effect is IChangeDamageCardEffect)
-                {
-                    if(effect.CanUse(null))
-                    {
-                        strike = ((IChangeDamageCardEffect)effect).GetDamage(strike, this);
-                    }
-                    
-                }
-            }
+            List<IStrikeModifyCardEffect> strikeModifyCardEffects = new List<IStrikeModifyCardEffect>();
+            List<IStrikeModifyCardEffect> strikeModifyCardEffects_UpDown = new List<IStrikeModifyCardEffect>();
 
-            #region 支援スキル
-            if (GManager.instance != null)
+            #region ダメージを特定の値にさせる効果とダメージを上下させる効果に分類
+            foreach (Player player in GManager.instance.turnStateMachine.gameContext.Players)
             {
-                if (GManager.instance.turnStateMachine != null)
+                foreach (Unit unit in player.FieldUnit)
                 {
-                    if (GManager.instance.turnStateMachine.AttackingUnit == this || GManager.instance.turnStateMachine.DefendingUnit == this)
+                    foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.None))
                     {
-                        foreach (CardSource SupportCard in Character.Owner.SupportCards)
+                        if (cardEffect is IStrikeModifyCardEffect)
                         {
-                            if (!this.CanNotSupportThisUnit(SupportCard))
+                            if (cardEffect.CanUse(null))
                             {
-                                foreach (ICardEffect cardEffect in SupportCard.cEntity_EffectController.GetSupportEffects(EffectTiming.None))
+                                IStrikeModifyCardEffect strikeModifyCardEffect = (IStrikeModifyCardEffect)cardEffect;
+
+                                if(!strikeModifyCardEffect.isUpDown())
                                 {
-                                    if (cardEffect is IChangeDamageCardEffect)
-                                    {
-                                        if(cardEffect.CanUse(null))
-                                        {
-                                            strike = ((IChangeDamageCardEffect)cardEffect).GetDamage(strike, this);
-                                        }
-                                        
-                                    }
+                                    strikeModifyCardEffects.Add(strikeModifyCardEffect);
+                                }
+
+                                else
+                                {
+                                    strikeModifyCardEffects_UpDown.Add(strikeModifyCardEffect);
                                 }
                             }
                         }
                     }
                 }
+            }
+            #endregion
+
+            #region ダメージを特定の値にさせる効果
+            foreach (StrikeModifyClass strikeModifyClass in strikeModifyCardEffects)
+            {
+                strike = strikeModifyClass.GetDamage(strike, this);
+            }
+            #endregion
+
+            #region ダメージを上下させる効果
+            foreach (StrikeModifyClass strikeModifyClass in strikeModifyCardEffects_UpDown)
+            {
+                strike = strikeModifyClass.GetDamage(strike, this);
             }
             #endregion
 
@@ -399,29 +348,60 @@ public class Unit
 
         if (Character != null)
         {
-            foreach (ICardEffect cardEffect in UntilOwnerTurnEndUnitEffects)
-            {
-                _EffectList.Add(cardEffect);
-            }
-
-            foreach (ICardEffect cardEffect in UntilEachTurnEndUnitEffects)
-            {
-                _EffectList.Add(cardEffect);
-            }
-
-            foreach (ICardEffect cardEffect in UntilEndBattleEffects)
-            {
-                _EffectList.Add(cardEffect);
-            }
-
-            foreach (ICardEffect cardEffect in UntilOpponentTurnEndEffects)
-            {
-                _EffectList.Add(cardEffect);
-            }
-
             foreach (ICardEffect cardEffect in Character.cEntity_EffectController.GetCardEffects(timing))
             {
-                _EffectList.Add(cardEffect);
+                if (cardEffect != null)
+                {
+                    _EffectList.Add(cardEffect);
+                }
+            }
+
+            foreach (Func<EffectTiming, ICardEffect> GetCardEffect in UntilOwnerTurnEndUnitEffects)
+            {
+                ICardEffect cardEffect = GetCardEffect(timing);
+
+                if(cardEffect != null)
+                {
+                    _EffectList.Add(cardEffect);
+                }
+            }
+
+            foreach (Func<EffectTiming, ICardEffect> GetCardEffect in UntilEachTurnEndUnitEffects)
+            {
+                ICardEffect cardEffect = GetCardEffect(timing);
+
+                if (cardEffect != null)
+                {
+                    _EffectList.Add(cardEffect);
+                }
+            }
+
+            foreach (Func<EffectTiming, ICardEffect> GetCardEffect in UntilOpponentTurnEndEffects)
+            {
+                ICardEffect cardEffect = GetCardEffect(timing);
+
+                if (cardEffect != null)
+                {
+                    _EffectList.Add(cardEffect);
+                }
+            }
+
+            foreach (Func<EffectTiming, ICardEffect> GetCardEffect in UntilEndBattleEffects)
+            {
+                ICardEffect cardEffect = GetCardEffect(timing);
+
+                if (cardEffect != null)
+                {
+                    _EffectList.Add(cardEffect);
+                }
+            }
+
+            foreach(ICardEffect cardEffect in _EffectList)
+            {
+                if(cardEffect != null)
+                {
+                    cardEffect._card = this.Character;
+                }
             }
         }
 
@@ -429,11 +409,47 @@ public class Unit
     }
     #endregion
 
+    #region 移動できるか(スキル・行動フェイズ問わず)
+    public bool CanMove
+    {
+        get
+        {
+            foreach (Player player in GManager.instance.turnStateMachine.gameContext.Players)
+            {
+                foreach (Unit unit in player.FieldUnit)
+                {
+                    foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.None))
+                    {
+                        if (cardEffect is ICanNotMoveEffect)
+                        {
+                            if (cardEffect.CanUse(null))
+                            {
+                                if (((ICanNotMoveEffect)cardEffect).CanNotMove(this))
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+    }
+
+    #endregion
+
     #region スキルの効果で移動できるか
     public bool CanMoveBySkill
     {
         get
         {
+            if(!CanMove)
+            {
+                return false;
+            }
+
             foreach(Player player in GManager.instance.turnStateMachine.gameContext.Players)
             {
                 foreach(Unit unit in player.FieldUnit)
@@ -464,6 +480,11 @@ public class Unit
     {
         get
         {
+            if(!CanMove)
+            {
+                return false;
+            }
+
             if(this.IsTapped)
             {
                 return false;
@@ -574,33 +595,9 @@ public class Unit
 
     #region 起動効果を宣言できる
     #region 宣言できる起動効果が一つでもある
-    public bool CanDeclareSkill(Hashtable hash)
+    public bool CanDeclareSkill()
     {
-        return CanDeclareSkillList(hash).Count > 0;
-    }
-    #endregion
-
-    #region その起動効果を宣言できる
-    public bool CanDeclareThisSkill(ICardEffect cardEffect,Hashtable hash)
-    {
-        if (Character != null)
-        {
-            foreach (ICardEffect _cardEffect in Character.cEntity_EffectController.GetCardEffects(EffectTiming.OnDeclaration))
-            {
-                if (_cardEffect is ActivateICardEffect)
-                {
-                    if(_cardEffect == cardEffect)
-                    {
-                        if (cardEffect.CanUse(hash))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
+        return CanDeclareSkillList(null).Count > 0;
     }
     #endregion
 
@@ -611,11 +608,14 @@ public class Unit
 
         if (Character != null)
         {
-            foreach (ICardEffect _cardEffect in Character.cEntity_EffectController.GetCardEffects(EffectTiming.OnDeclaration))
+            foreach (ICardEffect _cardEffect in EffectList(EffectTiming.OnDeclaration))
             {
-                if (CanDeclareThisSkill(_cardEffect,hash))
+                if(_cardEffect is ActivateICardEffect)
                 {
-                    CanDeclareSkillList.Add(_cardEffect);
+                    if (_cardEffect.CanUse(hash) && !_cardEffect.isBS)
+                    {
+                        CanDeclareSkillList.Add(_cardEffect);
+                    }
                 }
             }
         }
@@ -889,6 +889,40 @@ public class Unit
     }
     #endregion
 
+    #region このユニットがスキルのコストで撃破されないか
+    public bool CanNotDestroyedByCost
+    {
+        get
+        {
+            bool CanNotDestroyed = false;
+
+            foreach (Player player in GManager.instance.turnStateMachine.gameContext.Players)
+            {
+                foreach (Unit unit in player.FieldUnit)
+                {
+                    foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.None))
+                    {
+                        if (cardEffect is ICanNotDestroyedByCost)
+                        {
+                            if (cardEffect.CanUse(null))
+                            {
+                                bool _CanNotDestroy = ((ICanNotDestroyedByCost)cardEffect).CanNotDestroyedByCost(this);
+
+                                if (_CanNotDestroy)
+                                {
+                                    CanNotDestroyed = _CanNotDestroy;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return CanNotDestroyed;
+        }
+    }
+    #endregion
+
     #region このユニットが対象の効果で撃破されないか
     public bool CanNotDestroyedBySkill(ICardEffect skill)
     {
@@ -904,7 +938,7 @@ public class Unit
                     {
                         if (cardEffect.CanUse(null))
                         {
-                            bool _CanNotDestroy = ((ICanNotDestroyedBySkill)cardEffect).CanNotDestroyedBySkill(unit,skill);
+                            bool _CanNotDestroy = ((ICanNotDestroyedBySkill)cardEffect).CanNotDestroyedBySkill(this,skill);
 
                             if (_CanNotDestroy)
                             {
@@ -917,6 +951,33 @@ public class Unit
         }
 
         return CanNotDestroyed;
+    }
+    #endregion
+
+    #region　このユニットがターン開始時にアンタップ去れるか
+    public bool CanUnTapOnStartTurn
+    {
+        get
+        {
+            foreach(Player player in GManager.instance.turnStateMachine.gameContext.Players)
+            {
+                foreach (Unit unit in player.FieldUnit)
+                {
+                    foreach(ICardEffect cardEffect in unit.EffectList(EffectTiming.None))
+                    {
+                        if(cardEffect is ICanNotUntapOnStartTurnEffect)
+                        {
+                            if(((ICanNotUntapOnStartTurnEffect)cardEffect).CanNotUntapOnStartTurn(this))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return true;
+        }
     }
     #endregion
 }

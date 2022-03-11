@@ -6,20 +6,16 @@ using System.Linq;
 
 public class Ike_CrimiaBraveHero : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnLevelUpAnyone)
         {
-            activateClass[0].SetUpICardEffect("勇将の進撃", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Liberation Sortie";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("勇将の進撃", "Liberation Sortie", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -31,11 +27,14 @@ public class Ike_CrimiaBraveHero : CEntity_Effect
                         {
                             Unit Unit = (Unit)hashtable["Unit"];
 
-                            if (Unit.Character.Owner == this.card.Owner)
+                            if(Unit.Character != null)
                             {
-                                if (Unit != this.card.UnitContainingThisCharacter())
+                                if (Unit.Character.Owner == card.Owner)
                                 {
-                                    return true;
+                                    if (Unit != card.UnitContainingThisCharacter())
+                                    {
+                                        return true;
+                                    }
                                 }
                             }
                         }
@@ -47,9 +46,9 @@ public class Ike_CrimiaBraveHero : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                StrikeUpClass strikeUpClass = new StrikeUpClass();
-                strikeUpClass.SetUpStrikeUpClass((unit, Strike) => 2, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(strikeUpClass);
+                StrikeModifyClass strikeModifyClass = new StrikeModifyClass();
+                strikeModifyClass.SetUpStrikeModifyClass((unit, Strike) => 2, (unit) => unit == card.UnitContainingThisCharacter(), false);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => strikeModifyClass);
 
                 yield return null;
             }
@@ -57,15 +56,11 @@ public class Ike_CrimiaBraveHero : CEntity_Effect
 
         else if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[1].SetUpICardEffect("神剣ラグネル", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            activateClass[1].SetLvS(card.UnitContainingThisCharacter(), 3);
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Divine Blade Ragnell";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("神剣ラグネル", "Divine Blade Ragnell",new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            activateClass.SetLvS(card.UnitContainingThisCharacter(), 3);
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -84,7 +79,7 @@ public class Ike_CrimiaBraveHero : CEntity_Effect
             {
                 RangeUpClass rangeUpClass = new RangeUpClass();
                 rangeUpClass.SetUpRangeUpClass((unit, Range) => { Range.Add(1); Range.Add(2); return Range; }, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(rangeUpClass);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => rangeUpClass);
 
                 yield return null;
             }

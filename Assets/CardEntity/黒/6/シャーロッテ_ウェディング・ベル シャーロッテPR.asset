@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30B7\u30E3\u30FC\u30ED\u30C3\u30C6_\u30A6\u30A7\u30C7\u30A3\u30F3\u30B0\u30FB\u30D9\u30EB
+    \u30B7\u30E3\u30FC\u30ED\u30C3\u30C6PR"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 5a8dfd3c83cbb1947a6f9fa1dfc0bbe0, type: 3}
+  CardImage_English: {fileID: 21300000, guid: d8a481d5c12b6a94ab15b3f0d918730b, type: 3}
+  CardName: "\u30A6\u30A7\u30C7\u30A3\u30F3\u30B0\u30FB\u30D9\u30EB \u30B7\u30E3\u30FC\u30ED\u30C3\u30C6"
+  UnitName: "\u30B7\u30E3\u30FC\u30ED\u30C3\u30C6"
+  UnitName_English: Charlotte
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 06000000
+  Power: 50
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 1
+  Weapons: 02000000
+  ClassName: Challotte_WeddingBelle
+  SkillNames:
+  - "\u82B1\u5AC1\u306E\u5FC3\u5F97"
+  - "\u30DE\u30EA\u30FC\u30FB\u30DF\u30FC\uFF01"
+  SupportSkillNames: []
+  CardID: 741
+  MaxCountInDeck: 4

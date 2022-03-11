@@ -7,38 +7,59 @@ using Photon.Pun;
 
 public class Hardin_DarkEmperor : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("闇のオーブ", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Darksphere";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("闇のオーブ", "Darksphere",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine1()
             {
                 yield return ContinuousController.instance.StartCoroutine(CostCoroutine());
 
                 PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-                powerUpByEnemy.SetUpPowerUpByEnemyWeapon("", (enemyUnit, Power) => Power + 30, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit != enemyUnit.Character.Owner.Lord, PowerUpByEnemy.Mode.Defending);
-                card.UnitContainingThisCharacter().UntilOpponentTurnEndEffects.Add(powerUpByEnemy);
+                powerUpByEnemy.SetUpPowerUpByEnemyWeapon("", (enemyUnit, Power) => Power + 30, UnitCondition, enemyUnitCondition, PowerUpByEnemy.Mode.Defending, card);
+                card.UnitContainingThisCharacter().UntilOpponentTurnEndEffects.Add((_timing) => powerUpByEnemy);
+
+                bool UnitCondition(Unit unit)
+                {
+                    if(unit != null)
+                    {
+                        if (unit == card.UnitContainingThisCharacter())
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+
+                bool enemyUnitCondition(Unit enemyUnit)
+                {
+                    if(enemyUnit != null)
+                    {
+                        if (enemyUnit.Character != null)
+                        {
+                            if(enemyUnit != enemyUnit.Character.Owner.Lord)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+
+                    return false;
+                }
             }
 
-            activateClass[1].SetUpICardEffect("血染めの神槍", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine2());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Bloodstained Gradivus";
-            }
+            ActivateClass activateClass1 = new ActivateClass();
+            activateClass1.SetUpICardEffect("血染めの神槍", "Bloodstained Gradivus", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass1.SetUpActivateClass((hashtable) => ActivateCoroutine2());
+            cardEffects.Add(activateClass1);
 
             IEnumerator ActivateCoroutine2()
             {
@@ -56,7 +77,8 @@ public class Hardin_DarkEmperor : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: (targetUnits) => AfterSelectUnitCoroutine(targetUnits),
-                    mode: SelectUnitEffect.Mode.Custom);
+                    mode: SelectUnitEffect.Mode.Custom,
+                    cardEffect: activateClass1);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
@@ -64,11 +86,11 @@ public class Hardin_DarkEmperor : CEntity_Effect
                 {
                     List<IDestroyUnit> destroyUnits = new List<IDestroyUnit>();
 
-                    Hashtable _hashtable = new Hashtable();
-                    _hashtable.Add("cardEffect", selectUnitEffect);
-
-                    foreach(Unit unit in targetUnits)
+                    foreach (Unit unit in targetUnits)
                     {
+                        Hashtable _hashtable = new Hashtable();
+                        _hashtable.Add("cardEffect", activateClass1);
+                        _hashtable.Add("Unit", new Unit(unit.Characters));
                         IDestroyUnit destroyUnit = new IDestroyUnit(unit, 1, BreakOrbMode.Hand, _hashtable);
                         destroyUnits.Add(destroyUnit);
                         yield return ContinuousController.instance.StartCoroutine(destroyUnit.Destroy());
@@ -78,11 +100,11 @@ public class Hardin_DarkEmperor : CEntity_Effect
                     {
                         RangeUpClass rangeUpClass = new RangeUpClass();
                         rangeUpClass.SetUpRangeUpClass((unit, Range) => { Range.Add(1); Range.Add(2); return Range; }, (unit) => unit == card.UnitContainingThisCharacter());
-                        card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(rangeUpClass);
+                        card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => rangeUpClass);
 
-                        PowerUpClass powerUpClass = new PowerUpClass();
-                        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
-                        card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                        PowerModifyClass powerUpClass = new PowerModifyClass();
+                        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                        card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
                     }
                 }
             }
@@ -100,7 +122,7 @@ public class Hardin_DarkEmperor : CEntity_Effect
 
             bool CanPayDestroyCost()
             {
-                if (card.Owner.FieldUnit.Count((unit) => unit != card.UnitContainingThisCharacter() && !unit.CanNotDestroyedBySkill(GetComponent<SelectUnitEffect>())) > 0)
+                if (card.Owner.FieldUnit.Count((unit) => unit != card.UnitContainingThisCharacter() && !unit.CanNotDestroyedByCost) > 0)
                 {
                     return true;
                 }
@@ -127,7 +149,7 @@ public class Hardin_DarkEmperor : CEntity_Effect
 
                 selectUnitEffect.SetUp(
                     SelectPlayer: card.Owner,
-                    CanTargetCondition: (unit) => unit.Character.Owner == card.Owner && unit != card.UnitContainingThisCharacter() && !unit.CanNotDestroyedBySkill(GetComponent<SelectUnitEffect>()),
+                    CanTargetCondition: (unit) => unit.Character.Owner == card.Owner && unit != card.UnitContainingThisCharacter() && !unit.CanNotDestroyedByCost,
                     CanTargetCondition_ByPreSelecetedList: null,
                     CanEndSelectCondition: null,
                     MaxCount: 1,
@@ -135,7 +157,8 @@ public class Hardin_DarkEmperor : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Destroy);
+                    mode: SelectUnitEffect.Mode.Destroy,
+                    cardEffect:null);
 
                 //リバースコストしか払えない場合
                 if (CanPayReverseCost() && !CanPayDestroyCost())

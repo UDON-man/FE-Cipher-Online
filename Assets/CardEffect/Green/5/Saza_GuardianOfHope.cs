@@ -7,20 +7,16 @@ using Photon.Pun;
 
 public class Saza_GuardianOfHope : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[0].SetUpICardEffect("瞬殺", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine(hashtable));
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Bane";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("瞬殺", "Bane",new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine(hashtable));
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -36,7 +32,7 @@ public class Saza_GuardianOfHope : CEntity_Effect
                             {
                                 if (Unit.Character != null)
                                 {
-                                    if (Unit.Character.Owner != this.card.Owner)
+                                    if (Unit.Character.Owner != card.Owner)
                                     {
                                         if(GManager.instance.turnStateMachine.gameContext.NonTurnPlayer == card.Owner)
                                         {
@@ -66,13 +62,13 @@ public class Saza_GuardianOfHope : CEntity_Effect
                             {
                                 if (Unit.Character != null)
                                 {
-                                    if (Unit.Character.Owner != this.card.Owner)
+                                    if (Unit.Character.Owner != card.Owner)
                                     {
                                         if (GManager.instance.turnStateMachine.gameContext.NonTurnPlayer == card.Owner)
                                         {
                                             Hashtable hashtable1 = new Hashtable();
-                                            hashtable1.Add("cardEffect", activateClass[0]);
-
+                                            hashtable1.Add("cardEffect", activateClass);
+                                            hashtable1.Add("Unit", new Unit(Unit.Characters));
                                             yield return ContinuousController.instance.StartCoroutine(new IDestroyUnit(Unit, 1, BreakOrbMode.Hand, hashtable1).Destroy());
                                         }
                                     }
@@ -85,20 +81,16 @@ public class Saza_GuardianOfHope : CEntity_Effect
             }
         }
 
-        else if(timing == EffectTiming.OnDestroyDuringBattleAlly||timing == EffectTiming.OnDestroyedOther)
+        else if(timing == EffectTiming.OnDestroyDuringBattleAlly||timing == EffectTiming.OnDestroyedAnyone)
         {
-            activateClass[1].SetUpICardEffect("碧の護衛", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Green Shadow of Protection";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("碧の護衛", "Green Shadow of Protection", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if(timing == EffectTiming.OnDestroyDuringBattleAlly)
                     {
@@ -108,7 +100,7 @@ public class Saza_GuardianOfHope : CEntity_Effect
                         }
                     }
 
-                    else if(timing == EffectTiming.OnDestroyedOther)
+                    else if(timing == EffectTiming.OnDestroyedAnyone)
                     {
                         if (hashtable != null)
                         {
@@ -120,7 +112,7 @@ public class Saza_GuardianOfHope : CEntity_Effect
 
                                     if (cardEffect.card() != null)
                                     {
-                                        if (cardEffect.card() == this.card)
+                                        if (cardEffect.card() == card)
                                         {
                                             return true;
                                         }
@@ -146,7 +138,7 @@ public class Saza_GuardianOfHope : CEntity_Effect
                     CardSource cardSource = card.Owner.Enemy.LibraryCards[0];
 
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass[1]);
+                    hashtable.Add("cardEffect", activateClass);
                     yield return ContinuousController.instance.StartCoroutine(new IShowLibraryCard(new List<CardSource>() { cardSource }, hashtable, false).ShowLibraryCard());
 
                     if (card.Owner.isYou)

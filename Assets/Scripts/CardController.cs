@@ -13,7 +13,6 @@ public class ISetBondCard
         card = _card;
         isFace = _isFace;
     }
-
     CardSource card { get; set; }
 
     bool isFace { get; set; }
@@ -26,8 +25,41 @@ public class ISetBondCard
         //絆ゾーンにカードを追加
         yield return ContinuousController.instance.StartCoroutine(CardObjectController.SetBondCard(card));
 
-        //エフェクト
-        //yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().CreateFieldMajinCardEffect(majin.ShowingFieldMajinCard));
+        #region 絆ゾーンにカードが置かれた時の効果
+        List<SkillInfo> skillInfos = new List<SkillInfo>();
+        foreach (Player player in GManager.instance.turnStateMachine.gameContext.Players_ForTurnPlayer)
+        {
+            foreach (Unit unit in player.FieldUnit)
+            {
+                foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.OnSetBond))
+                {
+                    if (cardEffect is ActivateICardEffect)
+                    {
+                        Hashtable hashtable = new Hashtable();
+                        hashtable.Add("Card", card);
+                        if (cardEffect.CanUse(hashtable))
+                        {
+                            skillInfos.Add(new SkillInfo(cardEffect, hashtable));
+                        }
+                    }
+                }
+            }
+        }
+
+        foreach (ICardEffect cardEffect in card.cEntity_EffectController.GetBSCardEffect(EffectTiming.OnSetBond))
+        {
+            if (cardEffect is ActivateICardEffect)
+            {
+                Hashtable hashtable = new Hashtable();
+                hashtable.Add("Card", card);
+                if (cardEffect.CanUse(hashtable))
+                {
+                    skillInfos.Add(new SkillInfo(cardEffect, hashtable));
+                }
+            }
+        }
+        yield return ContinuousController.instance.StartCoroutine(GManager.instance.availableMultipleSkills.ActivateMultipleSkills(skillInfos));
+        #endregion
     }
 }
 #endregion
@@ -165,10 +197,17 @@ public class IPlayUnit
         //既に場に出ているユニットに重ねてプレイ
         else
         {
-            foreach(CardSource cardSource in targetUnit.Characters)
+            #region ユニットの効果をリセット
+            targetUnit.UntilEachTurnEndUnitEffects = new List<System.Func<EffectTiming, ICardEffect>>();
+            targetUnit.UntilEndBattleEffects = new List<System.Func<EffectTiming, ICardEffect>>();
+            targetUnit.UntilOpponentTurnEndEffects = new List<System.Func<EffectTiming, ICardEffect>>();
+            targetUnit.UntilOwnerTurnEndUnitEffects = new List<System.Func<EffectTiming, ICardEffect>>();
+
+            foreach (CardSource cardSource in targetUnit.Characters)
             {
                 cardSource.Init();
             }
+            #endregion
 
             #region HashTableを設定
             Hashtable _hashtable = new Hashtable();
@@ -193,8 +232,6 @@ public class IPlayUnit
             {
                 //エフェクト
                 yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().EvolutionFieldUnitCardEffect(card,targetUnit.ShowingFieldUnitCard));
-                //エフェクト
-                //yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().EvolutionFieldMajinCardEffect(card, targetUnit.ShowingFieldMajinCard));
             }
 
             bool HasCC = card.HasCC(targetUnit);
@@ -212,10 +249,11 @@ public class IPlayUnit
                 {
                     yield return new WaitForSeconds(0.1f);
 
-                    //CCボーナス
+                    #region CCボーナス
                     yield return ContinuousController.instance.StartCoroutine(new IDraw(targetUnit.Character.Owner, 1).Draw());
+                    #endregion
 
-                    //"他のユニットがCCした時"効果を使用
+                    #region 「ユニットがCCした時」効果
                     foreach (Player player in GManager.instance.turnStateMachine.gameContext.Players)
                     {
                         foreach (Unit _unit in player.FieldUnit)
@@ -232,9 +270,10 @@ public class IPlayUnit
                             }
                         }
                     }
+                    #endregion
                 }
 
-                //"他のユニットがレベルアップした時"効果を使用
+                #region 「ユニットがレベルアップした時」効果
                 foreach (Player player in GManager.instance.turnStateMachine.gameContext.Players)
                 {
                     foreach (Unit _unit in player.FieldUnit)
@@ -259,15 +298,14 @@ public class IPlayUnit
                         }
                     }
                 }
+                #endregion
 
                 yield return ContinuousController.instance.StartCoroutine(GManager.instance.availableMultipleSkills.ActivateMultipleSkills(skillInfos));
             }
             
         }
 
-        Debug.Log("ユニット設置終了待機開始");
         yield return GManager.instance.photonWaitController.StartWait("EndPlayUnit");
-        Debug.Log("ユニット設置終了待機終了");
     }
 }
 #endregion
@@ -424,7 +462,6 @@ public class IShowLibraryCard
                         if(cardEffect.CanUse(hashtable))
                         {
                             skillInfos.Add(new SkillInfo(cardEffect, hashtable));
-                            //yield return ContinuousController.instance.StartCoroutine(((ActivateICardEffect)cardEffect).Activate_Optional_Effect_Cost_Execute(hashtable));
                         }
                     }
                 }
@@ -524,7 +561,6 @@ public class IMoveUnitDuringAction
                 yield return ContinuousController.instance.StartCoroutine(targetUnit.Tap());
                 yield return ContinuousController.instance.StartCoroutine(new IMoveUnit(new List<Unit>() { targetUnit }, false,null).MoveUnits());
             }
-            
         }
     }
 
@@ -562,6 +598,11 @@ public class IMoveUnit
         {
             if (unit.Character != null)
             {
+                if(!unit.CanMove)
+                {
+                    continue;
+                }
+
                 if (isSkill && !unit.CanMoveBySkill)
                 {
                     continue;
@@ -775,6 +816,7 @@ public class IBattle
         {
             {"Attacker", _Attacker },
             {"Defender",_Defender },
+            {"Unit",_Defender },
         };
 
             BreakOrbMode breakOrbMode = BreakOrbMode.Hand;
@@ -783,74 +825,32 @@ public class IBattle
             #endregion
 
             //ユニットを撃破
-            yield return ContinuousController.instance.StartCoroutine(new IDestroyUnit(Defender, Attacker.Strike, breakOrbMode,null).Destroy());
+            yield return ContinuousController.instance.StartCoroutine(new IDestroyUnit(Defender, Attacker.Strike, breakOrbMode,_hashtable).Destroy());
 
             List<SkillInfo> skillInfos = new List<SkillInfo>();
 
-            skillInfos = new List<SkillInfo>();
-            //「味方が敵を撃破した時の効果」を発動
-            foreach (Unit unit in _Attacker.Character.Owner.FieldUnit)
+            #region 「戦闘終了時」能力
+
+            #region 攻撃側の「戦闘終了時」能力
+            if (GManager.instance.turnStateMachine.AttackingUnit != null)
             {
-                foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.OnDestroyDuringBattleAlly))
+                if (GManager.instance.turnStateMachine.AttackingUnit.Character != null)
                 {
-                    if (cardEffect is ActivateICardEffect)
+                    foreach (ICardEffect cardEffect in GManager.instance.turnStateMachine.AttackingUnit.EffectList(EffectTiming.OnEndBattle))
                     {
-                        if (cardEffect.CanUse(_hashtable))
+                        if (cardEffect is ActivateICardEffect)
                         {
-                            skillInfos.Add(new SkillInfo(cardEffect, _hashtable));
+                            if (cardEffect.CanUse(_hashtable))
+                            {
+                                skillInfos.Add(new SkillInfo(cardEffect, _hashtable));
+                            }
                         }
                     }
                 }
             }
-            yield return ContinuousController.instance.StartCoroutine(GManager.instance.availableMultipleSkills.ActivateMultipleSkills(skillInfos));
+            #endregion
 
-
-            //「味方が撃破された時の効果」を発動
-            skillInfos = new List<SkillInfo>();
-            foreach(ICardEffect cardEffect in _Defender.EffectList(EffectTiming.OnDestroyedDuringBattleAlly))
-            {
-                if (cardEffect is ActivateICardEffect)
-                {
-                    if (cardEffect.CanUse(_hashtable))
-                    {
-                        skillInfos.Add(new SkillInfo(cardEffect, _hashtable));
-                    }
-                }
-            }
-
-            foreach (Unit unit in _Defender.Character.Owner.FieldUnit)
-            {
-                foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.OnDestroyedDuringBattleAlly))
-                {
-                    if (cardEffect is ActivateICardEffect)
-                    {
-                        if (cardEffect.CanUse(_hashtable))
-                        {
-                            skillInfos.Add(new SkillInfo(cardEffect, _hashtable));
-                            //yield return ContinuousController.instance.StartCoroutine(((ActivateICardEffect)cardEffect).Activate_Effect_Optional_Cost_Execute(hash));
-                        }
-                    }
-                }
-            }
-            yield return ContinuousController.instance.StartCoroutine(GManager.instance.availableMultipleSkills.ActivateMultipleSkills(skillInfos));
-
-            //攻撃側のバトル終了時能力
-            skillInfos = new List<SkillInfo>();
-            foreach (ICardEffect cardEffect in GManager.instance.turnStateMachine.AttackingUnit.EffectList(EffectTiming.OnEndBattle))
-            {
-                if (cardEffect is ActivateICardEffect)
-                {
-                    if (cardEffect.CanUse(_hashtable))
-                    {
-                        skillInfos.Add(new SkillInfo(cardEffect, _hashtable));
-                        //yield return ContinuousController.instance.StartCoroutine(((ActivateICardEffect)cardEffect).Activate_Effect_Optional_Cost_Execute(hash));
-                    }
-                }
-            }
-            yield return ContinuousController.instance.StartCoroutine(GManager.instance.availableMultipleSkills.ActivateMultipleSkills(skillInfos));
-
-            //防御側のバトル終了時能力
-            skillInfos = new List<SkillInfo>();
+            #region 防御側の「戦闘終了時」能力
             if (GManager.instance.turnStateMachine.DefendingUnit != null)
             {
                 if(GManager.instance.turnStateMachine.DefendingUnit.Character != null)
@@ -862,12 +862,15 @@ public class IBattle
                             if (cardEffect.CanUse(_hashtable))
                             {
                                 skillInfos.Add(new SkillInfo(cardEffect, _hashtable));
-                                //yield return ContinuousController.instance.StartCoroutine(((ActivateICardEffect)cardEffect).Activate_Effect_Optional_Cost_Execute(hash));
                             }
                         }
                     }
                 }
             }
+            #endregion
+
+            #endregion
+
             yield return ContinuousController.instance.StartCoroutine(GManager.instance.availableMultipleSkills.ActivateMultipleSkills(skillInfos));
         }
     }
@@ -895,42 +898,73 @@ public class IDestroyUnit
     int breakOrbCount { get; set; }
     BreakOrbMode mode { get; set; }
     Hashtable hashtable { get; set; }
-
+    public bool Destroyed { get; set; } = false;
     public IEnumerator Destroy()
     {
-        #region スキルによる撃破で、スキル撃破されないなら処理終了
+        Unit _DestroyedUnit = new Unit(DestroyedUnit.Characters);
+
+        ICardEffect _cardEffect = null;
+
+        #region 撃破に使用されたスキルを取得
         if (hashtable != null)
         {
-            if (hashtable.ContainsKey("cardEffect"))
+            if(hashtable.ContainsKey("cardEffect"))
             {
-                if (hashtable["cardEffect"] is ICardEffect)
+                if(hashtable["cardEffect"] is ICardEffect)
                 {
-                    ICardEffect cardEffect = (ICardEffect)hashtable["cardEffect"];
-
-                    if(cardEffect != null)
+                    if((ICardEffect)hashtable["cardEffect"] != null)
                     {
-                        if(DestroyedUnit.CanNotDestroyedBySkill(cardEffect))
-                        {
-                            yield break;
-                        }
+                        _cardEffect = (ICardEffect)hashtable["cardEffect"];
                     }
                 }
             }
         }
         #endregion
 
+        Unit _Attacker = null;
+
+        #region 戦闘による撃破の場合、攻撃ユニットを取得
+        if (_cardEffect == null)
+        {
+            if (hashtable != null)
+            {
+                if (hashtable.ContainsKey("Attacker"))
+                {
+                    if (hashtable["Attacker"] is Unit)
+                    {
+                        _Attacker = (Unit)hashtable["Attacker"];
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region スキルによる撃破で、スキル撃破されないなら処理終了
+        if (_cardEffect != null)
+        {
+            if (DestroyedUnit.CanNotDestroyedBySkill(_cardEffect))
+            {
+                yield break;
+            }
+        }
+        #endregion
+
+        #region スキルによる撃破でなく、戦闘による撃破でもないなら(コストによる撃破)、コスト撃破されないなら処理終了
+        if(_cardEffect == null && _Attacker == null)
+        {
+            if(DestroyedUnit.CanNotDestroyedByCost)
+            {
+                yield break;
+            }
+        }
+        #endregion
+
+        //撃破されたフラグをオンにする
         Destroyed = true;
 
         #region 負けたユニットが主人公でなければカードを全て破棄
         if (DestroyedUnit != DestroyedUnit.Character.Owner.Lord)
         {
-            List<CardSource> DestroyedCharacters = new List<CardSource>();
-
-            foreach (CardSource cardSource in DestroyedUnit.Characters)
-            {
-                DestroyedCharacters.Add(cardSource);
-            }
-
             DestroyMode destroyMode = DestroyMode.Trash;
 
             #region 撃破したユニットを墓地以外の領域に送る効果
@@ -952,7 +986,7 @@ public class IDestroyUnit
             }
             #endregion
 
-            foreach (CardSource cardSource in DestroyedCharacters)
+            foreach (CardSource cardSource in _DestroyedUnit.Characters)
             {
                 switch (destroyMode)
                 {
@@ -994,25 +1028,97 @@ public class IDestroyUnit
 
         if(!GManager.instance.turnStateMachine.endGame)
         {
-            #region 「他のユニットが撃破された時」効果
+            #region 「ユニットが撃破された時」効果
             List<SkillInfo> skillInfos = new List<SkillInfo>();
+
+            #region 「このユニットが撃破された時」効果
+            foreach (ICardEffect cardEffect in _DestroyedUnit.EffectList(EffectTiming.OnDestroyedAnyone))
+            {
+                if (cardEffect is ActivateICardEffect)
+                {
+                    if (cardEffect.CanUse(hashtable))
+                    {
+                        skillInfos.Add(new SkillInfo(cardEffect, hashtable));
+                    }
+                }
+            }
+            #endregion
+
+            #region 「他のユニットが撃破された時」効果
             foreach (Player player in GManager.instance.turnStateMachine.gameContext.Players)
             {
                 foreach (Unit unit in player.FieldUnit)
                 {
-                    foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.OnDestroyedOther))
+                    foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.OnDestroyedAnyone))
                     {
                         if (cardEffect is ActivateICardEffect)
                         {
                             if (cardEffect.CanUse(hashtable))
                             {
                                 skillInfos.Add(new SkillInfo(cardEffect, hashtable));
-                                //yield return ContinuousController.instance.StartCoroutine(((ActivateICardEffect)cardEffect).Activate_Effect_Optional_Cost_Execute(hashtable));
                             }
                         }
                     }
                 }
             }
+            #endregion
+
+            #region 戦闘による撃破の場合
+            if (_cardEffect == null)
+            {
+                if(_Attacker != null)
+                {
+                    #region「味方が戦闘で撃破した時」効果
+                    foreach (Unit unit in _Attacker.Character.Owner.FieldUnit)
+                    {
+                        foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.OnDestroyDuringBattleAlly))
+                        {
+                            if (cardEffect is ActivateICardEffect)
+                            {
+                                if (cardEffect.CanUse(hashtable))
+                                {
+                                    skillInfos.Add(new SkillInfo(cardEffect, hashtable));
+                                }
+                            }
+                        }
+                    }
+                    #endregion
+
+                    #region「このユニットが戦闘で撃破された時」効果
+                    foreach (ICardEffect cardEffect in _DestroyedUnit.EffectList(EffectTiming.OnDestroyedDuringBattleAlly))
+                    {
+                        if (cardEffect is ActivateICardEffect)
+                        {
+                            if (cardEffect.CanUse(hashtable))
+                            {
+                                skillInfos.Add(new SkillInfo(cardEffect, hashtable));
+                            }
+                        }
+                    }
+                    #endregion
+
+                    #region「他の味方が戦闘で撃破された時」効果
+                    foreach (Unit unit in _DestroyedUnit.Character.Owner.FieldUnit)
+                    {
+                        if (unit != _DestroyedUnit)
+                        {
+                            foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.OnDestroyedDuringBattleAlly))
+                            {
+                                if (cardEffect is ActivateICardEffect)
+                                {
+                                    if (cardEffect.CanUse(hashtable))
+                                    {
+                                        skillInfos.Add(new SkillInfo(cardEffect, hashtable));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    #endregion
+                }
+            }
+            #endregion
+
             yield return ContinuousController.instance.StartCoroutine(GManager.instance.availableMultipleSkills.ActivateMultipleSkills(skillInfos));
             #endregion
 
@@ -1020,8 +1126,6 @@ public class IDestroyUnit
             yield return ContinuousController.instance.StartCoroutine(March.CheckMarch());
         }
     }
-
-    public bool Destroyed { get; set; } = false;
 }
 #endregion
 

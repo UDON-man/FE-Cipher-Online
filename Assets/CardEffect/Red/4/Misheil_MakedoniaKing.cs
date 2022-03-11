@@ -5,13 +5,13 @@ using System;
 
 public class Misheil_MakedoniaKing : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("アイオテの再来",new List<Cost>(),new List<Func<Hashtable, bool>>() { CanUseCondition },-1,false);
-        powerUpClass.SetUpPowerUpClass((unit,Power) => Power + 10,(unit) => unit != card.UnitContainingThisCharacter() && unit.Character.Owner == card.Owner && unit.Weapons.Contains(Weapon.Dragon) && unit.Weapons.Contains(Weapon.Wing));
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("アイオテの再来","" ,new List<Cost>(),new List<Func<Hashtable, bool>>() { CanUseCondition },-1,false,card);
+        powerUpClass.SetUpPowerUpClass((unit,Power) => Power + 10,(unit) => unit != card.UnitContainingThisCharacter() && unit.Character.Owner == card.Owner && unit.Weapons.Contains(Weapon.Dragon) && unit.Weapons.Contains(Weapon.Wing), true);
         cardEffects.Add(powerUpClass);
 
         bool CanUseCondition(Hashtable hashtable)
@@ -29,14 +29,10 @@ public class Misheil_MakedoniaKing : CEntity_Effect
 
         if (timing == EffectTiming.OnDestroyedDuringBattleAlly)
         {
-            activateClass[0].SetUpICardEffect("遺された希望", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Passing the Torch";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("遺された希望", "Passing the Torch", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
@@ -83,7 +79,9 @@ public class Misheil_MakedoniaKing : CEntity_Effect
                     mode: SelectCardEffect.Mode.AddHand,
                     root: SelectCardEffect.Root.Library,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect:activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
             }

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30D5\u30ED\u30FC\u30E9_\u7652\u3057\u306E\u6C37\u59C9 \u30D5\u30ED\u30FC\u30E9"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 196c98947e1c1a545a367076ceb5286d, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 013aacfc2e24bb64283b31942dcd83a4, type: 3}
+  CardName: "\u7652\u3057\u306E\u6C37\u59C9 \u30D5\u30ED\u30FC\u30E9"
+  UnitName: "\u30D5\u30ED\u30FC\u30E9"
+  UnitName_English: Flora
+  PlayCost: 1
+  HasCC: 0
+  CCCost: 0
+  cardColors: 06000000
+  Power: 30
+  SupportPower: 20
+  Ranges: 00000000
+  sex: 1
+  Weapons: 0400000008000000
+  ClassName: Flora_HealingIcceSister
+  SkillNames:
+  - "\u6697\u5668\u4FEE\u884C\u4E2D"
+  - "\u6C37\u306E\u59C9\u59B9"
+  SupportSkillNames:
+  - "\u7948\u308A\u306E\u7D0B\u7AE0"
+  CardID: 703
+  MaxCountInDeck: 4

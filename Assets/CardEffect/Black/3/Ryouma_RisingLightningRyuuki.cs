@@ -6,13 +6,13 @@ using System.Linq;
 
 public class Ryouma_RisingLightningRyuuki : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("交わる光", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("交わる光", "",null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool PowerUpCondition(Unit unit)
@@ -42,18 +42,14 @@ public class Ryouma_RisingLightningRyuuki : CEntity_Effect
 
         if (timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass[0].SetUpICardEffect("闇夜の雷鳴", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Nohrian Shockwave";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass.SetUpICardEffect("闇夜の雷鳴", "Nohrian Shockwave",null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -87,7 +83,8 @@ public class Ryouma_RisingLightningRyuuki : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

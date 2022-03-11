@@ -5,20 +5,16 @@ using System;
 using System.Linq;
 public class Gaia_DarkNightSweetSmell : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnStartTurn)
         {
-            activateClass[0].SetUpICardEffect("宝物庫の扉", new List<Cost>() { new ReverseCost(1,(cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Door of the Treasury";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("宝物庫の扉", "Door of the Treasury",new List<Cost>() { new ReverseCost(1,(cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -44,10 +40,8 @@ public class Gaia_DarkNightSweetSmell : CEntity_Effect
                 {
                     CardSource _cardSource = card.Owner.Enemy.LibraryCards[0];
 
-                    //ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ShowCardEffect(new List<CardSource>() { cardSource }, "Library Card", false));
-
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass[0]);
+                    hashtable.Add("cardEffect", activateClass);
                     yield return ContinuousController.instance.StartCoroutine(new IShowLibraryCard(new List<CardSource>() { _cardSource }, hashtable, false).ShowLibraryCard());
 
                     SelectCardEffect selectCardEffect = GetComponent<SelectCardEffect>();
@@ -66,7 +60,9 @@ public class Gaia_DarkNightSweetSmell : CEntity_Effect
                         mode: SelectCardEffect.Mode.AddHand,
                         root: SelectCardEffect.Root.Trash,
                         CustomRootCardList: null,
-                        CanLookReverseCard: true);
+                        CanLookReverseCard: true,
+                        SelectPlayer: card.Owner,
+                        cardEffect:activateClass);
 
                     yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -78,14 +74,10 @@ public class Gaia_DarkNightSweetSmell : CEntity_Effect
 
         else if(timing == EffectTiming.OnOpponentShowLibraryBySkill)
         {
-            activateClass[1].SetUpICardEffect("ガイアの高級菓子", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Gaius's Confect";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("ガイアの高級菓子", "Gaius's Confect", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -122,15 +114,13 @@ public class Gaia_DarkNightSweetSmell : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }
         }
-
-        
 
         return cardEffects;
     }

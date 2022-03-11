@@ -6,24 +6,20 @@ using System.Linq;
 
 public class Nefenie_PatrioticWarPrincess : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("怒髪天衝", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Furious Point";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("怒髪天衝", "Furious Point",new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (card.Owner.TrashCards.Count((cardSource) => cardSource.UnitNames.Contains("ネフェニー")) >= 1)
                     {
@@ -53,7 +49,9 @@ public class Nefenie_PatrioticWarPrincess : CEntity_Effect
                     mode: SelectCardEffect.Mode.Custom,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -63,29 +61,25 @@ public class Nefenie_PatrioticWarPrincess : CEntity_Effect
                     {
                         yield return ContinuousController.instance.StartCoroutine(new IGrow(card.UnitContainingThisCharacter(), targetCards).Grow());
 
-                        PowerUpClass powerUpClass = new PowerUpClass();
-                        powerUpClass.SetUpPowerUpClass((unit, Power) => Power * 2, (unit) => unit == card.UnitContainingThisCharacter());
-                        card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                        PowerModifyClass powerUpClass = new PowerModifyClass();
+                        powerUpClass.SetUpPowerUpClass((unit, Power) => Power * 2, (unit) => unit == card.UnitContainingThisCharacter(), false);
+                        card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                         yield return null;
                     }
                 }
             }
 
-            activateClass[1].SetUpICardEffect("手槍", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Javelin";
-            }
+            ActivateClass activateClass1 = new ActivateClass();
+            activateClass1.SetUpICardEffect("手槍", "Javelin", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, -1, false,card);
+            activateClass1.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            cardEffects.Add(activateClass1);
 
             IEnumerator ActivateCoroutine1()
             {
                 RangeUpClass rangeUpClass = new RangeUpClass();
                 rangeUpClass.SetUpRangeUpClass((unit, Range) => { Range.Add(1); Range.Add(2); return Range; }, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(rangeUpClass);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => rangeUpClass);
 
                 yield return null;
             }

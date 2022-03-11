@@ -5,13 +5,13 @@ using System;
 using System.Linq;
 public class Nn_QuietChild : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("長寿な竜一族", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, CanPowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("長寿な竜一族","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, CanPowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool CanPowerUpCondition(Unit unit)
@@ -27,9 +27,9 @@ public class Nn_QuietChild : CEntity_Effect
             return false;
         }
 
-        PowerUpClass powerUpClass1 = new PowerUpClass();
-        powerUpClass1.SetUpICardEffect("母との約束", null, null, -1, false);
-        powerUpClass1.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition);
+        PowerModifyClass powerUpClass1 = new PowerModifyClass();
+        powerUpClass1.SetUpICardEffect("母との約束","", null, null, -1, false,card);
+        powerUpClass1.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition, true);
         cardEffects.Add(powerUpClass1);
 
         bool PowerUpCondition(Unit unit)

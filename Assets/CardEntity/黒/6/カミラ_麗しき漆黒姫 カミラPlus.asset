@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30AB\u30DF\u30E9_\u9E97\u3057\u304D\u6F06\u9ED2\u59EB \u30AB\u30DF\u30E9Plus"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: c9cde782b0f660842965673785818fb2, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 90dad273f7eeb26409bbdfa69d6954b0, type: 3}
+  CardName: "\u9E97\u3057\u304D\u6F06\u9ED2\u59EB \u30AB\u30DF\u30E9"
+  UnitName: "\u30AB\u30DF\u30E9"
+  UnitName_English: Camilla
+  PlayCost: 4
+  HasCC: 1
+  CCCost: 3
+  cardColors: 06000000
+  Power: 60
+  SupportPower: 30
+  Ranges: 01000000
+  sex: 1
+  Weapons: 020000000b00000006000000
+  ClassName: Kamira_BeautifulObsidianPrincess
+  SkillNames:
+  - "\u7206\u767A"
+  - "\u6F06\u9ED2\u306E\u9727"
+  SupportSkillNames: []
+  CardID: 679
+  MaxCountInDeck: 4

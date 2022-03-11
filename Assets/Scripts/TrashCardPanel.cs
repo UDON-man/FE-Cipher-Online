@@ -19,6 +19,33 @@ public class TrashCardPanel : MonoBehaviour
     [Header("背景以外の親")]
     public GameObject Parent;
 
+    public List<HandCard> handCards 
+    { 
+        get 
+        {
+            List<HandCard> handCards = new List<HandCard>();
+
+            if(GManager.instance.turnStateMachine.DoseStartGame)
+            {
+                for (int i = 0; i < scrollRect.content.childCount; i++)
+                {
+                    if (scrollRect.content.GetChild(i) != null)
+                    {
+                        if (scrollRect.content.GetChild(i).gameObject != null)
+                        {
+                            if(scrollRect.content.GetChild(i).GetComponent<HandCard>() != null)
+                            {
+                                handCards.Add(scrollRect.content.GetChild(i).GetComponent<HandCard>());
+                            }
+                        }
+                    }
+                }
+            }
+
+            return handCards;
+        } 
+    }
+
     #region 退避ゾーンのカードを確認
     public void OnClickCheckTrashButton(bool IsYou)
     {
@@ -38,7 +65,7 @@ public class TrashCardPanel : MonoBehaviour
             Message = "Opponent's Retreat Area Cards";
         }
 
-        OpenSelectCardPanel(Message, player.TrashCards,true);
+        OpenSelectCardPanel(Message, player.TrashCards,true, null);
     }
     #endregion
 
@@ -61,7 +88,7 @@ public class TrashCardPanel : MonoBehaviour
             Message = "Opponent's Boundless Area Cards";
         }
 
-        OpenSelectCardPanel(Message, player.InfinityCards,true);
+        OpenSelectCardPanel(Message, player.InfinityCards,true,null);
     }
     #endregion
 
@@ -84,7 +111,7 @@ public class TrashCardPanel : MonoBehaviour
             Message = "Opponent's Orb Cards";
         }
 
-        OpenSelectCardPanel(Message, player.OrbCards,false);
+        OpenSelectCardPanel(Message, player.OrbCards,false, null);
     }
     #endregion
 
@@ -107,11 +134,11 @@ public class TrashCardPanel : MonoBehaviour
             Message = "Opponent's Bond Cards";
         }
 
-        OpenSelectCardPanel(Message, player.BondCards,true);
+        OpenSelectCardPanel(Message, player.BondCards,true, GManager.instance.turnStateMachine.GetOnClickBondAction);
     }
     #endregion
 
-    public void OpenSelectCardPanel(string Message, List<CardSource> RootCardSources,bool CanLookReverseCard)
+    public void OpenSelectCardPanel(string Message, List<CardSource> RootCardSources,bool CanLookReverseCard, Func<UnityAction<HandCard>> OnClickAction)
     {
         #region 初期化・初期設定
         this.gameObject.SetActive(true);
@@ -123,10 +150,10 @@ public class TrashCardPanel : MonoBehaviour
         MessageText.text = Message;
         #endregion
 
-        StartCoroutine(OpenSelectCardPanelCoroutine(RootCardSources, CanLookReverseCard));
+        StartCoroutine(OpenSelectCardPanelCoroutine(RootCardSources, CanLookReverseCard, OnClickAction));
     }
 
-    IEnumerator OpenSelectCardPanelCoroutine(List<CardSource> RootCardSources, bool CanLookReverseCard)
+    IEnumerator OpenSelectCardPanelCoroutine(List<CardSource> RootCardSources, bool CanLookReverseCard, Func<UnityAction<HandCard>> OnClickAction)
     {
         List<CardSource> root = new List<CardSource>();
 
@@ -138,7 +165,7 @@ public class TrashCardPanel : MonoBehaviour
         yield return new WaitForSeconds(Time.deltaTime);
 
         #region カード一覧を初期化
-        while (scrollRect.content.childCount > 0)
+        if (scrollRect.content.childCount > 0)
         {
             for (int i = 0; i < scrollRect.content.childCount; i++)
             {
@@ -147,13 +174,12 @@ public class TrashCardPanel : MonoBehaviour
                     if (scrollRect.content.GetChild(i).gameObject != null)
                     {
                         Destroy(scrollRect.content.GetChild(i).gameObject);
-                        yield return null;
                     }
                 }
             }
-        }
 
-        yield return new WaitWhile(() => scrollRect.content.childCount > 0);
+            yield return new WaitWhile(() => scrollRect.content.childCount > 0);
+        }
         #endregion
 
         #region カード生成
@@ -207,6 +233,19 @@ public class TrashCardPanel : MonoBehaviour
                     }
                 }
                 #endregion
+
+                #region 左クリック
+                else if (Input.GetMouseButtonUp(0))
+                {
+                    if (OnClickAction != null)
+                    {
+                        if (OnClickAction() != null)
+                        {
+                            OnClickAction().Invoke(handCard);
+                        }
+                    }
+                } 
+                #endregion
             }
             #endregion
 
@@ -222,11 +261,12 @@ public class TrashCardPanel : MonoBehaviour
             else
             {
                 handCard.SetUpReverseCard();
+
+                if(cardSource.Owner.BondCards.Contains(cardSource))
+                {
+                    handCard.SetShowFaceCard();
+                }
             }
-
-            
-
-            yield return null;
         }
 
         yield return new WaitWhile(() => scrollRect.content.childCount < root.Count);
@@ -243,12 +283,43 @@ public class TrashCardPanel : MonoBehaviour
 
         scrollRect.horizontalNormalizedPosition = 0;
 
-        yield return new WaitForSeconds(Time.deltaTime * 1.5f);
+        yield return new WaitForSeconds(Time.deltaTime * 0.5f);
+
+        GManager.instance.turnStateMachine.OpenTrashCardPanelAction?.Invoke();
     }
 
-
+    bool CanClose = true;
     public void CloseSelectCardPanel()
     {
+        if(!CanClose)
+        {
+            return;
+        }
+
+        CanClose = false;
+        ContinuousController.instance.StartCoroutine(CloseSelectCardPanelCoroutine());
+    }
+
+    public IEnumerator CloseSelectCardPanelCoroutine()
+    {
         this.gameObject.SetActive(false);
+
+        if(scrollRect.content.childCount > 0)
+        {
+            for (int i = 0; i < scrollRect.content.childCount; i++)
+            {
+                if (scrollRect.content.GetChild(i) != null)
+                {
+                    if (scrollRect.content.GetChild(i).gameObject != null)
+                    {
+                        Destroy(scrollRect.content.GetChild(i).gameObject);
+                    }
+                }
+            }
+
+            yield return new WaitWhile(() => scrollRect.content.childCount > 0);
+        }
+
+        CanClose = true;
     }
 }

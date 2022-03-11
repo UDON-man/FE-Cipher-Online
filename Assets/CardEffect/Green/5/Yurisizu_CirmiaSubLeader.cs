@@ -5,20 +5,16 @@ using System;
 using System.Linq;
 public class Yurisizu_CirmiaSubLeader : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnGrowAnyone)
         {
-            activateClass[0].SetUpICardEffect("裏の仕事", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Back to Work";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("裏の仕事", "Back to Work", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -30,11 +26,14 @@ public class Yurisizu_CirmiaSubLeader : CEntity_Effect
                         {
                             Unit Unit = (Unit)hashtable["Unit"];
 
-                            if (Unit.Character.Owner == this.card.Owner)
+                            if(Unit.Character != null)
                             {
-                                if (Unit != this.card.UnitContainingThisCharacter())
+                                if (Unit.Character.Owner == card.Owner)
                                 {
-                                    return true;
+                                    if (Unit != card.UnitContainingThisCharacter())
+                                    {
+                                        return true;
+                                    }
                                 }
                             }
                         }
@@ -52,14 +51,10 @@ public class Yurisizu_CirmiaSubLeader : CEntity_Effect
 
         else if (timing == EffectTiming.OnDiscardHand)
         {
-            activateClass[1].SetUpICardEffect("クリミア一の策士", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Crimea's Tactician";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("クリミア一の策士", "Crimea's Tactician", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -82,9 +77,9 @@ public class Yurisizu_CirmiaSubLeader : CEntity_Effect
                                         {
                                             if (cardEffect.card() != null)
                                             {
-                                                if (cardEffect.card().Owner == this.card.Owner.Enemy)
+                                                if (cardEffect.card().Owner == card.Owner.Enemy)
                                                 {
-                                                    if (cardSource == this.card)
+                                                    if (cardSource == card)
                                                     {
                                                         if (card.Owner.BondCards.Count((_cardSource) => !_cardSource.IsReverse && _cardSource.cardColors.Contains(CardColor.Green)) > 0)
                                                         {
@@ -116,17 +111,18 @@ public class Yurisizu_CirmiaSubLeader : CEntity_Effect
                 SelectHandEffect selectHandEffect = GetComponent<SelectHandEffect>();
 
                 selectHandEffect.SetUp(
-                        SelectPlayer: card.Owner.Enemy,
-                        CanTargetCondition: (cardSource) => cardSource.Owner.HandCards.Contains(cardSource),
-                        CanTargetCondition_ByPreSelecetedList: null,
-                        CanEndSelectCondition: null,
-                        MaxCount: 1,
-                        CanNoSelect: false,
-                        CanEndNotMax: false,
-                        isShowOpponent: true,
-                        SelectCardCoroutine: null,
-                        AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Discard);
+                    SelectPlayer: card.Owner.Enemy,
+                    CanTargetCondition: (cardSource) => cardSource.Owner.HandCards.Contains(cardSource),
+                    CanTargetCondition_ByPreSelecetedList: null,
+                    CanEndSelectCondition: null,
+                    MaxCount: 1,
+                    CanNoSelect: false,
+                    CanEndNotMax: false,
+                    isShowOpponent: true,
+                    SelectCardCoroutine: null,
+                    AfterSelectCardCoroutine: null,
+                    mode: SelectHandEffect.Mode.Discard,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
             }

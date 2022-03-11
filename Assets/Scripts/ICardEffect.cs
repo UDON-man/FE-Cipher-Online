@@ -6,7 +6,7 @@ using System.Linq;
 using UnityEngine;
 
 //カード効果
-public abstract class ICardEffect : MonoBehaviourPunCallbacks
+public abstract class ICardEffect 
 {
     public CardSource _card { get; set; } = null;
 
@@ -15,9 +15,11 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
         return _card;
     }
 
-    public void SetUpICardEffect(string EffectName,List<Cost> costs, List<Func<Hashtable, bool>> CanUseConditions,int MaxCountPerTurn,bool Optional)
+    #region 効果をセットアップ
+    public void SetUpICardEffect(string EffectName,string EffectName_En,List<Cost> costs, List<Func<Hashtable, bool>> CanUseConditions,int MaxCountPerTurn,bool Optional,CardSource card)
     {
         this.EffectName = EffectName;
+        this.EffecrName_En = EffectName_En;
 
         this.costs = new List<Cost>();
         if(costs != null)
@@ -37,12 +39,14 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
             }
         }
 
+        this.MaxCountPerTurn = 114514;
         if(MaxCountPerTurn > 0)
         {
             this.MaxCountPerTurn = MaxCountPerTurn;
         }
 
         this.Optional = Optional;
+        this._card = card;
 
         isCCS = false;
         isLvS = false;
@@ -51,6 +55,7 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
         isSupportSkill = false;
         isNotCheck_Effect = false;
     }
+    #endregion
 
     #region 発動確認・エフェクト無しか
     public bool isNotCheck_Effect { get; set; }
@@ -90,11 +95,32 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
     #endregion
 
     #region このターンに使った回数
-    public int UseCountThisTurn { get; set; }
+    //public int UseCountThisTurn { get; set; }
     #endregion
 
     #region 効果名
+
+    #region 効果名日本語
     public virtual string EffectName { get; set; } = "";
+    #endregion
+
+
+    #region 効果名英語
+    public virtual string EffecrName_En { get; set; } = "";
+    #endregion
+
+    public string GetEffectName()
+    {
+        if(ContinuousController.instance.language == Language.ENG)
+        {
+            return EffecrName_En;
+        }
+
+        else
+        {
+            return EffectName;
+        }
+    }
     #endregion
 
     #region 任意効果か
@@ -118,19 +144,23 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
             {
                 foreach (Unit unit in player.FieldUnit)
                 {
-                    foreach (ICardEffect cardEffect in unit.EffectList(EffectTiming.None))
+                    foreach(CEntity_Effect cEntity_Effect in unit.Character.cEntity_EffectController.GetCEntity_Effects)
                     {
-                        if (cardEffect is IInvalidationCardEffect)
+                        foreach (ICardEffect cardEffect in cEntity_Effect.GetCardEffects(EffectTiming.None,unit.Character))
                         {
-                            if (((IInvalidationCardEffect)cardEffect).IsInvalidate(this))
+                            if (cardEffect is IInvalidationCardEffect)
                             {
-                                return true;
+                                if (((IInvalidationCardEffect)cardEffect).IsInvalidate(this))
+                                {
+                                    return true;
+                                }
                             }
                         }
                     }
+                    
                 }
 
-                foreach (ICardEffect cardEffect in player.PlayerEffects)
+                foreach (ICardEffect cardEffect in player.PlayerEffects(EffectTiming.None))
                 {
                     if (cardEffect is IInvalidationCardEffect)
                     {
@@ -147,7 +177,11 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    #region スキルが使えるか
+    #region コストの支払いが完了したか
+    public bool DonePayCost { get; set; }
+    #endregion
+
+    #region 使用可能判定
     public List<Func<Hashtable,bool>> CanUseConditions = new List<Func<Hashtable,bool>>(); 
     public virtual bool CanUse(Hashtable hash)
     {
@@ -156,6 +190,7 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
         {
             if (cost != null && card() != null)
             {
+                #region リバースコスト
                 if (cost is ReverseCost)
                 {
                     if (((ReverseCost)cost).ReverseCount > card().Owner.BondCards.Count((cardSource) => !cardSource.IsReverse && ((ReverseCost)cost).CanTargetCondition(cardSource)))
@@ -163,7 +198,24 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
                         return false;
                     }
                 }
+                #endregion
 
+                #region 自身をリバースするコスト
+                else if (cost is ReverseSelfCost)
+                {
+                    if (card() == null)
+                    {
+                        return false;
+                    }
+
+                    if (!card().Owner.BondCards.Contains(card())||card().IsReverse)
+                    {
+                        return false;
+                    }
+                }
+                #endregion
+
+                #region タップコスト
                 else if (cost is TapCost)
                 {
                     if(card() == null)
@@ -181,8 +233,10 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
                         return false;
                     }
                 }
+                #endregion
 
-                else if(cost is SelectAllyCost)
+                #region 味方を選択して支払うコスト
+                else if (cost is SelectAllyCost)
                 {
                     SelectUnitEffect selectUnitEffect = GManager.instance.GetComponent<SelectUnitEffect>();
 
@@ -196,14 +250,17 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
                         CanEndNotMax: ((SelectAllyCost)cost).CanEndNotMax,
                         SelectUnitCoroutine: ((SelectAllyCost)cost).SelectUnitCoroutine,
                         AfterSelectUnitCoroutine: ((SelectAllyCost)cost).AfterSelectUnitCoroutine,
-                        mode: ((SelectAllyCost)cost).mode);
+                        mode: ((SelectAllyCost)cost).mode,
+                        cardEffect:null);
 
                     if(!selectUnitEffect.active())
                     {
                         return false;
                     }
                 }
+                #endregion
 
+                #region 手札を捨てるコスト
                 else if (cost is DiscardHandCost)
                 {
                     if (((DiscardHandCost)cost).DiscardCount > card().Owner.HandCards.Count((cardSource) => ((DiscardHandCost)cost).CanTargetCondition(cardSource)))
@@ -211,14 +268,42 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
                         return false;
                     }
                 }
+                #endregion
 
-                else if(cost is BreakOrbCost)
+                #region 手札を山札の上に置くコスト
+                else if (cost is PutHandLibraryTopCost)
+                {
+                    if (((PutHandLibraryTopCost)cost).SelectCount > card().Owner.HandCards.Count((cardSource) => ((PutHandLibraryTopCost)cost).CanTargetCondition(cardSource)))
+                    {
+                        return false;
+                    }
+                }
+                #endregion
+
+                #region 自分のオーブを撃破するコスト
+                else if (cost is BreakOrbCost)
                 {
                     if (((BreakOrbCost)cost).BreakCount > ((BreakOrbCost)cost).player.OrbCards.Count)
                     {
                         return false;
                     }
                 }
+                #endregion
+
+                #region 自身を撃破するコスト
+                else if(cost is DestroySelfCost)
+                {
+                    if (card() == null)
+                    {
+                        return false;
+                    }
+
+                    if (card().UnitContainingThisCharacter() == null)
+                    {
+                        return false;
+                    }
+                }
+                #endregion
             }
         }
         #endregion
@@ -234,7 +319,7 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
         #endregion
 
         #region 使用回数による成否判定
-        if(UseCountThisTurn >= MaxCountPerTurn)
+        if (card().cEntity_EffectController.IsOverMaxCountPerTurn(EffectName,MaxCountPerTurn))
         {
             return false;
         }
@@ -297,7 +382,7 @@ public abstract class ICardEffect : MonoBehaviourPunCallbacks
         {
             if(card() != null)
             {
-                if (!card().Owner.BondCards.Contains(card()))
+                if (!card().Owner.BondCards.Contains(card())||card().IsReverse)
                 {
                     return false;
                 }
@@ -372,6 +457,11 @@ public class ReverseCost : Cost
 
     public int ReverseCount { get; set; }
     public Func<CardSource, bool> CanTargetCondition;
+}
+
+public class ReverseSelfCost:Cost
+{
+
 }
 
 public class TapCost : Cost
@@ -493,7 +583,7 @@ public enum EffectTiming
     OnSetSupport,
     OnSetSupportBeforeSupportSkill,
     OnDiscardSuppot,
-    OnDestroyedOther,
+    OnDestroyedAnyone,
     OnEndTurn,
     OnStartTurn,
     OnMovedAnyone,
@@ -505,7 +595,211 @@ public enum EffectTiming
     OnOpponentShowLibraryBySkill,
     OnAddHandCardFromTrash,
     BeforeDiscardCritical_EvasionCard,
+    OnSetBond,
     None,
+}
+#endregion
+
+#region その場で処理する効果
+public interface ActivateICardEffect
+{
+    IEnumerator Activate(Hashtable hash);
+}
+
+public static class ActivateICardEffectExtensionClass
+{
+    #region エフェクト→任意効果発動選択→コスト→処理
+    public static IEnumerator Activate_Effect_Optional_Cost_Execute(this ActivateICardEffect activateICardEffect, Hashtable hash)
+    {
+        GManager.instance.turnStateMachine.isExecuting = true;
+
+        if (activateICardEffect is ICardEffect)
+        {
+            //エフェクト
+            yield return ContinuousController.instance.StartCoroutine(Activate_Effect(activateICardEffect));
+
+            //任意効果発動選択→コスト→処理
+            yield return ContinuousController.instance.StartCoroutine(Activate_Optional_Cost_Execute(activateICardEffect, hash, null));
+        }
+
+        foreach (Player player in GManager.instance.turnStateMachine.gameContext.Players)
+        {
+            player.TrashHandCard.gameObject.SetActive(false);
+            player.TrashHandCard.SkillNameText.transform.parent.gameObject.SetActive(false);
+            player.SupportHandCard.SkillNameText.transform.parent.gameObject.SetActive(false);
+        }
+
+        yield return new WaitForSeconds(Time.deltaTime * 2);
+
+        CardSource card = ((ICardEffect)activateICardEffect).card();
+
+        if (card != null)
+        {
+            if (card.UnitContainingThisCharacter() != null)
+            {
+                if (card.UnitContainingThisCharacter().ShowingFieldUnitCard != null)
+                {
+                    card.UnitContainingThisCharacter().ShowingFieldUnitCard.OffUsingSkillEffect();
+                    card.UnitContainingThisCharacter().ShowingFieldUnitCard.OffSkillName();
+                }
+            }
+
+            if (card.ShowingHandCard != null)
+            {
+                card.ShowingHandCard.SkillNameText.transform.parent.gameObject.SetActive(false);
+            }
+        }
+
+        GManager.instance.turnStateMachine.isExecuting = false;
+    }
+    #endregion
+
+    #region 任意効果発動選択→エフェクト→コスト→処理
+    public static IEnumerator Activate_Optional_Effect_Cost_Execute(this ActivateICardEffect activateICardEffect, Hashtable hash)
+    {
+        GManager.instance.turnStateMachine.isExecuting = true;
+
+        if (activateICardEffect is ICardEffect)
+        {
+            CardSource card = ((ICardEffect)activateICardEffect).card();
+
+            if (card != null)
+            {
+                if (card.Owner.isYou)
+                {
+                    if (card.ShowingHandCard != null)
+                    {
+                        card.ShowingHandCard.Outline_Select.SetActive(true);
+                        card.ShowingHandCard.SetOrangeOutline();
+                    }
+                }
+            }
+
+            //任意効果発動選択
+            if (((ICardEffect)activateICardEffect).Optional)
+            {
+                yield return ContinuousController.instance.StartCoroutine(Activate_Optional(activateICardEffect, null, false));
+            }
+
+            if (((ICardEffect)activateICardEffect).UseOptional || !((ICardEffect)activateICardEffect).Optional)
+            {
+                //エフェクト
+                yield return ContinuousController.instance.StartCoroutine(Activate_Effect(activateICardEffect));
+
+                //コスト→処理
+                yield return ContinuousController.instance.StartCoroutine(Activate_Cost_Execute(activateICardEffect, hash));
+            }
+
+            if (card != null)
+            {
+                if (card.ShowingHandCard != null)
+                {
+                    card.ShowingHandCard.Outline_Select.SetActive(false);
+                    card.ShowingHandCard.ShowOpponent = false;
+                }
+            }
+        }
+
+        GManager.instance.turnStateMachine.isExecuting = false;
+    }
+    #endregion
+
+    #region カード効果発動エフェクト表示
+    public static IEnumerator Activate_Effect(this ActivateICardEffect activateICardEffect)
+    {
+        CardSource card = ((ICardEffect)activateICardEffect).card();
+
+        if (card != null)
+        {
+            Unit unit = card.UnitContainingThisCharacter();
+
+            if (unit != null)
+            {
+                if (unit.ShowingFieldUnitCard != null)
+                {
+                    yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ActivateFieldUnitSkillEffect(unit, (ICardEffect)activateICardEffect));
+                }
+            }
+
+            else if (card.Owner.SupportCards.Contains(card))
+            {
+                yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ActivateSupportCardSkillEffect(card, (ICardEffect)activateICardEffect));
+            }
+
+            else if (card.Owner.HandCards.Contains(card))
+            {
+                if (card.ShowingHandCard != null)
+                {
+                    yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ActivateHandCardSkillEffect(card, (ICardEffect)activateICardEffect));
+                }
+            }
+
+            else if (card.Owner.TrashCards.Contains(card) || card.Owner.InfinityCards.Contains(card))
+            {
+                yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ActivateTrashInfinityCardSkillEffect(card, (ICardEffect)activateICardEffect));
+            }
+
+            else if (card.Owner.BondCards.Contains(card))
+            {
+                yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ActivateBondCardSkillEffect(card, (ICardEffect)activateICardEffect));
+            }
+        }
+    }
+    #endregion
+
+    #region 任意効果発動選択
+    public static IEnumerator Activate_Optional(this ActivateICardEffect activateICardEffect, string Message, bool ShowOpponentMessage)
+    {
+        if (((ICardEffect)activateICardEffect).Optional)
+        {
+            yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<OptionalSkill>().SelectOptional((ICardEffect)activateICardEffect, Message, ShowOpponentMessage));
+        }
+    }
+    #endregion
+
+    #region コスト→処理
+    public static IEnumerator Activate_Cost_Execute(this ActivateICardEffect activateICardEffect, Hashtable hash)
+    {
+        if (((ICardEffect)activateICardEffect).UseOptional || !((ICardEffect)activateICardEffect).Optional)
+        {
+            //使用回数をカウントアップ
+            ((ICardEffect)activateICardEffect).card().cEntity_EffectController.CountUpUseCountsThisTurn((ICardEffect)activateICardEffect);
+
+            //コストを処理
+            if (activateICardEffect is ICardEffect)
+            {
+                ((ICardEffect)activateICardEffect).DonePayCost = false;
+
+                yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<PayCostClass>().PayCost(((ICardEffect)activateICardEffect).costs, ((ICardEffect)activateICardEffect).card(), (ICardEffect)activateICardEffect));
+                
+                if(!((ICardEffect)activateICardEffect).DonePayCost)
+                {
+                    yield break;
+                }
+            }
+
+            //効果を処理
+            yield return ContinuousController.instance.StartCoroutine(activateICardEffect.Activate(hash));
+        }
+    }
+    #endregion
+
+    #region 任意効果発動選択→コスト→処理
+    public static IEnumerator Activate_Optional_Cost_Execute(this ActivateICardEffect activateICardEffect, Hashtable hash, string Message)
+    {
+        //任意効果発動選択
+        if (((ICardEffect)activateICardEffect).Optional)
+        {
+            yield return ContinuousController.instance.StartCoroutine(Activate_Optional(activateICardEffect, Message, true));
+        }
+
+        //コスト→処理
+        if (((ICardEffect)activateICardEffect).UseOptional || !((ICardEffect)activateICardEffect).Optional)
+        {
+            yield return ContinuousController.instance.StartCoroutine(Activate_Cost_Execute(activateICardEffect, hash));
+        }
+    }
+    #endregion
 }
 #endregion
 
@@ -558,6 +852,13 @@ public interface ICanNotMoveBySkillEffect
 }
 #endregion
 
+#region 「対象のユニットは移動できない」を付与する効果
+public interface ICanNotMoveEffect
+{
+    bool CanNotMove(Unit unit);
+}
+#endregion
+
 #region 「対象のユニットを攻撃できない」を付与する効果
 public interface ICanNotAttackTargetUnitCardEffect
 {
@@ -600,184 +901,14 @@ public interface ICanPlayEvenIfExistSameUnit
 }
 #endregion
 
-#region その場で処理する効果
-public interface ActivateICardEffect
-{
-    IEnumerator Activate(Hashtable hash);
-}
-
-public static class ActivateICardEffectExtensionClass
-{
-    #region エフェクト→任意効果発動選択→コスト→処理
-    public static IEnumerator Activate_Effect_Optional_Cost_Execute(this ActivateICardEffect activateICardEffect, Hashtable hash)
-    {
-        if(activateICardEffect is ICardEffect)
-        {
-            //エフェクト
-            yield return ContinuousController.instance.StartCoroutine(Activate_Effect(activateICardEffect));
-
-            //任意効果発動選択→コスト→処理
-            yield return ContinuousController.instance.StartCoroutine(Activate_Optional_Cost_Execute(activateICardEffect, hash,null));
-        }
-
-        foreach(Player player in GManager.instance.turnStateMachine.gameContext.Players)
-        {
-            player.TrashHandCard.gameObject.SetActive(false);
-        }
-
-        CardSource card = ((ICardEffect)activateICardEffect).card();
-
-        if(card != null)
-        {
-            if(card.UnitContainingThisCharacter() != null)
-            {
-                if(card.UnitContainingThisCharacter().ShowingFieldUnitCard != null)
-                {
-                    card.UnitContainingThisCharacter().ShowingFieldUnitCard.OffUsingSkillEffect();
-                }
-            }
-        }
-    }
-    #endregion
-
-    #region 任意効果発動選択→エフェクト→コスト→処理
-    public static IEnumerator Activate_Optional_Effect_Cost_Execute(this ActivateICardEffect activateICardEffect, Hashtable hash)
-    {
-        if (activateICardEffect is ICardEffect)
-        {
-            CardSource card = ((ICardEffect)activateICardEffect).card();
-
-            if (card != null)
-            {
-                if(card.Owner.isYou)
-                {
-                    if (card.ShowingHandCard != null)
-                    {
-                        card.ShowingHandCard.Outline_Select.SetActive(true);
-                        card.ShowingHandCard.SetOrangeOutline();
-                    }
-                }
-            }
-
-            //任意効果発動選択
-            if (((ICardEffect)activateICardEffect).Optional)
-            {
-                yield return ContinuousController.instance.StartCoroutine(Activate_Optional(activateICardEffect, null,false));
-            }
-
-            if (((ICardEffect)activateICardEffect).UseOptional || !((ICardEffect)activateICardEffect).Optional)
-            {
-                //エフェクト
-                yield return ContinuousController.instance.StartCoroutine(Activate_Effect(activateICardEffect));
-
-                //コスト→処理
-                yield return ContinuousController.instance.StartCoroutine(Activate_Cost_Execute(activateICardEffect, hash));
-            }
-
-            if (card != null)
-            {
-                if (card.ShowingHandCard != null)
-                {
-                    card.ShowingHandCard.Outline_Select.SetActive(false);
-                    card.ShowingHandCard.ShowOpponent = false;
-                }
-            }
-        }
-    }
-    #endregion
-
-    #region カード効果発動エフェクト表示
-    public static IEnumerator Activate_Effect(this ActivateICardEffect activateICardEffect)
-    {
-        CardSource card = ((ICardEffect)activateICardEffect).card();
-
-        if (card != null)
-        {
-            Unit unit = card.UnitContainingThisCharacter();
-
-            if (unit != null)
-            {
-                if (unit.ShowingFieldUnitCard != null)
-                {
-                    yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ActivateFieldUnitSkillEffect(unit));
-                }
-            }
-
-            else if (card.Owner.SupportCards.Contains(card))
-            {
-                yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ActivateSupportCardSkillEffect(card));
-            }
-
-            else if(card.Owner.HandCards.Contains(card))
-            {
-                if(card.ShowingHandCard != null)
-                {
-                    yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ActivateHandCardSkillEffect(card));
-                }
-            }
-
-            else if(card.Owner.TrashCards.Contains(card)||card.Owner.InfinityCards.Contains(card))
-            {
-                yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ActivateTrashInfinityCardSkillEffect(card));
-            }
-        }
-    }
-    #endregion
-
-    #region 任意効果発動選択
-    public static IEnumerator Activate_Optional(this ActivateICardEffect activateICardEffect,string Message,bool ShowOpponentMessage)
-    {
-        if (((ICardEffect)activateICardEffect).Optional)
-        {
-            yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<OptionalSkill>().SelectOptional((ICardEffect)activateICardEffect, Message, ShowOpponentMessage));
-        }
-    }
-    #endregion
-
-    #region コスト→処理
-    public static IEnumerator Activate_Cost_Execute(this ActivateICardEffect activateICardEffect, Hashtable hash)
-    {
-        if (((ICardEffect)activateICardEffect).UseOptional || !((ICardEffect)activateICardEffect).Optional)
-        {
-            //使用回数を記録
-            ((ICardEffect)activateICardEffect).UseCountThisTurn++;
-
-            //コストを処理
-            if (activateICardEffect is ICardEffect)
-            {
-                yield return ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<PayCostClass>().PayCost(((ICardEffect)activateICardEffect).costs, ((ICardEffect)activateICardEffect).card()));
-            }
-
-            //効果を処理
-            yield return ContinuousController.instance.StartCoroutine(activateICardEffect.Activate(hash));
-        }
-    }
-    #endregion
-
-    #region 任意効果発動選択→コスト→処理
-    public static IEnumerator Activate_Optional_Cost_Execute(this ActivateICardEffect activateICardEffect, Hashtable hash,string Message)
-    {
-        //任意効果発動選択
-        if (((ICardEffect)activateICardEffect).Optional)
-        {
-            yield return ContinuousController.instance.StartCoroutine(Activate_Optional(activateICardEffect,Message,true));
-        }
-
-        //コスト→処理
-        if (((ICardEffect)activateICardEffect).UseOptional || !((ICardEffect)activateICardEffect).Optional)
-        {
-            yield return ContinuousController.instance.StartCoroutine(Activate_Cost_Execute(activateICardEffect,hash));
-        }
-    }
-    #endregion
-}
-#endregion
-
 #region オーブダメージを変化させる効果
-public interface IChangeDamageCardEffect
+
+public interface IStrikeModifyCardEffect
 {
     int GetDamage(int Damage, Unit unit);
+    bool isUpDown();
 }
+
 #endregion
 
 #region 必殺攻撃倍率を変化させる効果
@@ -788,26 +919,11 @@ public interface IChangeCriticalMagnificationEffect
 #endregion
 
 #region パワーを変化させる効果
-public interface IChangePowerCardEffect
+public interface IPowerModifyCardEffect
 {
     int GetPower(int Power, Unit unit);
+    bool isUpDown();
 }
-
-#region 必殺攻撃
-class Critical : ICardEffect, IChangePowerCardEffect
-{
-    public int GetPower(int Power, Unit unit)
-    {
-        if (GManager.instance.turnStateMachine.AttackingUnit == unit)
-        {
-            return Power * GManager.instance.turnStateMachine.AttackingUnit.CriricalMagnification;
-        }
-
-        return Power;
-    }
-}
-#endregion
-
 #endregion
 
 #region 支援力を変化させる効果
@@ -828,6 +944,7 @@ public interface IChangeCCCostEffect
 public interface IChangePlayCost
 {
     int GetPlayCost(int PlayCost, CardSource cardSource);
+    bool isUpDown();
 }
 #endregion
 
@@ -898,6 +1015,27 @@ public interface ICanNotDestroyedByBattle
 public interface ICanNotDestroyedBySkill
 {
     bool CanNotDestroyedBySkill(Unit unit, ICardEffect skill);
+}
+#endregion
+
+#region 「対象のユニットはスキルのコストで撃破されない」を付与する効果
+public interface ICanNotDestroyedByCost
+{
+    bool CanNotDestroyedByCost(Unit unit);
+}
+#endregion
+
+#region 「対象のユニットはターン開始時にアンタップしない」を付与する効果
+public interface ICanNotUntapOnStartTurnEffect
+{
+    bool CanNotUntapOnStartTurn(Unit unit);
+}
+#endregion
+
+#region 「対象のカードに特定のスキルを与える」効果
+public interface IAddSkillEffect
+{
+    List<ICardEffect> GetCardEffect(CardSource card, List<ICardEffect> GetCardEffects, EffectTiming timing);
 }
 #endregion
 

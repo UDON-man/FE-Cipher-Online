@@ -6,14 +6,14 @@ using System.Linq;
 
 public class Tiban_FenikisKing : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass2 = new PowerUpClass();
-        powerUpClass2.SetUpICardEffect("化身の咆哮_空を統べる者", null, new List<Func<Hashtable, bool>>(), -1, false);
-        powerUpClass2.SetUpPowerUpClass(ChangePower, (unit) => unit.Character.Owner == card.Owner);
-        cardEffects.Add(powerUpClass2);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("化身の咆哮_空を統べる者","", null, new List<Func<Hashtable, bool>>(), -1, false,card);
+        powerUpClass.SetUpPowerUpClass(ChangePower, (unit) => unit.Character.Owner == card.Owner, true);
+        cardEffects.Add(powerUpClass);
 
         int ChangePower(Unit unit,int Power)
         {

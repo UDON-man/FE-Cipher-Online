@@ -6,20 +6,16 @@ using System.Linq;
 
 public class Kain_BraveFantomKnight : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("爆速のエクスタシー", new List<Cost>() { new TapCost(), new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { IsExistOnField }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Terminal Velocity";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("爆速のエクスタシー", "Terminal Velocity",new List<Cost>() { new TapCost(), new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() {(hashtable) => IsExistOnField(hashtable,card) }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -35,15 +31,16 @@ public class Kain_BraveFantomKnight : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Custom);
+                    mode: SelectUnitEffect.Mode.Custom,
+                    cardEffect:activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
                 IEnumerator SelectUnitCoroutine(Unit unit)
                 {
-                    StrikeUpClass strikeUpClass = new StrikeUpClass();
-                    strikeUpClass.SetUpStrikeUpClass((_unit, Strike) => 2, (_unit) => _unit == unit);
-                    unit.UntilEachTurnEndUnitEffects.Add(strikeUpClass);
+                    StrikeModifyClass strikeUpClass = new StrikeModifyClass();
+                    strikeUpClass.SetUpStrikeModifyClass((_unit, Strike) => 2, (_unit) => _unit == unit, false);
+                    unit.UntilEachTurnEndUnitEffects.Add((_timing) => strikeUpClass);
 
                     yield return null;
                 }
@@ -52,14 +49,14 @@ public class Kain_BraveFantomKnight : CEntity_Effect
         }
 
         CanNotDestroyedByBattleClass canNotDestroyedByBattleClass = new CanNotDestroyedByBattleClass();
-        canNotDestroyedByBattleClass.SetUpICardEffect("カルネージフォーム", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
+        canNotDestroyedByBattleClass.SetUpICardEffect("カルネージフォーム","", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
         canNotDestroyedByBattleClass.SetUpCanNotDestroyedByBattleClass((AttackingUnit) => AttackingUnit.Character.Owner == card.Owner.Enemy, (DefendingUnit) => DefendingUnit == card.UnitContainingThisCharacter());
         canNotDestroyedByBattleClass.SetCF();
         cardEffects.Add(canNotDestroyedByBattleClass);
 
         bool CanUseCondition(Hashtable hashtable)
         {
-            if(IsExistOnField(hashtable))
+            if(IsExistOnField(hashtable,card))
             {
                 if (card.UnitContainingThisCharacter() != null)
                 {
@@ -89,7 +86,7 @@ public class Kain_BraveFantomKnight : CEntity_Effect
     }
 
     #region 幻影の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         string _masterUnitName = "赤城斗馬";
 
@@ -97,14 +94,10 @@ public class Kain_BraveFantomKnight : CEntity_Effect
 
         if (timing == EffectTiming.OnDiscardSuppot)
         {
-            activateClass_Support[0].SetUpICardEffect("幻影の紋章", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine(_masterUnitName));
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Mirage Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("幻影の紋章", "Mirage Emblem", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true, card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine(_masterUnitName));
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -159,7 +152,7 @@ public class Kain_BraveFantomKnight : CEntity_Effect
 
                     card.Owner.SupportHandCard.gameObject.SetActive(false);
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass_Support[0]);
+                    hashtable.Add("cardEffect", activateClass_Support);
                     yield return StartCoroutine(new IPlayUnit(card, null, isFront, true, hashtable, false).PlayUnit());
                     card.Owner.SupportCards = new List<CardSource>();
                 }

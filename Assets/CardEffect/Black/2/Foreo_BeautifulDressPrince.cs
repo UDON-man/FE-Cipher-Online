@@ -3,24 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-
 public class Foreo_BeautifulDressPrince : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("ドロー", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass[0].SetCCS(card.UnitContainingThisCharacter());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Deadlock";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("ドロー", "Deadlock",new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, 1, false, card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass.SetCCS(card.UnitContainingThisCharacter());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -36,14 +31,15 @@ public class Foreo_BeautifulDressPrince : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }
         }
 
         CanNotMoveBySkillClass canNotMoveBySkillClass = new CanNotMoveBySkillClass();
-        canNotMoveBySkillClass.SetUpICardEffect("新たな戦術",new List<Cost>(),new List<Func<Hashtable, bool>>() { CanUseCondition },-1,false);
+        canNotMoveBySkillClass.SetUpICardEffect("新たな戦術", "",new List<Cost>(),new List<Func<Hashtable, bool>>() { CanUseCondition },-1,false, card);
         canNotMoveBySkillClass.SetUpCanNotMoveBySkillClass((unit) => card.Owner.FieldUnit.Contains(unit));
         cardEffects.Add(canNotMoveBySkillClass);
 

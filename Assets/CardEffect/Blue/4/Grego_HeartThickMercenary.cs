@@ -5,24 +5,20 @@ using System;
 
 public class Grego_HeartThickMercenary : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("飛行特効", (enemyUnit, Power) => Power + 30, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Wing), PowerUpByEnemy.Mode.Attacking);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("飛行特効", (enemyUnit, Power) => Power + 30, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Wing), PowerUpByEnemy.Mode.Attacking, card);
         cardEffects.Add(powerUpByEnemy);
 
         if (timing == EffectTiming.OnCCAnyone)
         {
-            activateClass[0].SetUpICardEffect("戦場のくわせ者", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Imposter on the Battlefield";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("戦場のくわせ者", "Imposter on the Battlefield",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -38,7 +34,10 @@ public class Grego_HeartThickMercenary : CEntity_Effect
 
                                 if (Unit.Character != null)
                                 {
-                                    return Unit.Character == this.card;
+                                    if (Unit.Character == card)
+                                    {
+                                        return true;
+                                    }
                                 }
 
                             }
@@ -64,7 +63,8 @@ public class Grego_HeartThickMercenary : CEntity_Effect
                 CanEndNotMax: false,
                 SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                 AfterSelectUnitCoroutine: null,
-                mode: SelectUnitEffect.Mode.Custom);
+                mode: SelectUnitEffect.Mode.Custom,
+                cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
@@ -97,7 +97,7 @@ public class Grego_HeartThickMercenary : CEntity_Effect
                     if (unit != null)
                     {
                         Hashtable hashtable = new Hashtable();
-                        hashtable.Add("cardEffect", activateClass[0]);
+                        hashtable.Add("cardEffect", activateClass);
                         yield return ContinuousController.instance.StartCoroutine(new IMoveUnit(new List<Unit>() { unit, card.UnitContainingThisCharacter() }, true, hashtable).MoveUnits());
                     }
                 }

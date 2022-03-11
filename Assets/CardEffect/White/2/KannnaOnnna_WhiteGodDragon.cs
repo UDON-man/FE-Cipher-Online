@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class KannnaOnnna_WhiteGodDragon : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("神祖竜の血族", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, CanPowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("神祖竜の血族","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, CanPowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool CanPowerUpCondition(Unit unit)
@@ -28,14 +28,10 @@ public class KannnaOnnna_WhiteGodDragon : CEntity_Effect
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[1].SetUpICardEffect("暴走する力", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Reckless Power";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("暴走する力", "Reckless Power", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -46,9 +42,9 @@ public class KannnaOnnna_WhiteGodDragon : CEntity_Effect
 
                 if(card.Owner.BondCards.Count >= 6)
                 {
-                    StrikeUpClass strikeUpClass = new StrikeUpClass();
-                    strikeUpClass.SetUpStrikeUpClass((unit, Strike) => 2, (unit) => unit == card.UnitContainingThisCharacter());
-                    card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(strikeUpClass);
+                    StrikeModifyClass strikeModifyClass = new StrikeModifyClass();
+                    strikeModifyClass.SetUpStrikeModifyClass((unit, Strike) => 2, (unit) => unit == card.UnitContainingThisCharacter(), false);
+                    card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => strikeModifyClass);
                 }
                 
                 yield return null;

@@ -5,20 +5,16 @@ using System;
 using System.Linq;
 public class Aqua_MeetDemonSingPrincess : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("滅びの予言詩", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Prophecy of Ruin";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("滅びの予言詩", "Prophecy of Ruin", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>(), -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -38,8 +34,8 @@ public class Aqua_MeetDemonSingPrincess : CEntity_Effect
                         if(unit.Weapons.Contains(Weapon.DragonStone))
                         {
                             Hashtable hashtable = new Hashtable();
-                            hashtable.Add("cardEffect", activateClass[0]);
-
+                            hashtable.Add("cardEffect", activateClass);
+                            hashtable.Add("Unit", new Unit(unit.Characters));
                             IDestroyUnit destroyUnit = new IDestroyUnit(unit, 1, BreakOrbMode.Hand, hashtable);
                             destroyUnits.Add(destroyUnit);
 
@@ -70,16 +66,17 @@ public class Aqua_MeetDemonSingPrincess : CEntity_Effect
                                     isShowOpponent: true,
                                     SelectCardCoroutine: null,
                                     AfterSelectCardCoroutine: null,
-                                    mode: SelectHandEffect.Mode.Discard);
+                                    mode: SelectHandEffect.Mode.Discard,
+                                    cardEffect: activateClass);
 
                     yield return ContinuousController.instance.StartCoroutine(selectHandEffect.Activate(null));
                 }
             }
         }
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("異邦の王女", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("異邦の王女", "",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
         cardEffects.Add(powerUpClass);
 
         bool CanUseCondition1(Hashtable hashtable)
@@ -93,13 +90,13 @@ public class Aqua_MeetDemonSingPrincess : CEntity_Effect
         }
 
         AddHasCCClass addHasCCClass = new AddHasCCClass();
-        addHasCCClass.SetUpICardEffect("逢魔への暗道", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition2 }, -1, false);
-        addHasCCClass.SetUpAddHasCCClass((cardSource) => cardSource == this.card, (unit) => true);
+        addHasCCClass.SetUpICardEffect("逢魔への暗道", "",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition2 }, -1, false,card);
+        addHasCCClass.SetUpAddHasCCClass((cardSource) => cardSource == card, (unit) => true);
         cardEffects.Add(addHasCCClass);
 
         ChangeCCCostClass changeCCCostClass = new ChangeCCCostClass();
-        changeCCCostClass.SetUpICardEffect("逢魔への暗道", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition2 }, -1, false);
-        changeCCCostClass.SetUpChangeCCCostClass((cardSource, unit, CCCost) => 2, (cardSource) => cardSource == this.card);
+        changeCCCostClass.SetUpICardEffect("逢魔への暗道","", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition2 }, -1, false,card);
+        changeCCCostClass.SetUpChangeCCCostClass((cardSource, unit, CCCost) => 2, (cardSource) => cardSource == card);
         cardEffects.Add(changeCCCostClass);
 
         bool CanUseCondition2(Hashtable hashtable)

@@ -6,13 +6,13 @@ using System.Linq;
 
 public class Chiki_RememberDragon : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("長寿な竜一族", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, CanPowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("長寿な竜一族","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, CanPowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool CanPowerUpCondition(Unit unit)
@@ -30,14 +30,10 @@ public class Chiki_RememberDragon : CEntity_Effect
 
         if(timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass[0].SetUpICardEffect("神竜の巫女", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() , 1, false);
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Voice of Naga";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass.SetUpICardEffect("神竜の巫女", "Voice of Naga", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() , 1, false,card);
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -51,12 +47,13 @@ public class Chiki_RememberDragon : CEntity_Effect
                         CanTargetCondition_ByPreSelecetedList: null,
                         CanEndSelectCondition: null,
                         MaxCount: 1,
-                        CanNoSelect: true,
+                        CanNoSelect: false,
                         CanEndNotMax: false,
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.SetFaceBond);
+                        mode: SelectHandEffect.Mode.SetFaceBond,
+                        cardEffect:activateClass);
 
                     yield return StartCoroutine(selectHandEffect.Activate(null));
                 }

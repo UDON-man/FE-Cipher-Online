@@ -5,20 +5,16 @@ using System;
 using System.Linq;
 public class Mikaya_SilverHairGirl : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("癒しの手", new List<Cost>() { new TapCost(), new DestroySelfCost() }, null, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Sacrifice";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("癒しの手", "Sacrifice", new List<Cost>() { new TapCost(), new DestroySelfCost() }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -34,15 +30,16 @@ public class Mikaya_SilverHairGirl : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Custom);
+                    mode: SelectUnitEffect.Mode.Custom,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
                 IEnumerator SelectUnitCoroutine(Unit unit)
                 {
-                    PowerUpClass powerUpClass = new PowerUpClass();
-                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 10, (_unit) => _unit == unit);
-                    unit.UntilOpponentTurnEndEffects.Add(powerUpClass);
+                    PowerModifyClass powerUpClass = new PowerModifyClass();
+                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 10, (_unit) => _unit == unit, true);
+                    unit.UntilOpponentTurnEndEffects.Add((_timing) => powerUpClass);
 
                     yield return null;
                 }
@@ -52,51 +49,49 @@ public class Mikaya_SilverHairGirl : CEntity_Effect
         return cardEffects;
     }
 
-
     #region 祈りの紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
-        activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-        activateClass_Support[0].SetUpICardEffect("祈りの紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        supportEffects.Add(activateClass_Support[0]);
-
-        if (ContinuousController.instance.language == Language.ENG)
+        if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].EffectName = "Miracle Emblem";
-        }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("祈りの紋章", "Miracle Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
-        bool CanUseCondition(Hashtable hashtable)
-        {
-            if (card.Owner.SupportCards.Contains(card))
+            bool CanUseCondition(Hashtable hashtable)
             {
-                if (GManager.instance.turnStateMachine.gameContext.NonTurnPlayer == card.Owner)
+                if (card.Owner.SupportCards.Contains(card))
                 {
-                    if (GManager.instance.turnStateMachine.AttackingUnit != null && GManager.instance.turnStateMachine.DefendingUnit != null)
+                    if (GManager.instance.turnStateMachine.gameContext.NonTurnPlayer == card.Owner)
                     {
-                        if (GManager.instance.turnStateMachine.DefendingUnit.Character != null)
+                        if (GManager.instance.turnStateMachine.AttackingUnit != null && GManager.instance.turnStateMachine.DefendingUnit != null)
                         {
-                            if (GManager.instance.turnStateMachine.DefendingUnit.Character.Owner == card.Owner)
+                            if (GManager.instance.turnStateMachine.DefendingUnit.Character != null)
                             {
-                                return true;
+                                if (GManager.instance.turnStateMachine.DefendingUnit.Character.Owner == card.Owner)
+                                {
+                                    return true;
+                                }
                             }
                         }
-                    }
 
+                    }
                 }
+
+                return false;
             }
 
-            return false;
-        }
+            IEnumerator ActivateCoroutine()
+            {
+                CanNotCriticalClass canNotCriticalClass = new CanNotCriticalClass();
+                canNotCriticalClass.SetUpCanNotCriticalClass((unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner != card.Owner);
+                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add((_timing) => canNotCriticalClass);
 
-        IEnumerator ActivateCoroutine()
-        {
-            CanNotCriticalClass canNotCriticalClass = new CanNotCriticalClass();
-            canNotCriticalClass.SetUpCanNotCriticalClass((unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner != card.Owner);
-            GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add(canNotCriticalClass);
-
-            yield return null;
+                yield return null;
+            }
         }
 
         return supportEffects;

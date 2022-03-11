@@ -6,18 +6,18 @@ using System.Linq;
 using Photon.Pun;
 public class Saza_TheifBoy : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass1 = new PowerUpClass();
-        powerUpClass1.SetUpICardEffect("鋼のナイフ", null, null, -1, false);
-        powerUpClass1.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass1 = new PowerModifyClass();
+        powerUpClass1.SetUpICardEffect("鋼のナイフ","", null, null, -1, false,card);
+        powerUpClass1.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
         powerUpClass1.SetLvS(card.UnitContainingThisCharacter(), 2);
         cardEffects.Add(powerUpClass1);
 
         RangeUpClass rangeUpClass = new RangeUpClass();
-        rangeUpClass.SetUpICardEffect("鋼のナイフ", null, null, -1, false);
+        rangeUpClass.SetUpICardEffect("鋼のナイフ","", null, null, -1, false,card);
         rangeUpClass.SetUpRangeUpClass((unit, Range) => { Range.Add(1); Range.Add(2); return Range; }, (unit) => unit == card.UnitContainingThisCharacter());
         rangeUpClass.SetLvS(card.UnitContainingThisCharacter(), 2);
         cardEffects.Add(rangeUpClass);
@@ -27,15 +27,16 @@ public class Saza_TheifBoy : CEntity_Effect
 
     #region 盗賊の紋章
 
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpICardEffect("盗賊の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            supportEffects.Add(activateClass_Support[0]);
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("盗賊の紋章", "Theif Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            supportEffects.Add(activateClass_Support);
 
             IEnumerator ActivateCoroutine()
             {
@@ -46,7 +47,7 @@ public class Saza_TheifBoy : CEntity_Effect
                     CardSource cardSource = card.Owner.Enemy.LibraryCards[0];
 
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass_Support[0]);
+                    hashtable.Add("cardEffect", activateClass_Support);
                     yield return ContinuousController.instance.StartCoroutine(new IShowLibraryCard(new List<CardSource>() { cardSource }, hashtable, false).ShowLibraryCard());
 
                     if (card.Owner.isYou)

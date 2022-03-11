@@ -5,20 +5,16 @@ using System;
 using System.Linq;
 public class Kevin_FireKnightSoul : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnCCAnyone)
         {
-            activateClass[0].SetUpICardEffect("一発屋", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Gamble";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("一発屋", "Gamble",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -28,9 +24,12 @@ public class Kevin_FireKnightSoul : CEntity_Effect
                     {
                         if (hashtable["Unit"] is Unit)
                         {
-                            Unit CCUnit = (Unit)hashtable["Unit"];
+                            Unit Unit = (Unit)hashtable["Unit"];
 
-                            return CCUnit.Character == this.card;
+                            if(Unit.Character == card)
+                            {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -40,17 +39,17 @@ public class Kevin_FireKnightSoul : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 50, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 50, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }
         }
 
-        PowerUpClass powerUpClass1 = new PowerUpClass();
-        powerUpClass1.SetUpICardEffect("永遠の好敵手?", null, null, -1, false);
-        powerUpClass1.SetUpPowerUpClass((unit, Power) => Power + 30, PowerUpCondition);
+        PowerModifyClass powerUpClass1 = new PowerModifyClass();
+        powerUpClass1.SetUpICardEffect("永遠の好敵手?","", null, null, -1, false,card);
+        powerUpClass1.SetUpPowerUpClass((unit, Power) => Power + 30, PowerUpCondition, true);
         cardEffects.Add(powerUpClass1);
 
         bool PowerUpCondition(Unit unit)

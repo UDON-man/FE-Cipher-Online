@@ -5,53 +5,44 @@ using System;
 using System.Linq;
 public class Irace_MysticalStomach : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("大喰らい", new List<Cost>() { new DiscardHandCost(1, (cardSource) => !cardSource.UnitNames.Contains("イレース")) }, null, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Voracious Appetite";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("大喰らい", "Voracious Appetite", new List<Cost>() { new DiscardHandCost(1, (cardSource) => !cardSource.UnitNames.Contains("イレース")) }, null, -1, false, card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }
         }
 
         CanAttackTargetUnitRegardlessRangeClass canAttackTargetUnitRegardlessRangeClass = new CanAttackTargetUnitRegardlessRangeClass();
-        canAttackTargetUnitRegardlessRangeClass.SetUpICardEffect("お腹いっぱいです", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
+        canAttackTargetUnitRegardlessRangeClass.SetUpICardEffect("お腹いっぱいです", "", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
         canAttackTargetUnitRegardlessRangeClass.SetUpCanAttackTargetUnitRegardlessRangeClass((AttackingUnit) => AttackingUnit == card.UnitContainingThisCharacter(), (DefendingUnit) => DefendingUnit.Character.Owner.GetBackUnits().Contains(DefendingUnit));
         cardEffects.Add(canAttackTargetUnitRegardlessRangeClass);
 
-        StrikeUpClass strikeUpClass = new StrikeUpClass();
-        strikeUpClass.SetUpICardEffect("お腹いっぱいです", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        strikeUpClass.SetUpStrikeUpClass((unit,Strike) => 2,(unit) => unit == card.UnitContainingThisCharacter());
-        cardEffects.Add(strikeUpClass);
+        StrikeModifyClass strikeModifyClass = new StrikeModifyClass();
+        strikeModifyClass.SetUpICardEffect("お腹いっぱいです", "", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+        strikeModifyClass.SetUpStrikeModifyClass((unit, Strike) => 2, (unit) => unit == card.UnitContainingThisCharacter(), false);
+        cardEffects.Add(strikeModifyClass);
 
         bool CanUseCondition(Hashtable hashtable)
         {
-            if (IsExistOnField(hashtable))
+            if (IsExistOnField(hashtable, card))
             {
-                ICardEffect cardEffect = activateClass[0];
-
-                if (cardEffect.EffectName == "大喰らい" || cardEffect.EffectName == "Voracious Appetite")
+                if (card.cEntity_EffectController.GetUseCountThisTurn("大喰らい") >= 7)
                 {
-                    if (cardEffect.UseCountThisTurn >= 7)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
 
@@ -62,15 +53,16 @@ public class Irace_MysticalStomach : CEntity_Effect
     }
 
     #region 魔術の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("魔術の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("魔術の紋章", "Magic Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -110,7 +102,8 @@ public class Irace_MysticalStomach : CEntity_Effect
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Discard);
+                        mode: SelectHandEffect.Mode.Discard,
+                        cardEffect: activateClass_Support);
 
                     yield return StartCoroutine(selectHandEffect.Activate(null));
                 }
@@ -120,5 +113,5 @@ public class Irace_MysticalStomach : CEntity_Effect
 
         return supportEffects;
     }
-    #endregion
+    #endregion}
 }

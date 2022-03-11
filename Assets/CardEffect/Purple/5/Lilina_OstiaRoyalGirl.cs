@@ -6,16 +6,17 @@ using System;
 public class Lilina_OstiaRoyalGirl : CEntity_Effect
 {
     #region 支援スキル
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         #region 魔術の紋章
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("魔術の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("魔術の紋章", "Magic Emblem",null, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false,card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
@@ -55,7 +56,8 @@ public class Lilina_OstiaRoyalGirl : CEntity_Effect
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Discard);
+                        mode: SelectHandEffect.Mode.Discard,
+                        cardEffect: activateClass_Support);
 
                     yield return StartCoroutine(selectHandEffect.Activate(null));
                 }
@@ -66,14 +68,10 @@ public class Lilina_OstiaRoyalGirl : CEntity_Effect
         #region 祈りの紋章
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[1].SetUpICardEffect("祈りの紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[1].EffectName = "Miracle Emblem";
-            }
+            ActivateClass activateClass_Support1 = new ActivateClass();
+            activateClass_Support1.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support1.SetUpICardEffect("祈りの紋章", "Miracle Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            supportEffects.Add(activateClass_Support1);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -102,7 +100,7 @@ public class Lilina_OstiaRoyalGirl : CEntity_Effect
             {
                 CanNotCriticalClass canNotCriticalClass = new CanNotCriticalClass();
                 canNotCriticalClass.SetUpCanNotCriticalClass((unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner != card.Owner);
-                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add(canNotCriticalClass);
+                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add((_timing) => canNotCriticalClass);
 
                 yield return null;
             }

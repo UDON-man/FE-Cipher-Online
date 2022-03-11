@@ -5,24 +5,20 @@ using System;
 
 public class Meg_NaiveVillagerGirl : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnAttackedAlly)
         {
-            activateClass[0].SetUpICardEffect("メグの盾", new List<Cost>() { new TapCost() }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Meg's Shield";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("メグの盾", "Meg's Shield", new List<Cost>() { new TapCost() }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.DefendingUnit != null)
                     {
@@ -30,7 +26,7 @@ public class Meg_NaiveVillagerGirl : CEntity_Effect
                         {
                             if (GManager.instance.turnStateMachine.DefendingUnit.Character.Owner == card.Owner)
                             {
-                                if (GManager.instance.turnStateMachine.DefendingUnit != this.card.UnitContainingThisCharacter())
+                                if (GManager.instance.turnStateMachine.DefendingUnit != card.UnitContainingThisCharacter())
                                 {
                                     if (card.Owner.GetFrontUnits().Contains(card.UnitContainingThisCharacter()))
                                     {
@@ -57,7 +53,7 @@ public class Meg_NaiveVillagerGirl : CEntity_Effect
                 #endregion
 
                 //防御ユニットを更新
-                GManager.instance.turnStateMachine.DefendingUnit = this.card.UnitContainingThisCharacter();
+                GManager.instance.turnStateMachine.DefendingUnit = card.UnitContainingThisCharacter();
 
                 #region 新防御ユニットのエフェクトを表示
                 GManager.instance.turnStateMachine.DefendingUnit.ShowingFieldUnitCard.SetDefenderEffect();
@@ -76,20 +72,16 @@ public class Meg_NaiveVillagerGirl : CEntity_Effect
     }
 
     #region 防御の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("防御の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Defense Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("防御の紋章", "Defense Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -112,9 +104,9 @@ public class Meg_NaiveVillagerGirl : CEntity_Effect
 
             IEnumerator ActivateCoroutine()
             {
-                PowerUpClass powerUpClass = new PowerUpClass();
-                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == GManager.instance.turnStateMachine.DefendingUnit && unit.Character.Owner == card.Owner);
-                GManager.instance.turnStateMachine.DefendingUnit.UntilEndBattleEffects.Add(powerUpClass);
+                PowerModifyClass powerUpClass = new PowerModifyClass();
+                powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == GManager.instance.turnStateMachine.DefendingUnit && unit.Character.Owner == card.Owner, true);
+                GManager.instance.turnStateMachine.DefendingUnit.UntilEndBattleEffects.Add((_timing) => powerUpClass);
 
                 yield return null;
             }

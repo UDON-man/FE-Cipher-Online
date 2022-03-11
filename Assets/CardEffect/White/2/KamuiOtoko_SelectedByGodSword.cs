@@ -6,20 +6,16 @@ using System.Linq;
 
 public class KamuiOtoko_SelectedByGodSword : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("光の御旗", new List<Cost>() { new ReverseCost(3, (cardSource) => true), new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("カムイ(男)")) }, null, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine1());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Banner of Light";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("光の御旗", "Banner of Light", new List<Cost>() { new ReverseCost(3, (cardSource) => true), new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("カムイ(男)")) }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine1());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine1()
             {
@@ -38,7 +34,8 @@ public class KamuiOtoko_SelectedByGodSword : CEntity_Effect
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Deploy);
+                        mode: SelectHandEffect.Mode.Deploy,
+                        cardEffect: activateClass);
 
                     bool CanSelectCondition(CardSource cardSource)
                     {
@@ -61,21 +58,16 @@ public class KamuiOtoko_SelectedByGodSword : CEntity_Effect
 
                 foreach (Unit unit in card.Owner.FieldUnit)
                 {
-                    PowerUpClass powerUpClass = new PowerUpClass();
-                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 30, (_unit) => _unit == unit);
-                    unit.UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                    PowerModifyClass powerUpClass = new PowerModifyClass();
+                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 30, (_unit) => _unit == unit, true);
+                    unit.UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
                 }
             }
 
-
-            activateClass[1].SetUpICardEffect("汚れなき白刃", new List<Cost>() { new ReverseCost(3, (cardSource) => true), new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("カムイ(男)")) }, null, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine2());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Untarnished White Sword";
-            }
+            ActivateClass activateClass1 = new ActivateClass();
+            activateClass1.SetUpICardEffect("汚れなき白刃", "Untarnished White Sword", new List<Cost>() { new ReverseCost(3, (cardSource) => true), new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("カムイ(男)")) }, null, -1, false,card);
+            activateClass1.SetUpActivateClass((hashtable) => ActivateCoroutine2());
+            cardEffects.Add(activateClass1);
 
             IEnumerator ActivateCoroutine2()
             {
@@ -91,7 +83,8 @@ public class KamuiOtoko_SelectedByGodSword : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Destroy);
+                    mode: SelectUnitEffect.Mode.Destroy,
+                    cardEffect: activateClass);
 
                 yield return StartCoroutine(selectUnitEffect.Activate(null));
 
@@ -111,7 +104,9 @@ public class KamuiOtoko_SelectedByGodSword : CEntity_Effect
                     mode: SelectCardEffect.Mode.AddHand,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return StartCoroutine(selectCardEffect.Activate(null));
             }

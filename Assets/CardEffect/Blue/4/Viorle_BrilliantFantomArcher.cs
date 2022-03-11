@@ -6,20 +6,16 @@ using System.Linq;
 
 public class Viorle_BrilliantFantomArcher : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("オール・デッド", new List<Cost>() { new TapCost(), new ReverseCost(1,(cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "All Dead";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("オール・デッド", "All Dead", new List<Cost>() { new TapCost(), new ReverseCost(1,(cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
@@ -30,7 +26,6 @@ public class Viorle_BrilliantFantomArcher : CEntity_Effect
 
                 return false;
             }
-
 
             IEnumerator ActivateCoroutine()
             {
@@ -50,8 +45,8 @@ public class Viorle_BrilliantFantomArcher : CEntity_Effect
                             if(unit.Character.PlayCost == 1)
                             {
                                 Hashtable hashtable = new Hashtable();
-                                hashtable.Add("cardEffect", activateClass[0]);
-
+                                hashtable.Add("cardEffect", activateClass);
+                                hashtable.Add("Unit", new Unit(unit.Characters));
                                 IDestroyUnit destroyUnit = new IDestroyUnit(unit, 1, BreakOrbMode.Hand, hashtable);
                                 yield return ContinuousController.instance.StartCoroutine(destroyUnit.Destroy());
                             }
@@ -62,7 +57,7 @@ public class Viorle_BrilliantFantomArcher : CEntity_Effect
         }
 
         CanNotDestroyedByBattleClass canNotDestroyedByBattleClass = new CanNotDestroyedByBattleClass();
-        canNotDestroyedByBattleClass.SetUpICardEffect("カルネージフォーム", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
+        canNotDestroyedByBattleClass.SetUpICardEffect("カルネージフォーム","", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
         canNotDestroyedByBattleClass.SetUpCanNotDestroyedByBattleClass((AttackingUnit) => AttackingUnit.Character.Owner == card.Owner.Enemy, (DefendingUnit) => DefendingUnit == card.UnitContainingThisCharacter());
         canNotDestroyedByBattleClass.SetCF();
         cardEffects.Add(canNotDestroyedByBattleClass);
@@ -95,7 +90,7 @@ public class Viorle_BrilliantFantomArcher : CEntity_Effect
     }
 
     #region 幻影の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         string _masterUnitName = "弓弦エレオノーラ";
 
@@ -103,14 +98,10 @@ public class Viorle_BrilliantFantomArcher : CEntity_Effect
 
         if (timing == EffectTiming.OnDiscardSuppot)
         {
-            activateClass_Support[0].SetUpICardEffect("幻影の紋章", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine(_masterUnitName));
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Mirage Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("幻影の紋章", "Mirage Emblem",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine(_masterUnitName));
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -165,7 +156,7 @@ public class Viorle_BrilliantFantomArcher : CEntity_Effect
 
                     card.Owner.SupportHandCard.gameObject.SetActive(false);
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass_Support[0]);
+                    hashtable.Add("cardEffect", activateClass_Support);
                     yield return StartCoroutine(new IPlayUnit(card, null, isFront, true, hashtable, false).PlayUnit());
                     card.Owner.SupportCards = new List<CardSource>();
                 }

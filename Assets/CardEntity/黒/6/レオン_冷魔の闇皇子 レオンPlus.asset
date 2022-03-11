@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30EC\u30AA\u30F3_\u51B7\u9B54\u306E\u95C7\u7687\u5B50 \u30EC\u30AA\u30F3Plus"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 50de456107d5a4847972684c97e210a4, type: 3}
+  CardImage_English: {fileID: 21300000, guid: d9bd58c8764b61b4998e78e4923f29ab, type: 3}
+  CardName: "\u51B7\u9B54\u306E\u95C7\u7687\u5B50 \u30EC\u30AA\u30F3"
+  UnitName: "\u30EC\u30AA\u30F3"
+  UnitName_English: Leo
+  PlayCost: 4
+  HasCC: 1
+  CCCost: 3
+  cardColors: 06000000
+  Power: 60
+  SupportPower: 20
+  Ranges: 0100000002000000
+  sex: 0
+  Weapons: 0300000008000000
+  ClassName: Leon_DarkPrinceOfChillingMagic
+  SkillNames:
+  - "\u754F\u6016"
+  - "\u51B7\u305F\u304D\u7634\u6C17"
+  SupportSkillNames: []
+  CardID: 682
+  MaxCountInDeck: 4

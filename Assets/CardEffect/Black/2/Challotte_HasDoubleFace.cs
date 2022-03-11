@@ -6,13 +6,13 @@ using System.Linq;
 
 public class Challotte_HasDoubleFace : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("夢は玉の輿", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + card.Owner.Enemy.FieldUnit.Count((_unit) => _unit.Character.sex.Contains(Sex.female)), (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("夢は玉の輿", "", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + card.Owner.Enemy.FieldUnit.Count((_unit) => _unit.Character.sex.Contains(Sex.female)), (unit) => unit == card.UnitContainingThisCharacter(), true);
         cardEffects.Add(powerUpClass);
 
         bool CanUseCondition(Hashtable hashtable)

@@ -7,24 +7,20 @@ using Photon.Pun;
 
 public class Ema_FinallyDragon : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[0].SetUpICardEffect("はりきっていきましょー!", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Let's go enthusiastically!";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("はりきっていきましょー!", "Let's go enthusiastically!",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (hashtable != null)
                     {
@@ -60,7 +56,8 @@ public class Ema_FinallyDragon : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }
@@ -69,14 +66,10 @@ public class Ema_FinallyDragon : CEntity_Effect
 
         else if (timing == EffectTiming.OnDiscardHand)
         {
-            activateClass[1].SetUpICardEffect("そうはいきません!", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "You don't have it your way!";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("そうはいきません!", "You don't have it your way!",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -99,13 +92,13 @@ public class Ema_FinallyDragon : CEntity_Effect
                                         {
                                             if (cardEffect.card() != null)
                                             {
-                                                if (cardEffect.card().Owner == this.card.Owner.Enemy)
+                                                if (cardEffect.card().Owner == card.Owner.Enemy)
                                                 {
-                                                    if (cardSource == this.card)
+                                                    if (cardSource == card)
                                                     {
                                                         if (card.Owner.BondCards.Count((_cardSource) => !_cardSource.IsReverse && _cardSource.cardColors.Contains(CardColor.Green)) > 0)
                                                         {
-                                                            if (this.card.CanPlayAsNewUnit())
+                                                            if (card.CanPlayAsNewUnit())
                                                             {
                                                                 return true;
                                                             }
@@ -153,7 +146,7 @@ public class Ema_FinallyDragon : CEntity_Effect
                 #endregion
 
                 Hashtable hashtable = new Hashtable();
-                hashtable.Add("cardEffect", activateClass[1]);
+                hashtable.Add("cardEffect", activateClass);
                 yield return StartCoroutine(new IPlayUnit(card, null, isFront, true, hashtable, false).PlayUnit());
             }
         }

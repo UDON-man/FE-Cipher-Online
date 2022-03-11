@@ -7,13 +7,13 @@ using Photon.Pun;
 
 public class Nefenie_FastLAnceForRelease : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("怒れる槍姫", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10 * (card.UnitContainingThisCharacter().Characters.Count - 1), CanPowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("怒れる槍姫","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10 * (card.UnitContainingThisCharacter().Characters.Count - 1), CanPowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool CanPowerUpCondition(Unit unit)
@@ -35,18 +35,14 @@ public class Nefenie_FastLAnceForRelease : CEntity_Effect
 
         if (timing == EffectTiming.OnCriticalAnyone)
         {
-            activateClass[1].SetUpICardEffect("秘めた激情", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Tempered Wrath";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("秘めた激情", "Tempered Wrath",new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit != null)
                     {
@@ -87,7 +83,9 @@ public class Nefenie_FastLAnceForRelease : CEntity_Effect
                     mode: SelectCardEffect.Mode.Custom,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 IEnumerator AfterSelectCardCoroutine(List<CardSource> cardSources)
                 {

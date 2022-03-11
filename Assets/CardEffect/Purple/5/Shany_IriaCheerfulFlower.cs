@@ -5,13 +5,13 @@ using System;
 using System.Linq;
 public class Shany_IriaCheerfulFlower : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("イリアの三天馬", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, CanPowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("イリアの三天馬","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, CanPowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool CanPowerUpCondition(Unit unit)
@@ -44,18 +44,14 @@ public class Shany_IriaCheerfulFlower : CEntity_Effect
                     AfterSelectUnitCoroutine: null,
                     mode: SelectUnitEffect.Mode.Tap);
 
-            activateClass[0].SetUpICardEffect("トライアングルアタック", new List<Cost>() { selectAllyCost }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Triangle Attack";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("トライアングルアタック", "Triangle Attack", new List<Cost>() { selectAllyCost }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -101,13 +97,13 @@ public class Shany_IriaCheerfulFlower : CEntity_Effect
             {
                 Unit targetUnit = card.UnitContainingThisCharacter();
 
-                PowerUpClass _powerUpClass = new PowerUpClass();
-                _powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, (unit) => unit == targetUnit);
-                targetUnit.UntilEndBattleEffects.Add(_powerUpClass);
+                PowerModifyClass _powerUpClass = new PowerModifyClass();
+                _powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 30, (unit) => unit == targetUnit, true);
+                targetUnit.UntilEndBattleEffects.Add((_timing) => _powerUpClass);
 
                 CanNotBeEvadedClass canNotBeEvadedClass = new CanNotBeEvadedClass();
                 canNotBeEvadedClass.SetUpCanNotBeEvadedClass((AttackingUnit) => AttackingUnit == card.UnitContainingThisCharacter(), (DefendingUnit) => true);
-                targetUnit.UntilEndBattleEffects.Add(canNotBeEvadedClass);
+                targetUnit.UntilEndBattleEffects.Add((_timing) => canNotBeEvadedClass);
 
                 yield return null;
             }

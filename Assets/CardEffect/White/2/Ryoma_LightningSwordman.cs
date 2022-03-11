@@ -6,20 +6,16 @@ using System.Linq;
 
 public class Ryoma_LightningSwordman : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnStartTurn)
         {
-            activateClass[0].SetUpICardEffect("不屈の軍勢", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Unyielding Forces";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("不屈の軍勢", "Unyielding Forces", new List<Cost>() { new ReverseCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
@@ -49,7 +45,9 @@ public class Ryoma_LightningSwordman : CEntity_Effect
                     mode: SelectCardEffect.Mode.Deploy,
                     root: SelectCardEffect.Root.Trash,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 
@@ -74,9 +72,9 @@ public class Ryoma_LightningSwordman : CEntity_Effect
             }
         }
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("雷神無双", null, new List<Func<Hashtable, bool>>() , -1, false);
-        powerUpClass.SetUpPowerUpClass(ChangePower, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("雷神無双","", null, new List<Func<Hashtable, bool>>() , -1, false,card);
+        powerUpClass.SetUpPowerUpClass(ChangePower, (unit) => unit == card.UnitContainingThisCharacter(), true);
         cardEffects.Add(powerUpClass);
 
         int ChangePower(Unit unit, int Power)
@@ -112,7 +110,7 @@ public class Ryoma_LightningSwordman : CEntity_Effect
         }
 
         RangeUpClass rangeUpClass = new RangeUpClass();
-        rangeUpClass.SetUpICardEffect("雷神無双", null, new List<Func<Hashtable, bool>>() , -1, false);
+        rangeUpClass.SetUpICardEffect("雷神無双","", null, new List<Func<Hashtable, bool>>() , -1, false,card);
         rangeUpClass.SetUpRangeUpClass(ChangeRange, (unit) => unit == card.UnitContainingThisCharacter());
         cardEffects.Add(rangeUpClass);
 
@@ -149,46 +147,14 @@ public class Ryoma_LightningSwordman : CEntity_Effect
             return Range;
         }
 
-        //if(CanUseCondition(null))
-        {
-            InvalidationClass invalidationClass = new InvalidationClass();
-            invalidationClass.SetUpICardEffect("雷神無双", null, new List<Func<Hashtable, bool>>() , -1, false);
-            invalidationClass.SetUpInvalidationClass(InvalidateCondition);
-            cardEffects.Add(invalidationClass);
-        }
-
-        bool CanUseCondition(Hashtable hashtable)
-        {
-            if (card.UnitContainingThisCharacter() != null)
-            {
-                if(card.Owner.GetFrontUnits().Contains(card.UnitContainingThisCharacter()))
-                {
-                    int count = 0;
-
-                    foreach (Unit _unit in card.Owner.FieldUnit)
-                    {
-                        if (_unit != card.UnitContainingThisCharacter())
-                        {
-                            if (_unit.Character.cardColors.Contains(CardColor.White))
-                            {
-                                count++;
-                            }
-                        }
-                    }
-
-                    if (count >= 4)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
+        InvalidationClass invalidationClass = new InvalidationClass();
+        invalidationClass.SetUpICardEffect("雷神無双","", null, new List<Func<Hashtable, bool>>(), -1, false,card);
+        invalidationClass.SetUpInvalidationClass(InvalidateCondition);
+        cardEffects.Add(invalidationClass);
 
         bool InvalidateCondition(ICardEffect cardEffect)
         {
-            if (cardEffect.EffectName == "不屈の軍勢"|| cardEffect.EffectName == "Unyielding Forces")
+            if (cardEffect.EffectName == "不屈の軍勢")
             {
                 if (card.UnitContainingThisCharacter() != null)
                 {
@@ -213,8 +179,7 @@ public class Ryoma_LightningSwordman : CEntity_Effect
                         }
                     }
                 }
-            }
-                
+            } 
 
             return false;
         }

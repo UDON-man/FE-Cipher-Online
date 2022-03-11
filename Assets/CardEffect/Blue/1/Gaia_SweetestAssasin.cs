@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Gaia_SweetestAssasin : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
@@ -12,14 +12,10 @@ public class Gaia_SweetestAssasin : CEntity_Effect
         {
             bool check = false;
 
-            activateClass[0].SetUpICardEffect("暗殺", new List<Cost>() { new TapCost() }, null, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Assassination";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("暗殺", "Assassination",new List<Cost>() { new TapCost() }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -29,34 +25,40 @@ public class Gaia_SweetestAssasin : CEntity_Effect
                 {
                     CardSource cardSource = card.Owner.Enemy.LibraryCards[0];
 
-                    //ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ShowCardEffect(new List<CardSource>() { cardSource }, "Library Card", false));
-
                     Hashtable hashtable = new Hashtable();
-                    hashtable.Add("cardEffect", activateClass[0]);
+                    hashtable.Add("cardEffect", activateClass);
                     yield return ContinuousController.instance.StartCoroutine(new IShowLibraryCard(new List<CardSource>() { cardSource }, hashtable, false).ShowLibraryCard());
 
                     if (cardSource.PlayCost >= 3)
                     {
-                        SelectUnitEffect selectUnitEffect = GetComponent<SelectUnitEffect>();
+                        ActivateClass activateClass1 = new ActivateClass();
+                        activateClass1.SetUpICardEffect("","", new List<Cost>() { new ReverseCost(2, (_cardSource) => true) }, null, -1, true,card);
+                        activateClass1.SetUpActivateClass((_hashtable) => ActivateCoroutine1());
 
-                        selectUnitEffect.SetUpICardEffect("", new List<Cost>() { new ReverseCost(2, (_cardSource) => true) }, null, -1, true);
+                        IEnumerator ActivateCoroutine1()
+                        {
+                            SelectUnitEffect selectUnitEffect = GetComponent<SelectUnitEffect>();
 
-                        selectUnitEffect.SetUp(
-                SelectPlayer: card.Owner,
-                CanTargetCondition: (unit) => unit.Character.Owner != card.Owner,
-                CanTargetCondition_ByPreSelecetedList: null,
-                CanEndSelectCondition: null,
-                MaxCount: 1,
-                CanNoSelect: false,
-                CanEndNotMax: false,
-                SelectUnitCoroutine: null,
-                AfterSelectUnitCoroutine: null,
-                mode: SelectUnitEffect.Mode.Destroy);
+                            selectUnitEffect.SetUp(
+                                SelectPlayer: card.Owner,
+                                CanTargetCondition: (unit) => unit.Character.Owner != card.Owner,
+                                CanTargetCondition_ByPreSelecetedList: null,
+                                CanEndSelectCondition: null,
+                                MaxCount: 1,
+                                CanNoSelect: false,
+                                CanEndNotMax: false,
+                                SelectUnitCoroutine: null,
+                                AfterSelectUnitCoroutine: null,
+                                mode: SelectUnitEffect.Mode.Destroy,
+                                cardEffect: activateClass1);
 
-                        if (selectUnitEffect.CanUse(null))
+                            yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
+                        }
+
+                        if (activateClass1.CanUse(null))
                         {
                             check = true;
-                            yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate_Optional_Cost_Execute(null, "Do you pay cost?"));
+                            yield return ContinuousController.instance.StartCoroutine(activateClass1.Activate_Optional_Cost_Execute(null, "Do you pay cost?"));
                         }
                     }
 
@@ -71,17 +73,13 @@ public class Gaia_SweetestAssasin : CEntity_Effect
             }
         }
 
-        else if(timing == EffectTiming.OnDestroyedOther)
+        else if(timing == EffectTiming.OnDestroyedAnyone)
         {
-            activateClass[1].SetUpICardEffect("報酬はスイーツ", new List<Cost>() , new List<System.Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass[1].SetCCS(card.UnitContainingThisCharacter());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Pay me in candy.";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("報酬はスイーツ", "Pay me in candy.", new List<Cost>() , new List<System.Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass.SetCCS(card.UnitContainingThisCharacter());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -100,7 +98,7 @@ public class Gaia_SweetestAssasin : CEntity_Effect
 
                             if (cardEffect.card() != null)
                             {
-                                if(cardEffect.card() == this.card)
+                                if(cardEffect.card() ==card)
                                 {
                                     return true;
                                 }

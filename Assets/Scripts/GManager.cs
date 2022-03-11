@@ -133,16 +133,21 @@ public class GManager : MonoBehaviour
 
         instance = this;
 
+        StartCoroutine(AwakeCoroutine());
+    }
+
+    IEnumerator AwakeCoroutine()
+    {
 #if UNITY_EDITOR
         if (!PhotonNetwork.IsConnected)
         {
             IsAI = true;
-            
+
         }
 #endif
-        if(ContinuousController.instance != null)
+        if (ContinuousController.instance != null)
         {
-            if(ContinuousController.instance.isAI)
+            if (ContinuousController.instance.isAI)
             {
                 IsAI = true;
             }
@@ -150,7 +155,7 @@ public class GManager : MonoBehaviour
 
         turnStateMachine = this.gameObject.AddComponent<TurnStateMachine>();
 
-        Init();
+        yield return StartCoroutine(Init());
 
         StartCoroutine(turnStateMachine.Init());
 
@@ -203,8 +208,10 @@ public class GManager : MonoBehaviour
         }
     }
 
-    public void Init()
+    public IEnumerator Init()
     {
+        yield return StartCoroutine(GManager.instance.LoadingObject.StartLoading("Now Loading"));
+
         selectCommandPanel.Off();
 
         BackButton.CloseSelectCommandButton();
@@ -229,7 +236,7 @@ public class GManager : MonoBehaviour
 
         //ShowDrag.SetActive(false);
 
-        trashCardPanel.CloseSelectCardPanel();
+        yield return StartCoroutine(trashCardPanel.CloseSelectCardPanelCoroutine());
 
         optionPanel.Init();
 

@@ -6,24 +6,20 @@ using System.Linq;
 
 public class KamuiOtoko_SealedDragon : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[0].SetUpICardEffect("竜の咆哮", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Dragon's Roar";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("竜の咆哮", "Dragon's Roar", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (hashtable != null)
                     {
@@ -56,20 +52,22 @@ public class KamuiOtoko_SealedDragon : CEntity_Effect
                 SelectCardEffect selectCardEffect = GetComponent<SelectCardEffect>();
 
                 selectCardEffect.SetUp(
-                CanTargetCondition: (cardSource) => !cardSource.IsReverse,
-                CanTargetCondition_ByPreSelecetedList: null,
-                CanEndSelectCondition: null,
-                CanNoSelect: () => false,
-                SelectCardCoroutine: null,
-                AfterSelectCardCoroutine: null,
-                Message: "Select a card to reverse.",
-                MaxCount: 1,
-                CanEndNotMax: false,
-                isShowOpponent: true,
-                mode: SelectCardEffect.Mode.Reverse,
-                root: SelectCardEffect.Root.Bond,
-                CustomRootCardList: null,
-                CanLookReverseCard: true);
+                    CanTargetCondition: (cardSource) => !cardSource.IsReverse,
+                    CanTargetCondition_ByPreSelecetedList: null,
+                    CanEndSelectCondition: null,
+                    CanNoSelect: () => false,
+                    SelectCardCoroutine: null,
+                    AfterSelectCardCoroutine: null,
+                    Message: "Select a card to reverse.",
+                    MaxCount: 1,
+                    CanEndNotMax: false,
+                    isShowOpponent: true,
+                    mode: SelectCardEffect.Mode.Reverse,
+                    root: SelectCardEffect.Root.Bond,
+                    CustomRootCardList: null,
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
             }

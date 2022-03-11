@@ -5,28 +5,24 @@ using System;
 
 public class Bnowa_WalkingLegend : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("重装の心得", (enemyUnit, Power) => Power + 20, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => !enemyUnit.Weapons.Contains(Weapon.MagicBook), PowerUpByEnemy.Mode.Defending);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("重装の心得", (enemyUnit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => !enemyUnit.Weapons.Contains(Weapon.MagicBook), PowerUpByEnemy.Mode.Defending,card);
         cardEffects.Add(powerUpByEnemy);
 
         if (timing == EffectTiming.OnAttackedAlly)
         {
-            activateClass[0].SetUpICardEffect("鉄壁の盾", new List<Cost>() { new ReverseCost(1,(cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Impregnable Wall";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("鉄壁の盾", "Impregnable Wall", new List<Cost>() { new ReverseCost(1,(cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if(IsExistOnField(hashtable))
+                if(IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.DefendingUnit != null)
                     {
@@ -34,7 +30,7 @@ public class Bnowa_WalkingLegend : CEntity_Effect
                         {
                             if (GManager.instance.turnStateMachine.DefendingUnit.Character.Owner == card.Owner)
                             {
-                                if (GManager.instance.turnStateMachine.DefendingUnit != this.card.UnitContainingThisCharacter())
+                                if (GManager.instance.turnStateMachine.DefendingUnit != card.UnitContainingThisCharacter())
                                 {
                                     if (card.Owner.GetFrontUnits().Contains(card.UnitContainingThisCharacter()))
                                     {
@@ -58,7 +54,7 @@ public class Bnowa_WalkingLegend : CEntity_Effect
                 #endregion
                 
                 //防御ユニットを更新
-                GManager.instance.turnStateMachine.DefendingUnit = this.card.UnitContainingThisCharacter();
+                GManager.instance.turnStateMachine.DefendingUnit = card.UnitContainingThisCharacter();
 
                 #region 新防御ユニットのエフェクトを表示
                 GManager.instance.turnStateMachine.DefendingUnit.ShowingFieldUnitCard.SetDefenderEffect();

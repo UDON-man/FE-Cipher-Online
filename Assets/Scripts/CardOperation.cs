@@ -33,6 +33,11 @@ public class CardOperation : MonoBehaviour
     {
         yield return StartCoroutine(GManager.instance.GetComponent<Effects>().DeleteHandCardEffectCoroutine(card));
 
+        if(!GManager.instance.GetComponent<Effects>().ShowCardParent.transform.parent.gameObject.activeSelf)
+        {
+            ContinuousController.instance.StartCoroutine(GManager.instance.GetComponent<Effects>().ShowCardEffect(new List<CardSource>() { card }, "Added Bond Card", true));
+        }
+
         yield return StartCoroutine(new ISetBondCard(card,isFace).SetBond());
     }
     #endregion

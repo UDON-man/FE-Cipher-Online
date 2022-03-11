@@ -7,13 +7,13 @@ using Photon.Pun;
 using System.Linq;
 public class Saizou_ByakuyaShadowNinja : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("リョウマ隊のサイゾウ", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("リョウマ隊のサイゾウ","", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
         cardEffects.Add(powerUpClass);
 
         bool CanUseCondition(Hashtable hashtable)
@@ -33,21 +33,16 @@ public class Saizou_ByakuyaShadowNinja : CEntity_Effect
     }
 
     #region 忍術の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDiscardSuppot)
         {
-            activateClass_Support[0].SetUpICardEffect("忍術の紋章", new List<Cost>() { new DiscardHandCost(1,(cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Ninja Emblem";
-
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpICardEffect("忍術の紋章", "Ninja Emblem", new List<Cost>() { new DiscardHandCost(1, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true, card);
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -95,8 +90,8 @@ public class Saizou_ByakuyaShadowNinja : CEntity_Effect
                 card.Owner.SupportHandCard.gameObject.SetActive(false);
 
                 Hashtable hashtable = new Hashtable();
-                hashtable.Add("cardEffect", activateClass_Support[0]);
-                yield return StartCoroutine(new IPlayUnit(card, null, isFront, true,hashtable,true).PlayUnit());
+                hashtable.Add("cardEffect", activateClass_Support);
+                yield return StartCoroutine(new IPlayUnit(card, null, isFront, true, hashtable, true).PlayUnit());
                 card.Owner.SupportCards = new List<CardSource>();
             }
         }

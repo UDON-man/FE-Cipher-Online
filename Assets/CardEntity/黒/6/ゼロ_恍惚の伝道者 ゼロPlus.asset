@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30BC\u30ED_\u604D\u60DA\u306E\u4F1D\u9053\u8005 \u30BC\u30EDPlus"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 90eddf8118583384c8bdea1382bebb56, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 1fba4a3683f0317499f1e3d649cb45b0, type: 3}
+  CardName: "\u604D\u60DA\u306E\u4F1D\u9053\u8005 \u30BC\u30ED"
+  UnitName: "\u30BC\u30ED"
+  UnitName_English: Niles
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 06000000
+  Power: 50
+  SupportPower: 20
+  Ranges: 02000000
+  sex: 0
+  Weapons: 0900000008000000
+  ClassName: Zero_PleasureProfessional
+  SkillNames:
+  - "\u4E00\u7DD2\u306B\u30A4\u3053\u3046\u305C\uFF1F"
+  - "\u98DB\u884C\u7279\u52B9"
+  SupportSkillNames: []
+  CardID: 692
+  MaxCountInDeck: 4

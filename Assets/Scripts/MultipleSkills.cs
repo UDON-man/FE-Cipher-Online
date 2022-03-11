@@ -115,7 +115,7 @@ public class MultipleSkills : MonoBehaviourPunCallbacks
                     GManager.instance.commandText.OpenCommandText("Select which skill activates first.");
 
                     yield return StartCoroutine(GManager.instance.selectCardPanel.OpenSelectCardPanel(
-                    Message: "Multiple skills have triggered at the same timing.\nWhich ability do you want to activate first?",
+                    Message: "Multiple skills have triggered at the same timing.\nWhich skill do you want to activate first?",
                     RootCardSources: RootCardSources,
                     _CanTargetCondition: (cardSource) => true,
                     _CanTargetCondition_ByPreSelecetedList: null,

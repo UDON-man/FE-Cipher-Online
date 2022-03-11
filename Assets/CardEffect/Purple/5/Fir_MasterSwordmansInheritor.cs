@@ -6,13 +6,13 @@ using System.Linq;
 
 public class Fir_MasterSwordmansInheritor : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         CanNotBeEvadedClass canNotBeEvadedClass = new CanNotBeEvadedClass();
-        canNotBeEvadedClass.SetUpICardEffect("共鳴する刃",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 },-1,false);
-        canNotBeEvadedClass.SetUpCanNotBeEvadedClass((AttackingUnit) => AttackingUnit != this.card.UnitContainingThisCharacter() && AttackingUnit.Character.Owner == card.Owner, (DefendingUnit) => DefendingUnit != DefendingUnit.Character.Owner.Lord);
+        canNotBeEvadedClass.SetUpICardEffect("共鳴する刃","",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 },-1,false,card);
+        canNotBeEvadedClass.SetUpCanNotBeEvadedClass((AttackingUnit) => AttackingUnit != card.UnitContainingThisCharacter() && AttackingUnit.Character.Owner == card.Owner, (DefendingUnit) => DefendingUnit != DefendingUnit.Character.Owner.Lord);
         cardEffects.Add(canNotBeEvadedClass);
 
         bool CanUseCondition1(Hashtable hashtable)
@@ -27,18 +27,14 @@ public class Fir_MasterSwordmansInheritor : CEntity_Effect
 
         if (timing == EffectTiming.BeforeDiscardCritical_EvasionCard)
         {
-            activateClass[0].SetUpICardEffect("剣姫の逆鱗", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Sword Priness's Imperial Wrath";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("剣姫の逆鱗", "Sword Priness's Imperial Wrath", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if(IsExistOnField(hashtable))
+                if(IsExistOnField(hashtable,card))
                 {
                     if(GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -56,8 +52,8 @@ public class Fir_MasterSwordmansInheritor : CEntity_Effect
 
                 List<Command_SelectCommand> command_SelectCommands = new List<Command_SelectCommand>()
                             {
-                                new Command_SelectCommand("Place Deck Top",() => { GManager.instance.GetComponent<Critical_Evasion>().handmode = SelectCardEffect.Mode.PutLibraryTop; endSelect = true; },0),
-                                new Command_SelectCommand("Discard",() => { GManager.instance.GetComponent<Critical_Evasion>().handmode = SelectCardEffect.Mode.DiscardFromHand;endSelect = true; },1),
+                                new Command_SelectCommand("Place Deck Top",() => { GManager.instance.GetComponent<Critical_Evasion>().handmode = SelectHandEffect.Mode.PutLibraryTop; endSelect = true; },0),
+                                new Command_SelectCommand("Discard",() => { GManager.instance.GetComponent<Critical_Evasion>().handmode = SelectHandEffect.Mode.Discard; endSelect = true; },1),
                             };
 
                 GManager.instance.selectCommandPanel.SetUpCommandButton(command_SelectCommands);
@@ -71,20 +67,16 @@ public class Fir_MasterSwordmansInheritor : CEntity_Effect
     }
 
     #region 剣聖の一喝
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("剣聖の一喝", new List<Cost>() { new ReverseCost(1,(cardSource) => true)}, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Master Swordman's Roar";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("剣聖の一喝", "Master Swordman's Roar", new List<Cost>() { new ReverseCost(1,(cardSource) => true)}, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -110,7 +102,6 @@ public class Fir_MasterSwordmansInheritor : CEntity_Effect
                 yield return ContinuousController.instance.StartCoroutine(CardObjectController.MissSupport(card.Owner.Enemy));
             }
         }
-
 
         return supportEffects;
     }

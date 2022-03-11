@@ -5,21 +5,17 @@ using System;
 using System.Linq;
 public class Matoi_PerfectPersueWing : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[0].SetUpICardEffect("速さの叫び", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass[0].SetCCS(card.UnitContainingThisCharacter());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Speed of Sound";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("速さの叫び", "Speed of Sound", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass.SetCCS(card.UnitContainingThisCharacter());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -46,7 +42,7 @@ public class Matoi_PerfectPersueWing : CEntity_Effect
 
                 selectUnitEffect.SetUp(
                     SelectPlayer: card.Owner,
-                    CanTargetCondition: (unit) => unit.Character.Owner == this.card.Owner,
+                    CanTargetCondition: (unit) => unit.Character.Owner == card.Owner,
                     CanTargetCondition_ByPreSelecetedList: null,
                     CanEndSelectCondition: null,
                     MaxCount: 1,
@@ -54,7 +50,8 @@ public class Matoi_PerfectPersueWing : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }
@@ -62,14 +59,10 @@ public class Matoi_PerfectPersueWing : CEntity_Effect
 
         else if(timing == EffectTiming.OnDeclaration)
         {
-            activateClass[1].SetUpICardEffect("武器輸送", new List<Cost>() { new ReverseCost(1,(cardSource) => true)}, new List<Func<Hashtable, bool>>(), -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Weapon Shift";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("武器輸送", "Weapon Shift",new List<Cost>() { new ReverseCost(1,(cardSource) => true)}, new List<Func<Hashtable, bool>>(), -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -77,7 +70,7 @@ public class Matoi_PerfectPersueWing : CEntity_Effect
 
                 selectUnitEffect.SetUp(
                     SelectPlayer: card.Owner,
-                    CanTargetCondition: (unit) => unit.Character.Owner == this.card.Owner && unit.Weapons.Contains(Weapon.Wing),
+                    CanTargetCondition: (unit) => unit.Character.Owner == card.Owner && unit.Weapons.Contains(Weapon.Wing),
                     CanTargetCondition_ByPreSelecetedList: null,
                     CanEndSelectCondition: null,
                     MaxCount: 1,
@@ -85,7 +78,8 @@ public class Matoi_PerfectPersueWing : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: (unit) => SelectUnitCoroutine(unit),
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Custom);
+                    mode: SelectUnitEffect.Mode.Custom,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
 
@@ -93,7 +87,7 @@ public class Matoi_PerfectPersueWing : CEntity_Effect
                 {
                     RangeUpClass rangeUpClass = new RangeUpClass();
                     rangeUpClass.SetUpRangeUpClass((_unit, Range) => { Range.Add(1); Range.Add(2); return Range; }, (_unit) => _unit == unit);
-                    unit.UntilEachTurnEndUnitEffects.Add(rangeUpClass);
+                    unit.UntilEachTurnEndUnitEffects.Add((_timing) => rangeUpClass);
 
                     yield return null;
                 }

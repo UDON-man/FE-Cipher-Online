@@ -6,12 +6,12 @@ using System;
 
 public class MarkOnnna_TimeLostChild : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         WeaponChangeClass weaponChangeClass = new WeaponChangeClass();
-        weaponChangeClass.SetUpICardEffect("無限の可能性", new List<Cost>(), new List<Func<Hashtable, bool>>() { (hash) => GManager.instance.turnStateMachine.gameContext.TurnPlayer == card.Owner }, -1, false);
+        weaponChangeClass.SetUpICardEffect("無限の可能性","" ,new List<Cost>(), new List<Func<Hashtable, bool>>() { (hash) => GManager.instance.turnStateMachine.gameContext.TurnPlayer == card.Owner }, -1, false,card);
         weaponChangeClass.SetUpWeaponChangeClass(ChangeWeapon, (cardSource) => cardSource == card);
         cardEffects.Add(weaponChangeClass);
 
@@ -49,7 +49,7 @@ public class MarkOnnna_TimeLostChild : CEntity_Effect
         }
 
         RangeUpClass rangeUpClass = new RangeUpClass();
-        rangeUpClass.SetUpICardEffect("無限の可能性", new List<Cost>(), new List<Func<Hashtable, bool>>() { (hash) => GManager.instance.turnStateMachine.gameContext.TurnPlayer == card.Owner && card.UnitContainingThisCharacter() != null }, -1, false);
+        rangeUpClass.SetUpICardEffect("無限の可能性","", new List<Cost>(), new List<Func<Hashtable, bool>>() { (hash) => GManager.instance.turnStateMachine.gameContext.TurnPlayer == card.Owner && card.UnitContainingThisCharacter() != null }, -1, false,card);
         rangeUpClass.SetUpRangeUpClass(ChangeRange, (unit) => unit == card.UnitContainingThisCharacter());
         cardEffects.Add(rangeUpClass);
 
@@ -86,9 +86,9 @@ public class MarkOnnna_TimeLostChild : CEntity_Effect
             return Range;
         }
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("華炎", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("華炎", "",new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), true);
         powerUpClass.SetCCS(card.UnitContainingThisCharacter());
         cardEffects.Add(powerUpClass);
 

@@ -6,13 +6,13 @@ using System.Linq;
 
 public class Marks_DarkOnmyoushi : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("交わる闇", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("交わる闇","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, PowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool PowerUpCondition(Unit unit)
@@ -42,18 +42,14 @@ public class Marks_DarkOnmyoushi : CEntity_Effect
 
         if(timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass[0].SetUpICardEffect("陰陽の霊符", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Amulet of Divination";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass.SetUpICardEffect("陰陽の霊符", "Amulet of Divination", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -93,7 +89,8 @@ public class Marks_DarkOnmyoushi : CEntity_Effect
                         isShowOpponent: true,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Discard);
+                        mode: SelectHandEffect.Mode.Discard,
+                        cardEffect: activateClass);
 
                     yield return StartCoroutine(selectHandEffect.Activate(null));
                 }

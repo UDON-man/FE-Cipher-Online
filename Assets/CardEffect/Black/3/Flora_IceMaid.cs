@@ -7,20 +7,16 @@ using System.Linq;
 
 public class Flora_IceMaid : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnAttackedAlly)
         {
-            activateClass[0].SetUpICardEffect("間に合いました", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "At Your Service.";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("間に合いました", "At Your Service.",new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -74,7 +70,7 @@ public class Flora_IceMaid : CEntity_Effect
                 yield return new WaitWhile(() => GManager.instance.commandText.gameObject.activeSelf);
 
                 Hashtable hashtable = new Hashtable();
-                hashtable.Add("cardEffect", activateClass[0]);
+                hashtable.Add("cardEffect", activateClass);
 
                 //ソウルを場に出す処理
                 yield return StartCoroutine(GManager.instance.GetComponent<Effects>().DeleteHandCardEffectCoroutine(card));
@@ -86,18 +82,14 @@ public class Flora_IceMaid : CEntity_Effect
 
         else if(timing == EffectTiming.OnEnterFieldAnyone)
         {
-            activateClass[1].SetUpICardEffect("お役に立てましたか?", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Did I Prove Useful?";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("お役に立てましたか?", "Did I Prove Useful?", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable) 
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (hashtable != null)
                     {
@@ -117,7 +109,7 @@ public class Flora_IceMaid : CEntity_Effect
 
                                             if (cardEffect.card() != null)
                                             {
-                                                if (cardEffect.card() == this.card)
+                                                if (cardEffect.card() == card)
                                                 {
                                                     return true;
                                                 }
@@ -141,7 +133,7 @@ public class Flora_IceMaid : CEntity_Effect
                 #endregion
 
                 //防御ユニットを更新
-                GManager.instance.turnStateMachine.DefendingUnit = this.card.UnitContainingThisCharacter();
+                GManager.instance.turnStateMachine.DefendingUnit = card.UnitContainingThisCharacter();
 
                 #region 新防御ユニットのエフェクトを表示
                 GManager.instance.turnStateMachine.DefendingUnit.ShowingFieldUnitCard.SetDefenderEffect();
@@ -158,14 +150,10 @@ public class Flora_IceMaid : CEntity_Effect
 
         else if(timing == EffectTiming.OnDestroyedDuringBattleAlly)
         {
-            activateClass[2].SetUpICardEffect("氷の血", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false);
-            activateClass[2].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[2]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[2].EffectName = "Icy Blood";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("氷の血", "Icy Blood", new List<Cost>() , new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -200,7 +188,7 @@ public class Flora_IceMaid : CEntity_Effect
 
                 selectUnitEffect.SetUp(
                     SelectPlayer: card.Owner,
-                    CanTargetCondition: (unit) => unit.Character.Owner != this.card.Owner && unit != unit.Character.Owner.Lord && unit.Character.PlayCost <= 2,
+                    CanTargetCondition: (unit) => unit.Character.Owner != card.Owner && unit != unit.Character.Owner.Lord && unit.Character.PlayCost <= 2,
                     CanTargetCondition_ByPreSelecetedList: null,
                     CanEndSelectCondition: null,
                     MaxCount: 1,
@@ -208,7 +196,8 @@ public class Flora_IceMaid : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Destroy);
+                    mode: SelectUnitEffect.Mode.Destroy,
+                    cardEffect:activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

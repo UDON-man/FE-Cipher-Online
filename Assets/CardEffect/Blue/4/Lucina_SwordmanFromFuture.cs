@@ -6,25 +6,21 @@ using System.Linq;
 
 public class Lucina_SwordmanFromFuture : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         UnitNamesChangeClass unitNamesChangeClass = new UnitNamesChangeClass();
-        unitNamesChangeClass.SetUpICardEffect("英雄王の名", null, null, -1, false);
-        unitNamesChangeClass.SetUpUnitNamesChangeClass((cardSource, UnitNames) => { UnitNames.Add("マルス"); return UnitNames; }, (cardSource) => this.card);
+        unitNamesChangeClass.SetUpICardEffect("英雄王の名","", null, null, -1, false,card);
+        unitNamesChangeClass.SetUpUnitNamesChangeClass((cardSource, UnitNames) => { UnitNames.Add("マルス"); return UnitNames; }, (cardSource) =>card);
         cardEffects.Add(unitNamesChangeClass);
 
         if (timing == EffectTiming.OnCCAnyone)
         {
-            activateClass[0].SetUpICardEffect("未来の記憶", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Future Memories";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("未来の記憶", "Future Memories", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -36,9 +32,9 @@ public class Lucina_SwordmanFromFuture : CEntity_Effect
                         {
                             Unit Unit = (Unit)hashtable["Unit"];
 
-                            if (Unit.Character.Owner == this.card.Owner)
+                            if (Unit.Character.Owner == card.Owner)
                             {
-                                if (Unit != this.card.UnitContainingThisCharacter())
+                                if (Unit != card.UnitContainingThisCharacter())
                                 {
                                     return true;
                                 }
@@ -68,7 +64,9 @@ public class Lucina_SwordmanFromFuture : CEntity_Effect
                     mode: SelectCardEffect.Mode.AddHand,
                     root: SelectCardEffect.Root.Library,
                     CustomRootCardList: null,
-                    CanLookReverseCard: true);
+                    CanLookReverseCard: true,
+                    SelectPlayer: card.Owner,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
             }
@@ -78,15 +76,16 @@ public class Lucina_SwordmanFromFuture : CEntity_Effect
     }
 
     #region 運命の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("運命の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("運命の紋章", "Fate Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -129,7 +128,8 @@ public class Lucina_SwordmanFromFuture : CEntity_Effect
                         isShowOpponent: false,
                         SelectCardCoroutine: null,
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.PutLibraryTop);
+                        mode: SelectHandEffect.Mode.PutLibraryTop,
+                        cardEffect: activateClass_Support);
 
                     yield return StartCoroutine(selectHandEffect.Activate(null));
                 }

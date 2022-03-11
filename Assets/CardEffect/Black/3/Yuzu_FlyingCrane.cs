@@ -5,35 +5,27 @@ using System;
 
 public class Yuzu_FlyingCrane : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("禁じられた秘剣", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, null, 1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Forbidden Sword";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("禁じられた秘剣", "Forbidden Sword", new List<Cost>() { new ReverseCost(2, (cardSource) => true) }, null, 1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
                 CanNotBeEvadedClass canNotBeEvadedClass = new CanNotBeEvadedClass();
-                canNotBeEvadedClass.SetUpCanNotBeEvadedClass((AttackingUnit) => AttackingUnit == this.card.UnitContainingThisCharacter(), (DefendingUnit) => true);
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(canNotBeEvadedClass);
+                canNotBeEvadedClass.SetUpCanNotBeEvadedClass((AttackingUnit) => AttackingUnit == card.UnitContainingThisCharacter(), (DefendingUnit) => true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => canNotBeEvadedClass);
 
-                activateClass[1].SetUpICardEffect("このユニットを\n撃破する", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-                activateClass[1].SetUpActivateClass((hashtable1) => ActivateCoroutine1());
-                card.Owner.UntilTurnEndActions.Add(UntilTurnEndAction);
-
-                if (ContinuousController.instance.language == Language.ENG)
-                {
-                    activateClass[1].EffectName = "Destroy\nthis unit.";
-                }
+                ActivateClass activateClass1 = new ActivateClass();
+                activateClass1.SetUpICardEffect("このユニットを\n撃破する", "Destroy\nthis unit.", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+                activateClass1.SetUpActivateClass((hashtable1) => ActivateCoroutine1());
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(UntilTurnEndAction);
 
                 bool CanUseCondition(Hashtable hashtable1)
                 {
@@ -51,16 +43,16 @@ public class Yuzu_FlyingCrane : CEntity_Effect
                 IEnumerator ActivateCoroutine1()
                 {
                     Hashtable hashtable1 = new Hashtable();
-                    hashtable1.Add("cardEffect", activateClass[1]);
-
+                    hashtable1.Add("cardEffect", activateClass1);
+                    hashtable1.Add("Unit", new Unit(card.UnitContainingThisCharacter().Characters));
                     yield return ContinuousController.instance.StartCoroutine(new IDestroyUnit(card.UnitContainingThisCharacter(), 1, BreakOrbMode.Hand, hashtable1).Destroy());
                 }
 
-                ActivateICardEffect UntilTurnEndAction(EffectTiming _timing)
+                ICardEffect UntilTurnEndAction(EffectTiming _timing)
                 {
                     if (_timing == EffectTiming.OnEndAttackAnyone)
                     {
-                        return activateClass[1];
+                        return activateClass1;
                     }
 
                     return null;
@@ -70,9 +62,9 @@ public class Yuzu_FlyingCrane : CEntity_Effect
             }
         }
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("不屈の精神", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, CanPowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("不屈の精神","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, CanPowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool CanPowerUpCondition(Unit unit)

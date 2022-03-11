@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b98fc37962993ae48bce0ceaae0c8505, type: 3}
+  m_Name: "\u30D5\u30A3\u30F3_\u84BC\u304D\u5FE0\u69CD \u30D5\u30A3\u30F3"
+  m_EditorClassIdentifier: 
+  CardImage: {fileID: 21300000, guid: 3e182b9bf3dbd8f4c810479d60ee8ebe, type: 3}
+  CardImage_English: {fileID: 21300000, guid: 8ca780cae3be889468652da8c7589842, type: 3}
+  CardName: "\u84BC\u304D\u5FE0\u69CD \u30D5\u30A3\u30F3"
+  UnitName: "\u30D5\u30A3\u30F3"
+  UnitName_English: Finn
+  PlayCost: 3
+  HasCC: 1
+  CCCost: 2
+  cardColors: 03000000
+  Power: 60
+  SupportPower: 10
+  Ranges: 01000000
+  sex: 0
+  Weapons: 0100000008000000
+  ClassName: Finn_DevotedBlueLance
+  SkillNames:
+  - "\u6069\u5BF5\u306E\u69CD"
+  - "\u69CD\u9A0E\u58EB\u306E\u8A87\u308A"
+  SupportSkillNames: []
+  CardID: 633
+  MaxCountInDeck: 4

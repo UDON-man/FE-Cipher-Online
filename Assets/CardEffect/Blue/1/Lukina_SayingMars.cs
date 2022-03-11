@@ -4,43 +4,52 @@ using UnityEngine;
 using System;
 public class Lukina_SayingMars : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("裏剣 ファルシオン", (enemyUnit, Power) => Power + 20, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Dragon), PowerUpByEnemy.Mode.Attacking);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("裏剣 ファルシオン",(enemyUnit, Power) => Power + 20, (unit) => unit ==card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.Dragon), PowerUpByEnemy.Mode.Attacking,card);
         cardEffects.Add(powerUpByEnemy);
 
         UnitNamesChangeClass unitNamesChangeClass = new UnitNamesChangeClass();
-        unitNamesChangeClass.SetUpICardEffect("英雄王の名", null, null, -1, false);
-        unitNamesChangeClass.SetUpUnitNamesChangeClass((cardSource, UnitNames) => { UnitNames.Add("マルス"); return UnitNames; }, (cardSource) => this.card);
+        unitNamesChangeClass.SetUpICardEffect("英雄王の名","", null, null, -1, false,card);
+        unitNamesChangeClass.SetUpUnitNamesChangeClass((cardSource, UnitNames) => { UnitNames.Add("マルス"); return UnitNames; }, (cardSource) => card);
         cardEffects.Add(unitNamesChangeClass);
 
         return cardEffects;
     }
 
     #region 英雄の紋章
-    public override List<ICardEffect> SupportEffects(EffectTiming timing)
+    public override List<ICardEffect> SupportEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> supportEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnSetSupport)
         {
-            activateClass_Support[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            activateClass_Support[0].SetUpICardEffect("英雄の紋章", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-            supportEffects.Add(activateClass_Support[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass_Support[0].EffectName = "Hero Emblem";
-            }
+            ActivateClass activateClass_Support = new ActivateClass();
+            activateClass_Support.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            activateClass_Support.SetUpICardEffect("英雄の紋章", "Hero Emblem", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false, card);
+            supportEffects.Add(activateClass_Support);
 
             IEnumerator ActivateCoroutine()
             {
-                StrikeUpClass strikeUpClass = new StrikeUpClass();
-                strikeUpClass.SetUpStrikeUpClass((unit, Strike) => 2, (unit) => unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character.Owner == card.Owner);
-                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add(strikeUpClass);
+                StrikeModifyClass strikeModifyClass = new StrikeModifyClass();
+                strikeModifyClass.SetUpStrikeModifyClass((unit, Strike) => 2, CanStrikeModifyCondition, false);
+                GManager.instance.turnStateMachine.AttackingUnit.UntilEndBattleEffects.Add((_timing) => strikeModifyClass);
+
+                bool CanStrikeModifyCondition(Unit unit)
+                {
+                    if (unit == GManager.instance.turnStateMachine.AttackingUnit && unit.Character != null)
+                    {
+                        if (unit.Character.Owner == card.Owner)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
 
                 yield return null;
             }
@@ -68,6 +77,7 @@ public class Lukina_SayingMars : CEntity_Effect
                 return false;
             }
         }
+
 
         return supportEffects;
     }

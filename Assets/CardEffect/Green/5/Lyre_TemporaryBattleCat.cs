@@ -5,13 +5,13 @@ using System;
 using System.Linq;
 public class Lyre_TemporaryBattleCat : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass1 = new PowerUpClass();
-        powerUpClass1.SetUpICardEffect("憧れの隊長", null, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false);
-        powerUpClass1.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass1 = new PowerModifyClass();
+        powerUpClass1.SetUpICardEffect("憧れの隊長", "",null, new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false,card);
+        powerUpClass1.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
         cardEffects.Add(powerUpClass1);
 
         bool CanUseCondition1(Hashtable hashtable)
@@ -24,14 +24,14 @@ public class Lyre_TemporaryBattleCat : CEntity_Effect
             return false;
         }
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("化身", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("化身","", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
         powerUpClass.SetLvS(card.UnitContainingThisCharacter(), 2);
         cardEffects.Add(powerUpClass);
 
         CanAttackTargetUnitRegardlessRangeClass canAttackTargetUnitRegardlessRangeClass = new CanAttackTargetUnitRegardlessRangeClass();
-        canAttackTargetUnitRegardlessRangeClass.SetUpICardEffect("化身", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
+        canAttackTargetUnitRegardlessRangeClass.SetUpICardEffect("化身","", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
         canAttackTargetUnitRegardlessRangeClass.SetUpCanAttackTargetUnitRegardlessRangeClass((AttackingUnit) => AttackingUnit == card.UnitContainingThisCharacter(), (DefendingUnit) => DefendingUnit.Character.Owner.GetBackUnits().Contains(DefendingUnit));
         canAttackTargetUnitRegardlessRangeClass.SetLvS(card.UnitContainingThisCharacter(), 2);
         cardEffects.Add(canAttackTargetUnitRegardlessRangeClass);

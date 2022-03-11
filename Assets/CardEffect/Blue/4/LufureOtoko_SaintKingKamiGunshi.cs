@@ -6,28 +6,24 @@ using System.Linq;
 
 public class LufureOtoko_SaintKingKamiGunshi : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnDeclaration)
         {
-            activateClass[0].SetUpICardEffect("七色の叫び", new List<Cost>() { new ReverseCost(2, (cardSource) => true), new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("ルフレ(男)")) }, null, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Rally Spectrum";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("七色の叫び", "Rally Spectrum", new List<Cost>() { new ReverseCost(2, (cardSource) => true), new DiscardHandCost(1, (cardSource) => cardSource.UnitNames.Contains("ルフレ(男)")) }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
                 foreach (Unit unit in card.Owner.FieldUnit)
                 {
-                    PowerUpClass powerUpClass = new PowerUpClass();
-                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 10, (_unit) => _unit == unit);
-                    unit.UntilEachTurnEndUnitEffects.Add(powerUpClass);
+                    PowerModifyClass powerUpClass = new PowerModifyClass();
+                    powerUpClass.SetUpPowerUpClass((_unit, Power) => Power + 10, (_unit) => _unit == unit, true);
+                    unit.UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass);
                 }
 
                 if(card.Owner.OrbCards.Count < card.Owner.Enemy.OrbCards.Count)
@@ -47,7 +43,8 @@ public class LufureOtoko_SaintKingKamiGunshi : CEntity_Effect
                             isShowOpponent: false,
                             SelectCardCoroutine: (cardSource) => SelectCardCoroutine(cardSource),
                             AfterSelectCardCoroutine: null,
-                            mode: SelectHandEffect.Mode.Custom);
+                            mode: SelectHandEffect.Mode.Custom,
+                            cardEffect: activateClass);
 
                         yield return StartCoroutine(selectHandEffect.Activate(null));
                         
@@ -64,18 +61,14 @@ public class LufureOtoko_SaintKingKamiGunshi : CEntity_Effect
 
         else if(timing == EffectTiming.OnDestroyDuringBattleAlly)
         {
-            activateClass[1].SetUpICardEffect("次なる一手", new List<Cost>() { new BreakOrbCost(card.Owner,1,BreakOrbMode.Hand)}, new List<Func<Hashtable, bool>>() { CanUseCondition } , -1, true);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Two Steps Ahead";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("次なる一手", "Two Steps Ahead", new List<Cost>() { new BreakOrbCost(card.Owner,1,BreakOrbMode.Hand)}, new List<Func<Hashtable, bool>>() { CanUseCondition } , -1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
-                if (IsExistOnField(hashtable))
+                if (IsExistOnField(hashtable,card))
                 {
                     if (GManager.instance.turnStateMachine.AttackingUnit == card.UnitContainingThisCharacter())
                     {
@@ -103,7 +96,8 @@ public class LufureOtoko_SaintKingKamiGunshi : CEntity_Effect
                         isShowOpponent: false,
                         SelectCardCoroutine: (cardSource) => SelectCardCoroutine(cardSource),
                         AfterSelectCardCoroutine: null,
-                        mode: SelectHandEffect.Mode.Custom);
+                        mode: SelectHandEffect.Mode.Custom,
+                        cardEffect: activateClass);
 
                     yield return StartCoroutine(selectHandEffect.Activate(null));
 

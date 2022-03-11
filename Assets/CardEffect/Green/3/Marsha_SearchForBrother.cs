@@ -5,16 +5,16 @@ using System.Linq;
 using System;
 public class Marsha_SearchForBrother : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         PowerUpByEnemy powerUpByEnemy = new PowerUpByEnemy();
-        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("天馬の護り", (enemyUnit, Power) => Power + 20, (unit) => unit == this.card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.MagicBook), PowerUpByEnemy.Mode.Defending);
+        powerUpByEnemy.SetUpPowerUpByEnemyWeapon("天馬の護り", (enemyUnit, Power) => Power + 20, (unit) => unit == card.UnitContainingThisCharacter(), (enemyUnit) => enemyUnit.Weapons.Contains(Weapon.MagicBook), PowerUpByEnemy.Mode.Defending,card);
         cardEffects.Add(powerUpByEnemy);
 
         SupportPowerUpClass supportPowerUpClass = new SupportPowerUpClass();
-        supportPowerUpClass.SetUpICardEffect("天馬の叫び", null, null, -1, false);
+        supportPowerUpClass.SetUpICardEffect("天馬の叫び","", null, null, -1, false,card);
         supportPowerUpClass.SetUpSupportPowerUpClass((cardSource, SupportPower) => SupportPower + 10, ChangeSupportPowerCondition);
         supportPowerUpClass.SetCCS(card.UnitContainingThisCharacter());
         cardEffects.Add(supportPowerUpClass);

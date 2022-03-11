@@ -81,6 +81,8 @@ MonoBehaviour:
   - SetIsHand_Chiki
   - SetIsFront_Ema
   - SetDiscardCard_Critical_Evasion
+  - SetUseSkillCard
+  - SetIsFront_Kamira
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

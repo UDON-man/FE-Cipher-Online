@@ -5,13 +5,13 @@ using System.Linq;
 using System;
 public class Sairi_ReleaseSwordPrincess : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("解放軍の指揮官", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter());
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("解放軍の指揮官","", null, new List<Func<Hashtable, bool>>() { CanUseCondition }, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 10, (unit) => unit == card.UnitContainingThisCharacter(), true);
         cardEffects.Add(powerUpClass);
 
         bool CanUseCondition(Hashtable hashtable)
@@ -26,18 +26,14 @@ public class Sairi_ReleaseSwordPrincess : CEntity_Effect
 
         if(timing == EffectTiming.OnEvadeAnyone)
         {
-            activateClass[1].SetUpICardEffect("流水の剣", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false);
-            activateClass[1].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[1]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[1].EffectName = "Flowing Sword";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("流水の剣", "Flowing Sword", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition1(Hashtable hashtable)
             {
-                if(IsExistOnField(hashtable))
+                if(IsExistOnField(hashtable,card))
                 {
                     if(GManager.instance.turnStateMachine.DefendingUnit != null)
                     {
@@ -63,9 +59,9 @@ public class Sairi_ReleaseSwordPrincess : CEntity_Effect
                     }
                 }
 
-                PowerUpClass powerUpClass1 = new PowerUpClass();
-                powerUpClass1.SetUpPowerUpClass((unit, Power) => Power + plusPower, (unit) => unit == card.UnitContainingThisCharacter());
-                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add(powerUpClass1);
+                PowerModifyClass powerUpClass1 = new PowerModifyClass();
+                powerUpClass1.SetUpPowerUpClass((unit, Power) => Power + plusPower, (unit) => unit == card.UnitContainingThisCharacter(), true);
+                card.UnitContainingThisCharacter().UntilEachTurnEndUnitEffects.Add((_timing) => powerUpClass1);
 
                 yield return null;
             }
@@ -73,5 +69,4 @@ public class Sairi_ReleaseSwordPrincess : CEntity_Effect
 
         return cardEffects;
     }
-
 }

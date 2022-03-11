@@ -5,7 +5,7 @@ using System;
 
 public class Esto_YoungWingWhiteKnight : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
@@ -23,14 +23,10 @@ public class Esto_YoungWingWhiteKnight : CEntity_Effect
                  AfterSelectUnitCoroutine: null,
                  mode: SelectUnitEffect.Mode.Tap);
 
-            activateClass[0].SetUpICardEffect("エストの風笛", new List<Cost>() { new TapCost(), new ReverseCost(1, (cardSource) => true), selectAllyCost }, null, -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Est's Bagpipes";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("エストの風笛", "Est's Bagpipes", new List<Cost>() { new TapCost(), new ReverseCost(1, (cardSource) => true), selectAllyCost }, null, -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -50,7 +46,9 @@ public class Esto_YoungWingWhiteKnight : CEntity_Effect
                 mode: SelectCardEffect.Mode.Deploy,
                 root: SelectCardEffect.Root.Library,
                 CustomRootCardList: null,
-                CanLookReverseCard: true);
+                CanLookReverseCard: true,
+                SelectPlayer: card.Owner,
+                cardEffect:activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectCardEffect.Activate(null));
 

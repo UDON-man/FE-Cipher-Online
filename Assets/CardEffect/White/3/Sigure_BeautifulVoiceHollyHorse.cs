@@ -6,20 +6,16 @@ using System;
 
 public class Sigure_BeautifulVoiceHollyHorse : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         if (timing == EffectTiming.OnMovedAnyone)
         {
-            activateClass[0].SetUpICardEffect("響心の歌", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Cry of the Pegasus";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("響心の歌", "Cry of the Pegasus", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition }, 1, true,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             bool CanUseCondition(Hashtable hashtable)
             {
@@ -31,9 +27,12 @@ public class Sigure_BeautifulVoiceHollyHorse : CEntity_Effect
                         {
                             Unit Unit = (Unit)hashtable["Unit"];
 
-                            if (Unit.Character.Owner == this.card.Owner)
+                            if(Unit.Character != null)
                             {
-                                return true;
+                                if (Unit.Character.Owner == card.Owner)
+                                {
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -56,14 +55,15 @@ public class Sigure_BeautifulVoiceHollyHorse : CEntity_Effect
                     CanEndNotMax: false,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }
         }
 
         SupportPowerUpClass supportPowerUpClass = new SupportPowerUpClass();
-        supportPowerUpClass.SetUpICardEffect("天馬の叫び", null, null, -1, false);
+        supportPowerUpClass.SetUpICardEffect("天馬の叫び", "",null, null, -1, false,card);
         supportPowerUpClass.SetUpSupportPowerUpClass((cardSource, SupportPower) => SupportPower + 10, ChangeSupportPowerCondition);
         supportPowerUpClass.SetCCS(card.UnitContainingThisCharacter());
         cardEffects.Add(supportPowerUpClass);

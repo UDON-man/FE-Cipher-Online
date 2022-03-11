@@ -5,12 +5,12 @@ using System;
 using System.Linq;
 public class Cilus_AuthBestFriend : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
         ChangeCardColorsClass changeCardColorsClass = new ChangeCardColorsClass();
-        changeCardColorsClass.SetUpICardEffect("変わらぬ友情", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false);
+        changeCardColorsClass.SetUpICardEffect("変わらぬ友情","", new List<Cost>(), new List<Func<Hashtable, bool>>() { CanUseCondition1 }, -1, false,card);
         changeCardColorsClass.SetUpCardColorChangeClass(ChangeCardColors, CanCardColorChangeCondition);
         cardEffects.Add(changeCardColorsClass);
 
@@ -58,9 +58,9 @@ public class Cilus_AuthBestFriend : CEntity_Effect
             return false;
         }
 
-        PowerUpClass powerUpClass = new PowerUpClass();
-        powerUpClass.SetUpICardEffect("友情の誓い", null, null, -1, false);
-        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, PowerUpCondition);
+        PowerModifyClass powerUpClass = new PowerModifyClass();
+        powerUpClass.SetUpICardEffect("友情の誓い","", null, null, -1, false,card);
+        powerUpClass.SetUpPowerUpClass((unit, Power) => Power + 20, PowerUpCondition, true);
         cardEffects.Add(powerUpClass);
 
         bool PowerUpCondition(Unit unit)

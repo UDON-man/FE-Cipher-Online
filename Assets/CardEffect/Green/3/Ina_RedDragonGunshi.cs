@@ -5,7 +5,7 @@ using System;
 
 public class Ina_RedDragonGunshi : CEntity_Effect
 {
-    public override List<ICardEffect> CardEffects(EffectTiming timing)
+    public override List<ICardEffect> CardEffects(EffectTiming timing, CardSource card)
     {
         List<ICardEffect> cardEffects = new List<ICardEffect>();
 
@@ -23,14 +23,10 @@ public class Ina_RedDragonGunshi : CEntity_Effect
                  AfterSelectUnitCoroutine: null,
                  mode: SelectUnitEffect.Mode.Tap);
 
-            activateClass[0].SetUpICardEffect("竜鱗の軍師", new List<Cost>() { new TapCost(), selectAllyCost }, new List<Func<Hashtable, bool>>(), -1, false);
-            activateClass[0].SetUpActivateClass((hashtable) => ActivateCoroutine());
-            cardEffects.Add(activateClass[0]);
-
-            if (ContinuousController.instance.language == Language.ENG)
-            {
-                activateClass[0].EffectName = "Dragon Tactician";
-            }
+            ActivateClass activateClass = new ActivateClass();
+            activateClass.SetUpICardEffect("竜鱗の軍師", "Dragon Tactician",new List<Cost>() { new TapCost(), selectAllyCost }, new List<Func<Hashtable, bool>>(), -1, false,card);
+            activateClass.SetUpActivateClass((hashtable) => ActivateCoroutine());
+            cardEffects.Add(activateClass);
 
             IEnumerator ActivateCoroutine()
             {
@@ -55,7 +51,8 @@ public class Ina_RedDragonGunshi : CEntity_Effect
                     CanEndNotMax: CanEndNotMax,
                     SelectUnitCoroutine: null,
                     AfterSelectUnitCoroutine: null,
-                    mode: SelectUnitEffect.Mode.Move);
+                    mode: SelectUnitEffect.Mode.Move,
+                    cardEffect: activateClass);
 
                 yield return ContinuousController.instance.StartCoroutine(selectUnitEffect.Activate(null));
             }

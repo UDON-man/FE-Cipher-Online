@@ -7,69 +7,49 @@ using System.Linq;
 
 public abstract class CEntity_Effect : MonoBehaviourPunCallbacks
 {
-    public CardSource card
-    {
-        get;set;
-    }
-
-    public virtual List<ICardEffect> CardEffects(EffectTiming timing)
+    public virtual List<ICardEffect> CardEffects(EffectTiming timing, CardSource cardSource)
     {
         return new List<ICardEffect>();
     }
 
-    public virtual List<ICardEffect> SupportEffects(EffectTiming timing)
+    public virtual List<ICardEffect> SupportEffects(EffectTiming timing, CardSource cardSource)
     {
         return new List<ICardEffect>();
     }
 
-    public List<ActivateClass> activateClass { get; set; } = new List<ActivateClass>();
-    public List<ActivateClass> activateClass_Support { get; set; } = new List<ActivateClass>();
+    public CEntity_EffectController cEntity_EffectController
+    {
+        get
+        {
+            return GetComponent<CEntity_EffectController>();
+        }
+    }
+
     public void AttachICardEffectComponent()
     {
-        for(int i=0; i<8;i++)
-        {
-            ActivateClass _activateClass = gameObject.AddComponent<ActivateClass>();
-            _activateClass._card = this.card;
-            activateClass.Add(_activateClass);
-        }
-
-        for (int i = 0; i < 6; i++)
-        {
-            ActivateClass _activateClass = gameObject.AddComponent<ActivateClass>();
-            _activateClass._card = this.card;
-            activateClass_Support.Add(_activateClass);
-        }
-
         SelectUnitEffect selectUnitEffect = gameObject.AddComponent<SelectUnitEffect>();
-        selectUnitEffect._card = this.card;
-
         SelectCardEffect selectCardEffect = gameObject.AddComponent<SelectCardEffect>();
-        selectCardEffect._card = this.card;
-
         SelectHandEffect selectHandEffect = gameObject.AddComponent<SelectHandEffect>();
-        selectHandEffect._card = this.card;
     }
 
-    public List<ICardEffect> GetCardEffects(EffectTiming timing)
+    public List<ICardEffect> GetCardEffects(EffectTiming timing, CardSource cardSource)
     {
         List<ICardEffect> _GetCardEffects = new List<ICardEffect>();
 
-        foreach (ICardEffect cardEffect in CardEffects(timing))
+        foreach (ICardEffect cardEffect in CardEffects(timing,cardSource))
         {
-            cardEffect._card = this.card;
             _GetCardEffects.Add(cardEffect);
         }
 
         return _GetCardEffects;
     }
 
-    public List<ICardEffect> GetSupportEffects(EffectTiming timing)
+    public List<ICardEffect> GetSupportEffects(EffectTiming timing, CardSource cardSource)
     {
         List<ICardEffect> _GetSupportEffects = new List<ICardEffect>();
 
-        foreach (ICardEffect cardEffect in SupportEffects(timing))
+        foreach (ICardEffect cardEffect in SupportEffects(timing,cardSource))
         {
-            cardEffect._card = this.card;
             cardEffect.isSupportSkill = true;
             _GetSupportEffects.Add(cardEffect);
         }
@@ -77,13 +57,13 @@ public abstract class CEntity_Effect : MonoBehaviourPunCallbacks
         return _GetSupportEffects;
     }
 
-    public List<ICardEffect> GetAllSupportEffects()
+    public List<ICardEffect> GetAllSupportEffects(CardSource cardSource)
     {
         List<ICardEffect> GetAllSupportEffects = new List<ICardEffect>();
 
         foreach (EffectTiming timing in Enum.GetValues(typeof(EffectTiming)))
         {
-            foreach (ICardEffect cardEffect in GetSupportEffects(timing))
+            foreach (ICardEffect cardEffect in GetSupportEffects(timing,cardSource))
             {
                 GetAllSupportEffects.Add(cardEffect);
             }
@@ -92,13 +72,13 @@ public abstract class CEntity_Effect : MonoBehaviourPunCallbacks
         return GetAllSupportEffects;
     }
 
-    public List<ICardEffect> GetAllCardEffects()
+    public List<ICardEffect> GetAllCardEffects(CardSource cardSource)
     {
         List<ICardEffect> GetAllCardEffects = new List<ICardEffect>();
 
         foreach (EffectTiming timing in Enum.GetValues(typeof(EffectTiming)))
         {
-            foreach (ICardEffect cardEffect in GetCardEffects(timing))
+            foreach (ICardEffect cardEffect in GetCardEffects(timing,cardSource))
             {
                 GetAllCardEffects.Add(cardEffect);
             }
@@ -106,7 +86,7 @@ public abstract class CEntity_Effect : MonoBehaviourPunCallbacks
 
         foreach (EffectTiming timing in Enum.GetValues(typeof(EffectTiming)))
         {
-            foreach (ICardEffect cardEffect in GetSupportEffects(timing))
+            foreach (ICardEffect cardEffect in GetSupportEffects(timing,cardSource))
             {
                 GetAllCardEffects.Add(cardEffect);
             }
@@ -115,15 +95,7 @@ public abstract class CEntity_Effect : MonoBehaviourPunCallbacks
         return GetAllCardEffects;
     }
 
-    public void ResetUsedCountThisTurn()
-    {
-        foreach(ICardEffect cardEffect in GetAllCardEffects())
-        {
-            cardEffect.UseCountThisTurn = 0;
-        }
-    }
-
-    public bool IsExistOnField(Hashtable hashtable)
+    public bool IsExistOnField(Hashtable hashtable,CardSource card)
     {
         if (card.UnitContainingThisCharacter() != null)
         {
@@ -138,6 +110,6 @@ public abstract class CEntity_Effect : MonoBehaviourPunCallbacks
 
     public virtual void Init()
     {
-        ResetUsedCountThisTurn();
+
     }
 }
